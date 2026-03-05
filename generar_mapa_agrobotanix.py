@@ -1,5 +1,8 @@
+# python3 generar_mapa_agrobotanix.py
+
 """
-Agrobotanix — Generador de Mapa Interactivo
+Agrobotanix — Generador de Mapa Interactivo (ESTE SCRIPT SOLO GENERA EL MAPA INTERACTIVO, NO LAS TRES PESTAÑAS QUE CONTIENE EL 
+REPORTE COMPLETO)
 Genera un HTML autónomo con Leaflet + circleMarker por estado.
 Uso: python generar_mapa_agrobotanix.py
 """
@@ -389,15 +392,20 @@ function colorPorEnfermedades(n) {{
     if (n < 20) return '#e17055';
     return '#d63031';
 }}
+function getPctCultivoFiltrado(e) {{
+    if (cultivoFiltro === 'todos') return 0;
+    const c = e.cultivos.find(c => c.nombre === cultivoFiltro);
+    return c ? c.exportacion : 0;
+}}
 function getColor(e) {{
     if (vistaActual === 'cultivos')     return colorPorCultivos(e.n_cultivos);
-    if (vistaActual === 'exportacion')  return colorPorExportacion(e.max_exportacion);
+    if (vistaActual === 'exportacion')  return colorPorExportacion(getPctCultivoFiltrado(e));
     if (vistaActual === 'enfermedades') return colorPorEnfermedades(e.n_enfermedades);
     return '#74c69d';
 }}
 function getRadius(e) {{
     if (vistaActual === 'cultivos')     return 10 + e.n_cultivos * 3;
-    if (vistaActual === 'exportacion')  return 10 + (e.max_exportacion / 100) * 28;
+    if (vistaActual === 'exportacion')  return 10 + (getPctCultivoFiltrado(e) / 100) * 28;
     if (vistaActual === 'enfermedades') return 10 + Math.min(e.n_enfermedades * 1.3, 32);
     return 14;
 }}
@@ -410,17 +418,35 @@ function buildTooltip(e) {{
         `<span style="display:inline-block;width:8px;height:8px;background:${{c.color}};
          border-radius:50%;margin-right:4px;vertical-align:middle;"></span>${{cap(c.nombre)}}`
     ).join('<br>');
+
+    let expLine = '';
+    if (vistaActual === 'exportacion' && cultivoFiltro !== 'todos') {{
+        const pct = getPctCultivoFiltrado(e);
+        expLine = `<br><span style="color:#aed6f1">📦 ${{cap(cultivoFiltro)}}: <b>${{pct}}%</b> va a exportación</span>`;
+    }}
+
     return `<b style="font-size:13px">${{cap(e.estado)}}</b><br>
         <span style="color:#74c69d">🌾 ${{cultivos.length}} cultivo(s)</span><br>
         ${{dots}}<br>
-        <span style="color:#ffd6a5">🦠 ${{e.n_enfermedades}} reg. fitosanitarios</span><br>
-        <span style="color:#aed6f1">📦 Exp. máx.: ${{e.max_exportacion}}%</span>`;
+        <span style="color:#ffd6a5">🦠 ${{e.n_enfermedades}} reg. fitosanitarios</span>
+        ${{expLine}}`;
 }}
 
 // ── Marcadores ─────────────────────────────────────────────────────────────
 function renderMarcadores() {{
     markers.forEach(m => map.removeLayer(m));
     markers = [];
+
+    // Vista exportacion sin cultivo seleccionado → pedir al usuario que filtre
+    if (vistaActual === 'exportacion' && cultivoFiltro === 'todos') {{
+        document.getElementById('estado-detalle').innerHTML = `
+            <div class="panel-placeholder">
+                <div class="icon">📦</div>
+                <p>Selecciona un <b style="color:#74c69d">cultivo</b> en el filtro superior para ver su porcentaje de exportación por estado.</p>
+            </div>`;
+        actualizarLeyendaMapa();
+        return;
+    }}
 
     let datos = DATOS;
     if (cultivoFiltro !== 'todos') {{
@@ -545,12 +571,18 @@ function actualizarLeyendaMapa() {{
             <div class="map-legend-item"><div class="map-legend-dot" style="background:#fdcb6e"></div>5–6 cultivos</div>
             <div class="map-legend-item"><div class="map-legend-dot" style="background:#e17055"></div>7+ cultivos</div>`;
         }} else if (vistaActual === 'exportacion') {{
-            div.innerHTML = `<div class="map-legend-title">📦 % Exportación</div>
-            <div class="map-legend-item"><div class="map-legend-dot" style="background:#74b9ff"></div>&lt;20%</div>
-            <div class="map-legend-item"><div class="map-legend-dot" style="background:#55efc4"></div>20–40%</div>
-            <div class="map-legend-item"><div class="map-legend-dot" style="background:#fdcb6e"></div>40–60%</div>
-            <div class="map-legend-item"><div class="map-legend-dot" style="background:#e17055"></div>60–75%</div>
-            <div class="map-legend-item"><div class="map-legend-dot" style="background:#d63031"></div>&gt;75%</div>`;
+            const nombreCultivo = cultivoFiltro !== 'todos' ? cap(cultivoFiltro) : null;
+            div.innerHTML = nombreCultivo
+                ? `<div class="map-legend-title">📦 Exportación — ${{nombreCultivo}}</div>
+                   <div class="map-legend-item"><div class="map-legend-dot" style="background:#74b9ff"></div>&lt;20%</div>
+                   <div class="map-legend-item"><div class="map-legend-dot" style="background:#55efc4"></div>20–40%</div>
+                   <div class="map-legend-item"><div class="map-legend-dot" style="background:#fdcb6e"></div>40–60%</div>
+                   <div class="map-legend-item"><div class="map-legend-dot" style="background:#e17055"></div>60–75%</div>
+                   <div class="map-legend-item"><div class="map-legend-dot" style="background:#d63031"></div>&gt;75%</div>`
+                : `<div class="map-legend-title">📦 Exportación</div>
+                   <div style="font-size:0.78em;color:#74c69d;margin-top:4px;line-height:1.5;">
+                     Selecciona un cultivo<br>para ver su % de exportación
+                   </div>`;
         }} else {{
             div.innerHTML = `<div class="map-legend-title">🦠 Riesgo fitosanitario</div>
             <div class="map-legend-item"><div class="map-legend-dot" style="background:#55efc4"></div>&lt;5 registros</div>
