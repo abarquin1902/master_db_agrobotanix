@@ -1,11 +1,5 @@
 # python3 generar_dashboard.py
 
-"""
-Agrobotanix — Dashboard Unificado
-Genera un único HTML con 3 tabs: Mapa, Enfermedades y Calendario.
-Uso: python generar_dashboard.py
-"""
-
 import json
 import pandas as pd
 from collections import defaultdict
@@ -107,6 +101,9 @@ def construir_datos_mapa(calendario, enfermedades, exportacion):
     for _, row in enfermedades.iterrows():
         enf_por_cultivo[row["cultivo"]].append({
             "nombre":     str(row["nombre_comun"]),
+            # ── CAMBIO 1: se agrega nombre científico ─────────────────────
+            "cientifico": str(row["nombre_cientifico"]),
+            # ──────────────────────────────────────────────────────────────
             "tipo":       str(row["tipo_patogeno"]),
             "dificultad": str(row["dificultad_erradicacion"]),
             "preventivo": str(row["producto_preventivo"]),
@@ -130,7 +127,9 @@ def construir_datos_mapa(calendario, enfermedades, exportacion):
                 "color":        COLORES_CULTIVO.get(c, "#95a5a6"),
                 "exportacion":  round(float(pct_exp) * 100, 1),
                 "n_enf":        len(enfs_unicas),
-                "enfermedades": enfs_unicas[:8],
+                # ── CAMBIO 1: lista completa, sin [:8] ────────────────────
+                "enfermedades": enfs_unicas,
+                # ──────────────────────────────────────────────────────────
             })
         n_enf_total = sum(c["n_enf"] for c in cultivos_detalle)
         max_exp     = max((c["exportacion"] for c in cultivos_detalle), default=0)
@@ -309,17 +308,43 @@ def generar_html(estados_mapa, registros_enf, output=OUTPUT_HTML):
             display:flex; align-items:center; justify-content:space-between;
         }}
         .cultivo-exp {{ font-size:0.7em; color:#95d5b2; margin-top:1px; }}
-        .enf-list {{ margin-top:6px; }}
+
+        /* ── CAMBIO 2: estilos toggle colapsable ──────────────────────────── */
+        .enf-toggle {{
+            display:flex; align-items:center; justify-content:space-between;
+            margin-top:7px; padding:5px 7px;
+            background:#0d1b2a; border-radius:5px;
+            cursor:pointer; border:1px solid #1e3a5f;
+            transition:border-color 0.15s, background 0.15s;
+            user-select:none;
+        }}
+        .enf-toggle:hover {{ border-color:#2d6a4f; background:#111f30; }}
+        .enf-toggle-label {{ font-size:0.72em; color:#74c69d; font-weight:600; }}
+        .enf-toggle-icon {{
+            font-size:0.68em; color:#4a7a9b;
+            transition:transform 0.2s;
+            display:inline-block;
+        }}
+        .enf-toggle-icon.abierto {{ transform:rotate(90deg); }}
+
+        .enf-list {{
+            margin-top:5px;
+            display:none;
+        }}
+        .enf-list.visible {{ display:block; }}
+
         .enf-item {{
             background:#0d1b2a; border-radius:4px; padding:5px 7px; margin-bottom:3px;
         }}
-        .enf-nombre {{ color:#e2e8f0; font-weight:600; font-size:0.73em; margin-bottom:2px; }}
+        .enf-nombre {{ color:#e2e8f0; font-weight:600; font-size:0.73em; margin-bottom:1px; }}
+        /* ── CAMBIO 2: nombre científico en itálica ───────────────────────── */
+        .enf-cientifico {{ color:#4a7a9b; font-style:italic; font-size:0.67em; margin-bottom:3px; }}
+        /* ──────────────────────────────────────────────────────────────────── */
         .enf-meta {{ display:flex; gap:4px; flex-wrap:wrap; margin-bottom:3px; }}
         .prod-row {{ display:flex; gap:4px; flex-wrap:wrap; }}
         .prod-pill {{ padding:1px 7px; border-radius:9px; font-size:0.66em; font-weight:700; }}
         .prod-prev {{ background:#1a4731; color:#74c69d; border:1px solid #2d6a4f; }}
         .prod-corr {{ background:#4a1942; color:#f7aef8; border:1px solid #7b2d8b; }}
-        .more-enf {{ font-size:0.68em; color:#74c69d; padding:2px 0 0 2px; }}
 
         .leyenda-cultivos {{ display:flex; flex-direction:column; gap:3px; }}
         .leyenda-item {{
@@ -635,12 +660,10 @@ function cambiarTab(nombre) {{
     document.getElementById('tab-' + nombre).classList.add('activo');
     document.getElementById('content-' + nombre).classList.add('activo');
 
-    // Inicializar mapa solo la primera vez que se muestra el tab
     if (nombre === 'mapa' && !mapaIniciado) {{
         setTimeout(iniciarMapa, 50);
         mapaIniciado = true;
     }}
-    // Invalidar tamaño si el mapa ya existe (por si el tab se oculta/muestra)
     if (nombre === 'mapa' && mapaIniciado && map) {{
         setTimeout(() => map.invalidateSize(), 50);
     }}
@@ -663,7 +686,6 @@ function iniciarMapa() {{
     renderMarcadores();
 }}
 
-// Color helpers
 function colorCultivos(n) {{
     return n<=1?'#74b9ff':n<=3?'#00b894':n<=5?'#fdcb6e':'#e17055';
 }}
@@ -733,6 +755,7 @@ function renderMarcadores() {{
     actualizarLeyendaMapa();
 }}
 
+// ── CAMBIO 3: mostrarDetalleEstado — toggle colapsable + nombre científico ──
 function mostrarDetalleEstado(e) {{
     const cs = mapa_cultivo==='todos'?e.cultivos:e.cultivos.filter(c=>c.nombre===mapa_cultivo);
     let html=`<div class="estado-header">
@@ -743,32 +766,62 @@ function mostrarDetalleEstado(e) {{
             <span class="badge badge-exp">📦 ${{e.max_exportacion}}% exp.</span>
         </div>
     </div>`;
-    cs.forEach(c=>{{
-        const enfs=c.enfermedades.slice(0,4);
-        let enfsHtml='';
-        if(enfs.length){{
-            enfsHtml='<div class="enf-list">'+enfs.map(enf=>{{
-                const tt='tag-'+enf.tipo.toLowerCase().trim();
-                const td='tag-'+enf.dificultad.toLowerCase().trim();
+
+    cs.forEach((c, ci) => {{
+        const toggleId = `enf-list-${{ci}}`;
+        const iconId   = `enf-icon-${{ci}}`;
+
+        let enfsHtml = '';
+        if (c.enfermedades && c.enfermedades.length) {{
+            enfsHtml = c.enfermedades.map(enf => {{
+                const tt = 'tag-' + enf.tipo.toLowerCase().trim();
+                const td = 'tag-' + enf.dificultad.toLowerCase().trim();
                 return `<div class="enf-item">
                     <div class="enf-nombre">🦠 ${{enf.nombre}}</div>
-                    <div class="enf-meta"><span class="tag ${{tt}}">${{enf.tipo}}</span><span class="tag ${{td}}">${{enf.dificultad}}</span></div>
-                    <div class="prod-row"><span class="prod-pill prod-prev">🛡️ ${{enf.preventivo}}</span><span class="prod-pill prod-corr">💊 ${{enf.correctivo}}</span></div>
+                    <div class="enf-cientifico">(${{enf.cientifico}})</div>
+                    <div class="enf-meta">
+                        <span class="tag ${{tt}}">${{enf.tipo}}</span>
+                        <span class="tag ${{td}}">${{enf.dificultad}}</span>
+                    </div>
+                    <div class="prod-row">
+                        <span class="prod-pill prod-prev">🛡️ ${{enf.preventivo}}</span>
+                        <span class="prod-pill prod-corr">💊 ${{enf.correctivo}}</span>
+                    </div>
                 </div>`;
-            }}).join('')+'</div>';
-            if(c.n_enf>4) enfsHtml+=`<div class="more-enf">+ ${{c.n_enf-4}} más...</div>`;
+            }}).join('');
         }}
-        html+=`<div class="cultivo-card" style="border-left-color:${{c.color}}">
+
+        html += `<div class="cultivo-card" style="border-left-color:${{c.color}}">
             <div class="cultivo-nombre">
-                <span><span style="display:inline-block;width:8px;height:8px;background:${{c.color}};border-radius:50%;margin-right:5px;"></span>${{cap(c.nombre)}}</span>
+                <span>
+                    <span style="display:inline-block;width:8px;height:8px;background:${{c.color}};border-radius:50%;margin-right:5px;"></span>
+                    ${{cap(c.nombre)}}
+                </span>
                 <span style="font-size:0.7em;color:#95d5b2;">📦 ${{c.exportacion}}%</span>
             </div>
             <div class="cultivo-exp">🦠 ${{c.n_enf}} enfermedades</div>
-            ${{enfsHtml}}
+            ${{c.enfermedades && c.enfermedades.length ? `
+            <div class="enf-toggle" onclick="toggleEnfList('${{toggleId}}','${{iconId}}')">
+                <span class="enf-toggle-label">Ver enfermedades (${{c.n_enf}})</span>
+                <span class="enf-toggle-icon" id="${{iconId}}">▶</span>
+            </div>
+            <div class="enf-list" id="${{toggleId}}">${{enfsHtml}}</div>
+            ` : ''}}
         </div>`;
     }});
-    document.getElementById('estado-detalle').innerHTML=html;
+
+    document.getElementById('estado-detalle').innerHTML = html;
 }}
+
+// ── CAMBIO 3: función toggle ──────────────────────────────────────────────
+function toggleEnfList(listId, iconId) {{
+    const list = document.getElementById(listId);
+    const icon = document.getElementById(iconId);
+    if (!list) return;
+    const abierto = list.classList.toggle('visible');
+    if (icon) icon.classList.toggle('abierto', abierto);
+}}
+// ─────────────────────────────────────────────────────────────────────────
 
 function renderLeyendaMapa() {{
     const cont=document.getElementById('mapa-leyenda');
@@ -856,7 +909,6 @@ let enf_filtrados=[...DATOS_ENF];
 let enf_orden_col='cultivo', enf_orden_asc=true;
 
 window.onload=()=>{{
-    // Iniciar mapa desde el principio (tab 1 está activo)
     iniciarMapa();
     mapaIniciado=true;
     enfAplicarFiltros();
@@ -1072,7 +1124,6 @@ def main():
     print("🎨 Generando dashboard unificado...")
     generar_html(estados_mapa, registros_enf)
     print(f"\n✅ Listo. Abre {OUTPUT_HTML} en tu navegador.")
-
 
 if __name__ == "__main__":
     main()
