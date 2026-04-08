@@ -258,19 +258,17 @@
     position: relative;
   }
 
-  /* Grid lines on track */
-  .track::before {
-    content: '';
+  /* Grid lines drawn by JS as absolute divs */
+  .grid-line {
     position: absolute;
-    inset: 0;
-    background-image: repeating-linear-gradient(
-      90deg,
-      var(--border) 0px,
-      var(--border) 0.5px,
-      transparent 0.5px,
-      transparent var(--week-w, 60px)
-    );
+    top: 0; bottom: 0;
+    width: 0.5px;
+    background: var(--border);
     pointer-events: none;
+    z-index: 1;
+  }
+  .grid-line.month-start {
+    background: var(--border2);
   }
 
   .today-marker {
@@ -435,27 +433,34 @@
 </div>
 
 <script>
-const START = new Date(2026, 3, 1);
-const END   = new Date(2026, 6, 1);
-const TOTAL  = (END - START) / 864e5;
+// ── Escala unificada ──────────────────────────────────────────────
+// Todo el sistema usa días desde START como unidad base.
+// px = (días / TOTAL_DIAS) * TRACK_PX  →  mismo cálculo para header, barras y líneas.
+
+const START_DATE = new Date('2026-04-01T12:00:00');
+const END_DATE   = new Date('2026-07-01T12:00:00');
+const TOTAL_DAYS = (END_DATE - START_DATE) / 864e5;  // 91 días
+
+const TODAY = new Date('2026-04-08T12:00:00');  // 8 abr 2026, mediodía evita desfase UTC
 
 const COLORS = {
-  ai:   { solid: '#4f8ef7', border: '#4f8ef7', text: '#fff' },
-  etl:  { solid: '#34c98b', border: '#34c98b', text: '#022a1c' },
-  dash: { solid: '#f59e3f', border: '#f59e3f', text: '#2a1500' },
-  auto: { solid: '#a78bfa', border: '#a78bfa', text: '#fff' },
-  exp:  { solid: '#f472b6', border: '#f472b6', text: '#fff' },
-  ext:  { solid: '#6b7280', border: '#6b7280', text: '#fff' },
+  ai:   { solid: '#4f8ef7', text: '#fff' },
+  etl:  { solid: '#34c98b', text: '#022a1c' },
+  dash: { solid: '#f59e3f', text: '#2a1500' },
+  auto: { solid: '#a78bfa', text: '#fff' },
+  exp:  { solid: '#f472b6', text: '#fff' },
+  ext:  { solid: '#6b7280', text: '#fff' },
 };
 
-function p(dateStr) {
-  const d = new Date(dateStr);
-  return Math.max(0, Math.min(100, ((d - START) / 864e5) / TOTAL * 100));
+// Días desde START_DATE para una fecha string "YYYY-MM-DD"
+function daysFrom(dateStr) {
+  const d = new Date(dateStr + 'T12:00:00');
+  return (d - START_DATE) / 864e5;
 }
 
 function fmtDate(s) {
   const d = new Date(s);
-  const dias = ['dom','lun','mar','mié','jue','vie','sáb'];
+  const dias  = ['dom','lun','mar','mié','jue','vie','sáb'];
   const meses = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
   return `${dias[d.getDay()]} ${d.getDate()} ${meses[d.getMonth()]}`;
 }
@@ -513,35 +518,25 @@ const projects = [
   { section: 'Dashboards' },
   {
     name: 'TRG — Clientes históricos', tag: 'TRG', type: 'dash',
-    bars: [
-      { s: '2026-05-06', e: '2026-05-13', label: 'Diseño + build', phase: 'Desarrollo' }
-    ]
+    bars: [{ s: '2026-05-06', e: '2026-05-13', label: 'Diseño + build', phase: 'Desarrollo' }]
   },
   {
     name: 'Leads Agro vs ventas', tag: 'Agro', type: 'dash',
-    bars: [
-      { s: '2026-05-14', e: '2026-05-22', label: 'Diseño + build', phase: 'Desarrollo' }
-    ]
+    bars: [{ s: '2026-05-14', e: '2026-05-22', label: 'Diseño + build', phase: 'Desarrollo' }]
   },
   {
     name: 'Ventas agentes IA Drea + TRG', tag: 'Drea · TRG', type: 'dash',
-    bars: [
-      { s: '2026-05-23', e: '2026-05-29', label: 'Diseño + build', phase: 'Desarrollo' }
-    ]
+    bars: [{ s: '2026-05-23', e: '2026-05-29', label: 'Diseño + build', phase: 'Desarrollo' }]
   },
 
   { section: 'Automatización' },
   {
     name: 'Flujo aprobación etiquetas', tag: 'Zoho Projects', type: 'auto',
-    bars: [
-      { s: '2026-05-05', e: '2026-05-09', label: 'Build + prueba', phase: 'Desarrollo' }
-    ]
+    bars: [{ s: '2026-05-05', e: '2026-05-09', label: 'Build + prueba', phase: 'Desarrollo' }]
   },
   {
     name: 'Flujo aprobación influencers', tag: 'Zoho Projects', type: 'auto',
-    bars: [
-      { s: '2026-05-12', e: '2026-05-16', label: 'Build + prueba', phase: 'Desarrollo' }
-    ]
+    bars: [{ s: '2026-05-12', e: '2026-05-16', label: 'Build + prueba', phase: 'Desarrollo' }]
   },
 
   { section: 'Gestión externa' },
@@ -554,121 +549,165 @@ const projects = [
   },
 ];
 
-// --- Build week ticks ---
-function buildHeader() {
-  const months = [
-    { name: 'Abril',  start: '2026-04-01', end: '2026-05-01' },
-    { name: 'Mayo',   start: '2026-05-01', end: '2026-06-01' },
-    { name: 'Junio',  start: '2026-06-01', end: '2026-07-01' },
-  ];
-
-  let monthHtml = '<div class="time-header">';
-  months.forEach(m => {
-    const mStart = p(m.start);
-    const mEnd   = p(m.end);
-    const mW     = mEnd - mStart;
-
-    // collect weeks inside this month
-    let weeks = [];
-    let cur = new Date(m.start);
-    const mEndDate = new Date(m.end);
-    while (cur < mEndDate) {
-      const next = new Date(cur); next.setDate(next.getDate() + 7);
-      const wEnd = next < mEndDate ? next : mEndDate;
-      const wStartPct = p(cur.toISOString().slice(0,10));
-      const wEndPct   = p(wEnd.toISOString().slice(0,10));
-      const wW = wEndPct - wStartPct;
-      weeks.push({ label: `${cur.getDate()}/${cur.getMonth()+1}`, w: wW });
-      cur = next;
-    }
-
-    monthHtml += `<div class="month-block" style="width:${mW}%">
-      <div class="month-name">${m.name}</div>
-      <div class="weeks-row">`;
-    weeks.forEach(w => {
-      monthHtml += `<div class="week-tick" style="width:${w.w/mW*100}%">${w.label}</div>`;
+// ── Ticks de semana: cada lunes dentro del rango ──────────────────
+function getWeekTicks() {
+  const ticks = [];
+  let d = new Date('2026-04-01T12:00:00');
+  while (d < END_DATE) {
+    ticks.push({
+      days: (d - START_DATE) / 864e5,
+      label: `${d.getDate()}/${d.getMonth() + 1}`
     });
-    monthHtml += `</div></div>`;
-  });
-  monthHtml += '</div>';
-  return monthHtml;
+    d = new Date(d); d.setDate(d.getDate() + 7);
+  }
+  return ticks;
 }
 
-function buildRows() {
-  const todayPct = p('2026-04-08');
-  let html = '';
+// ── Límites de mes ────────────────────────────────────────────────
+const MONTHS = [
+  { name: 'Abril', start: new Date('2026-04-01T12:00:00'), end: new Date('2026-05-01T12:00:00') },
+  { name: 'Mayo',  start: new Date('2026-05-01T12:00:00'), end: new Date('2026-06-01T12:00:00') },
+  { name: 'Junio', start: new Date('2026-06-01T12:00:00'), end: new Date('2026-07-01T12:00:00') },
+];
 
+// ── Render ────────────────────────────────────────────────────────
+function render() {
+  const container = document.getElementById('gantt-inner');
+  const LABEL_W = 230; // px fijos para la columna de etiquetas
+  const trackW  = container.clientWidth - LABEL_W;
+
+  function pct(days) {
+    return Math.max(0, Math.min(100, (days / TOTAL_DAYS) * 100));
+  }
+  function px(days) {
+    return (days / TOTAL_DAYS) * trackW;
+  }
+
+  const weekTicks = getWeekTicks();
+  const todayDays = (TODAY - START_DATE) / 864e5 + 0.5;
+
+  // ── Header ──
+  let hHtml = `<div style="display:flex;margin-left:${LABEL_W}px;margin-bottom:2px;">`;
+  MONTHS.forEach(m => {
+    const mDays = (m.end - m.start) / 864e5;
+    const mW    = (mDays / TOTAL_DAYS) * 100;
+    hHtml += `<div style="width:${mW}%;font-size:11px;font-weight:600;color:var(--text-muted);
+      text-transform:uppercase;letter-spacing:0.08em;padding:0 0 4px 6px;
+      border-left:0.5px solid var(--border2);">${m.name}</div>`;
+  });
+  hHtml += '</div>';
+
+  // semanas: posición absoluta dentro de una barra relativa
+  hHtml += `<div style="position:relative;margin-left:${LABEL_W}px;height:20px;margin-bottom:8px;border-bottom:0.5px solid var(--border2);">`;
+  weekTicks.forEach(t => {
+    hHtml += `<div style="position:absolute;left:${pct(t.days)}%;
+      font-size:10px;color:var(--text-dim);font-family:'DM Mono',monospace;
+      border-left:0.5px solid var(--border);padding-left:3px;top:0;bottom:0;
+      display:flex;align-items:center;">${t.label}</div>`;
+  });
+  // líneas de mes en el header
+  MONTHS.forEach((m,i) => {
+    if (i === 0) return;
+    const mDays = (m.start - START_DATE) / 864e5;
+    hHtml += `<div style="position:absolute;left:${pct(mDays)}%;top:0;bottom:0;
+      width:0.5px;background:var(--border2);"></div>`;
+  });
+  hHtml += '</div>';
+
+  // ── Rows ──
+  let rHtml = '';
   projects.forEach(proj => {
     if (proj.section) {
-      html += `<div class="section-row">
-        <div class="section-label">${proj.section}</div>
-        <div class="section-line"></div>
+      rHtml += `<div style="display:flex;align-items:center;margin:20px 0 6px;">
+        <div style="width:${LABEL_W}px;min-width:${LABEL_W}px;font-size:10px;font-weight:600;
+          text-transform:uppercase;letter-spacing:0.1em;color:var(--text-dim);padding-right:16px;">
+          ${proj.section}</div>
+        <div style="flex:1;height:0.5px;background:var(--border);"></div>
       </div>`;
       return;
     }
 
     const c = COLORS[proj.type];
-    html += `<div class="project-row">
-      <div class="project-label">
-        <div class="project-name">${proj.name}</div>
-        <div class="project-tag">${proj.tag}</div>
-      </div>
-      <div class="track">
-        <div class="today-marker" style="left:${todayPct}%"></div>`;
+    const multiBar = proj.bars.length > 1;
 
+    // track con líneas de cuadrícula absolutas sincronizadas
+    let trackHtml = `<div class="track" style="flex:1;height:${multiBar?52:36}px;position:relative;">`;
+
+    // líneas verticales de semana
+    weekTicks.forEach(t => {
+      trackHtml += `<div class="grid-line" style="left:${pct(t.days)}%;"></div>`;
+    });
+    // líneas de mes más marcadas
+    MONTHS.forEach((m,i) => {
+      if (i === 0) return;
+      const mDays = (m.start - START_DATE) / 864e5;
+      trackHtml += `<div class="grid-line month-start" style="left:${pct(mDays)}%;"></div>`;
+    });
+
+    // línea HOY
+    trackHtml += `<div class="today-marker" style="left:${pct(todayDays)}%;"></div>`;
+
+    // barras
     proj.bars.forEach((b, i) => {
-      const left = p(b.s);
-      const w    = p(b.e) - left;
-      const minW = 1.5;
-      const actualW = Math.max(w, minW);
+      const startDays = daysFrom(b.s);
+      const endDays   = daysFrom(b.e);
+      const durDays   = Math.max(endDays - startDays, TOTAL_DAYS * 0.015);
+      const leftPct   = pct(startDays);
+      const widthPct  = pct(startDays + durDays) - leftPct;
 
-      const topOffset = proj.bars.length > 1
-        ? (i === 0 ? '-14px' : '6px')
-        : '0px';
+      const barH = 20;
+      const totalH = multiBar ? 52 : 36;
+      const topPx = multiBar
+        ? (i === 0 ? 4 : totalH - barH - 4)
+        : (totalH - barH) / 2;
+
+      const baseStyle = `position:absolute;left:${leftPct}%;width:${widthPct}%;
+        height:${barH}px;top:${topPx}px;border-radius:3px;
+        display:flex;align-items:center;padding:0 7px;
+        font-size:10px;font-weight:500;white-space:nowrap;
+        overflow:visible;cursor:default;transition:filter 0.15s;z-index:5;`;
+
+      const tooltip = `<div class="tooltip">
+        <div class="t-name">${proj.name}</div>
+        <div class="t-phase" style="color:${c.solid}">${b.phase}</div>
+        <div class="t-dates">${fmtDate(b.s)} → ${fmtDate(b.e)}</div>
+      </div>`;
 
       if (b.beta) {
-        html += `<div class="bar beta" style="
-          left:${left}%; width:${actualW}%;
-          border-color:${c.border};
-          color:${c.border};
-          top: calc(50% + ${topOffset});
-        ">
-          ${b.label}
-          <div class="tooltip">
-            <div class="t-name">${proj.name}</div>
-            <div class="t-phase" style="color:${c.border}">${b.phase}</div>
-            <div class="t-dates">${fmtDate(b.s)} → ${fmtDate(b.e)}</div>
-          </div>
-        </div>`;
+        trackHtml += `<div class="bar beta" style="${baseStyle}
+          border:1.5px dashed ${c.solid};color:${c.solid};background:transparent;"
+          onmouseenter="this.style.filter='brightness(1.2)'"
+          onmouseleave="this.style.filter=''">
+          ${b.label}${tooltip}</div>`;
       } else {
-        html += `<div class="bar" style="
-          left:${left}%; width:${actualW}%;
-          background:${c.solid};
-          color:${c.text};
-          top: calc(50% + ${topOffset});
-        ">
-          ${b.label}
-          <div class="tooltip">
-            <div class="t-name">${proj.name}</div>
-            <div class="t-phase" style="color:${c.solid}">${b.phase}</div>
-            <div class="t-dates">${fmtDate(b.s)} → ${fmtDate(b.e)}</div>
-          </div>
-        </div>`;
+        trackHtml += `<div class="bar" style="${baseStyle}background:${c.solid};color:${c.text};"
+          onmouseenter="this.style.filter='brightness(1.15)'"
+          onmouseleave="this.style.filter=''">
+          ${b.label}${tooltip}</div>`;
       }
     });
 
-    html += `</div></div>`;
+    trackHtml += '</div>';
+
+    rHtml += `<div class="project-row" style="display:flex;align-items:center;
+      min-height:${multiBar?52:36}px;border-radius:6px;margin-bottom:2px;">
+      <div class="project-label" style="width:${LABEL_W}px;min-width:${LABEL_W}px;padding:4px 16px 4px 0;">
+        <div class="project-name">${proj.name}</div>
+        <div class="project-tag">${proj.tag}</div>
+      </div>
+      ${trackHtml}
+    </div>`;
 
     if (proj.note) {
-      html += `<div class="note-row">${proj.note}</div>`;
+      rHtml += `<div class="note-row" style="margin-left:${LABEL_W}px;">${proj.note}</div>`;
     }
   });
 
-  return html;
+  container.innerHTML = hHtml + rHtml;
 }
 
-const container = document.getElementById('gantt-inner');
-container.innerHTML = buildHeader() + buildRows();
+window.addEventListener('load', render);
+window.addEventListener('resize', render);
 </script>
 </body>
 </html>
