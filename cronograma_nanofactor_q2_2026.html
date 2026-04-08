@@ -1,0 +1,674 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cronograma de Proyectos — Nanofactor Q2 2026</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0f1117;
+    --surface: #181c27;
+    --surface2: #1f2435;
+    --border: rgba(255,255,255,0.07);
+    --border2: rgba(255,255,255,0.12);
+    --text: #e8eaf0;
+    --text-muted: #6b7280;
+    --text-dim: #3d4455;
+
+    --ai: #4f8ef7;
+    --ai-beta: #4f8ef740;
+    --ai-solid: #1a3a6e;
+    --etl: #34c98b;
+    --etl-beta: #34c98b40;
+    --etl-solid: #0f4030;
+    --dash: #f59e3f;
+    --dash-beta: #f59e3f40;
+    --dash-solid: #4a2e08;
+    --auto: #a78bfa;
+    --auto-beta: #a78bfa40;
+    --auto-solid: #2e1f5e;
+    --exp: #f472b6;
+    --exp-beta: #f472b640;
+    --exp-solid: #4a1030;
+    --ext: #6b7280;
+    --ext-beta: #6b728040;
+    --ext-solid: #1f2435;
+
+    --today: #ff4d4d;
+    --label-w: 230px;
+    --row-h: 44px;
+    --bar-h: 24px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    min-height: 100vh;
+    padding: 40px 32px 60px;
+  }
+
+  .page-header {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    margin-bottom: 36px;
+    padding-bottom: 24px;
+    border-bottom: 0.5px solid var(--border2);
+  }
+
+  .page-header h1 {
+    font-size: 22px;
+    font-weight: 600;
+    letter-spacing: -0.3px;
+    color: var(--text);
+  }
+
+  .page-header .sub {
+    font-size: 13px;
+    color: var(--text-muted);
+    margin-top: 4px;
+    font-weight: 400;
+  }
+
+  .meta {
+    text-align: right;
+    font-size: 12px;
+    color: var(--text-muted);
+    font-family: 'DM Mono', monospace;
+    line-height: 1.8;
+  }
+
+  .legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    margin-bottom: 32px;
+    align-items: center;
+  }
+
+  .legend-group {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .legend-bars {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .leg-bar {
+    width: 28px;
+    height: 10px;
+    border-radius: 2px;
+  }
+
+  .leg-label {
+    font-size: 11px;
+    color: var(--text-muted);
+    font-weight: 500;
+  }
+
+  .leg-divider {
+    width: 0.5px;
+    height: 14px;
+    background: var(--border2);
+  }
+
+  .phase-dot {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 11px;
+    color: var(--text-muted);
+  }
+
+  .phase-dot .dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 2px;
+  }
+
+  .today-legend {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11px;
+    color: var(--today);
+    font-family: 'DM Mono', monospace;
+  }
+
+  .today-legend-line {
+    width: 2px;
+    height: 14px;
+    background: var(--today);
+    border-radius: 1px;
+  }
+
+  /* Gantt container */
+  .gantt {
+    width: 100%;
+    overflow-x: auto;
+  }
+
+  .gantt-inner {
+    min-width: 900px;
+  }
+
+  /* Month + week headers */
+  .time-header {
+    display: flex;
+    margin-left: var(--label-w);
+    margin-bottom: 0;
+  }
+
+  .month-block {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .month-name {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    padding: 0 0 6px 8px;
+    border-left: 0.5px solid var(--border2);
+  }
+
+  .weeks-row {
+    display: flex;
+  }
+
+  .week-tick {
+    font-size: 10px;
+    color: var(--text-dim);
+    font-family: 'DM Mono', monospace;
+    padding: 0 0 8px 4px;
+    border-left: 0.5px solid var(--border);
+  }
+
+  /* Section header */
+  .section-row {
+    display: flex;
+    align-items: center;
+    margin: 20px 0 6px;
+  }
+
+  .section-label {
+    width: var(--label-w);
+    min-width: var(--label-w);
+    font-size: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--text-dim);
+    padding-right: 16px;
+  }
+
+  .section-line {
+    flex: 1;
+    height: 0.5px;
+    background: var(--border);
+  }
+
+  /* Project row */
+  .project-row {
+    display: flex;
+    align-items: center;
+    min-height: var(--row-h);
+    border-radius: 6px;
+    transition: background 0.15s;
+  }
+
+  .project-row:hover {
+    background: var(--surface);
+  }
+
+  .project-label {
+    width: var(--label-w);
+    min-width: var(--label-w);
+    padding: 4px 16px 4px 0;
+  }
+
+  .project-name {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text);
+    line-height: 1.4;
+  }
+
+  .project-tag {
+    font-size: 10px;
+    color: var(--text-muted);
+    margin-top: 1px;
+    font-family: 'DM Mono', monospace;
+  }
+
+  .track {
+    flex: 1;
+    height: var(--row-h);
+    position: relative;
+  }
+
+  /* Grid lines on track */
+  .track::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image: repeating-linear-gradient(
+      90deg,
+      var(--border) 0px,
+      var(--border) 0.5px,
+      transparent 0.5px,
+      transparent var(--week-w, 60px)
+    );
+    pointer-events: none;
+  }
+
+  .today-marker {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 1.5px;
+    background: var(--today);
+    z-index: 20;
+    border-radius: 1px;
+  }
+
+  .today-marker::after {
+    content: 'HOY';
+    position: absolute;
+    top: -18px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 9px;
+    font-weight: 600;
+    color: var(--today);
+    font-family: 'DM Mono', monospace;
+    letter-spacing: 0.05em;
+    white-space: nowrap;
+  }
+
+  .bar {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    height: var(--bar-h);
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    padding: 0 8px;
+    font-size: 10px;
+    font-weight: 500;
+    white-space: nowrap;
+    overflow: visible;
+    cursor: default;
+    transition: filter 0.15s;
+    z-index: 5;
+  }
+
+  .bar:hover {
+    filter: brightness(1.15);
+    z-index: 15;
+  }
+
+  .bar.beta {
+    border: 1.5px dashed;
+    background: transparent !important;
+  }
+
+  /* Tooltip */
+  .bar .tooltip {
+    display: none;
+    position: absolute;
+    bottom: calc(100% + 8px);
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--surface2);
+    border: 0.5px solid var(--border2);
+    border-radius: 6px;
+    padding: 8px 12px;
+    font-size: 11px;
+    color: var(--text);
+    white-space: nowrap;
+    z-index: 100;
+    pointer-events: none;
+    line-height: 1.7;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+  }
+
+  .bar:hover .tooltip {
+    display: block;
+  }
+
+  .tooltip .t-name {
+    font-weight: 600;
+    margin-bottom: 4px;
+    font-size: 12px;
+  }
+
+  .tooltip .t-dates {
+    color: var(--text-muted);
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+  }
+
+  .tooltip .t-phase {
+    margin-top: 3px;
+    font-size: 10px;
+  }
+
+  .note-row {
+    margin-left: var(--label-w);
+    padding: 2px 0 6px;
+    font-size: 10px;
+    color: var(--text-dim);
+    font-style: italic;
+  }
+</style>
+</head>
+<body>
+
+<div class="page-header">
+  <div>
+    <h1>Cronograma de Proyectos</h1>
+    <div class="sub">Nanofactor Global — Abril · Mayo · Junio 2026</div>
+  </div>
+  <div class="meta">
+    <div>Responsable: Alejandro Barquín</div>
+    <div>Área: IA &amp; Data Science</div>
+    <div>Actualizado: 8 abril 2026</div>
+  </div>
+</div>
+
+<div class="legend">
+  <div class="legend-group">
+    <div class="leg-bar" style="background:#4f8ef7;"></div>
+    <span class="leg-label">IA / Agentes</span>
+  </div>
+  <div class="legend-group">
+    <div class="leg-bar" style="background:#34c98b;"></div>
+    <span class="leg-label">ETL / Datos</span>
+  </div>
+  <div class="legend-group">
+    <div class="leg-bar" style="background:#f59e3f;"></div>
+    <span class="leg-label">Dashboards</span>
+  </div>
+  <div class="legend-group">
+    <div class="leg-bar" style="background:#a78bfa;"></div>
+    <span class="leg-label">Automatización</span>
+  </div>
+  <div class="legend-group">
+    <div class="leg-bar" style="background:#f472b6;"></div>
+    <span class="leg-label">Experimento / I+D</span>
+  </div>
+  <div class="legend-group">
+    <div class="leg-bar" style="background:#6b7280;"></div>
+    <span class="leg-label">Gestión externa</span>
+  </div>
+  <div class="leg-divider"></div>
+  <div class="phase-dot">
+    <div class="dot" style="background:#4f8ef7;border:1.5px dashed #4f8ef7;background:transparent;"></div>
+    Beta / En progreso
+  </div>
+  <div class="phase-dot">
+    <div class="dot" style="background:#4f8ef7;"></div>
+    Versión final
+  </div>
+  <div class="leg-divider"></div>
+  <div class="today-legend">
+    <div class="today-legend-line"></div>
+    Hoy (8 abr)
+  </div>
+</div>
+
+<div class="gantt">
+  <div class="gantt-inner" id="gantt-inner"></div>
+</div>
+
+<script>
+const START = new Date(2026, 3, 1);
+const END   = new Date(2026, 6, 1);
+const TOTAL  = (END - START) / 864e5;
+
+const COLORS = {
+  ai:   { solid: '#4f8ef7', border: '#4f8ef7', text: '#fff' },
+  etl:  { solid: '#34c98b', border: '#34c98b', text: '#022a1c' },
+  dash: { solid: '#f59e3f', border: '#f59e3f', text: '#2a1500' },
+  auto: { solid: '#a78bfa', border: '#a78bfa', text: '#fff' },
+  exp:  { solid: '#f472b6', border: '#f472b6', text: '#fff' },
+  ext:  { solid: '#6b7280', border: '#6b7280', text: '#fff' },
+};
+
+function p(dateStr) {
+  const d = new Date(dateStr);
+  return Math.max(0, Math.min(100, ((d - START) / 864e5) / TOTAL * 100));
+}
+
+function fmtDate(s) {
+  const d = new Date(s);
+  const dias = ['dom','lun','mar','mié','jue','vie','sáb'];
+  const meses = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
+  return `${dias[d.getDay()]} ${d.getDate()} ${meses[d.getMonth()]}`;
+}
+
+const projects = [
+  { section: 'IA / Agentes' },
+  {
+    name: 'Recordatorios TRG', tag: 'TRG', type: 'ai',
+    bars: [
+      { s: '2026-04-08', e: '2026-04-10', label: 'Beta', phase: 'Beta', beta: true },
+      { s: '2026-04-10', e: '2026-04-16', label: 'v1.0 final', phase: 'Versión final' }
+    ]
+  },
+  {
+    name: "Agente Dr'ea", tag: 'Drea', type: 'ai',
+    bars: [
+      { s: '2026-04-08', e: '2026-04-13', label: 'v1.0 final', phase: 'Versión final' }
+    ]
+  },
+  {
+    name: 'Agente Agrobotanix', tag: 'Agro', type: 'ai',
+    bars: [
+      { s: '2026-04-08', e: '2026-04-13', label: 'Beta', phase: 'Beta', beta: true },
+      { s: '2026-04-13', e: '2026-04-22', label: 'Final + testeo', phase: 'Versión final + QA' }
+    ]
+  },
+  {
+    name: 'Claude Code × Redes Sociales', tag: 'I+D', type: 'exp',
+    bars: [
+      { s: '2026-05-19', e: '2026-05-23', label: 'Experimento (4 días)', phase: 'Experimento' }
+    ]
+  },
+
+  { section: 'ETL / Datos' },
+  {
+    name: 'Plantillas Envia.com', tag: 'Logística', type: 'etl',
+    bars: [
+      { s: '2026-04-16', e: '2026-04-24', label: 'Integración', phase: 'Desarrollo' }
+    ]
+  },
+  {
+    name: 'ETL Shopify — 3 unidades', tag: 'Drea · Agro · TRG', type: 'etl',
+    bars: [
+      { s: '2026-04-22', e: '2026-04-27', label: 'Beta', phase: 'Beta', beta: true },
+      { s: '2026-04-27', e: '2026-05-04', label: 'Versión final', phase: 'Versión final' }
+    ]
+  },
+  {
+    name: 'Integración Amazon → Tablero', tag: 'E-commerce', type: 'etl',
+    bars: [
+      { s: '2026-04-28', e: '2026-05-02', label: 'Conexión + validación', phase: 'Desarrollo' }
+    ]
+  },
+
+  { section: 'Dashboards' },
+  {
+    name: 'TRG — Clientes históricos', tag: 'TRG', type: 'dash',
+    bars: [
+      { s: '2026-05-06', e: '2026-05-13', label: 'Diseño + build', phase: 'Desarrollo' }
+    ]
+  },
+  {
+    name: 'Leads Agro vs ventas', tag: 'Agro', type: 'dash',
+    bars: [
+      { s: '2026-05-14', e: '2026-05-22', label: 'Diseño + build', phase: 'Desarrollo' }
+    ]
+  },
+  {
+    name: 'Ventas agentes IA Drea + TRG', tag: 'Drea · TRG', type: 'dash',
+    bars: [
+      { s: '2026-05-23', e: '2026-05-29', label: 'Diseño + build', phase: 'Desarrollo' }
+    ]
+  },
+
+  { section: 'Automatización' },
+  {
+    name: 'Flujo aprobación etiquetas', tag: 'Zoho Projects', type: 'auto',
+    bars: [
+      { s: '2026-05-05', e: '2026-05-09', label: 'Build + prueba', phase: 'Desarrollo' }
+    ]
+  },
+  {
+    name: 'Flujo aprobación influencers', tag: 'Zoho Projects', type: 'auto',
+    bars: [
+      { s: '2026-05-12', e: '2026-05-16', label: 'Build + prueba', phase: 'Desarrollo' }
+    ]
+  },
+
+  { section: 'Gestión externa' },
+  {
+    name: 'Agent Storefront Shopify', tag: 'GPT · Claude · Gemini', type: 'ext',
+    note: '* Timeline sujeto a aprobación de Shopify',
+    bars: [
+      { s: '2026-05-26', e: '2026-06-05', label: 'Pendiente aprobación *', phase: 'En gestión', beta: true }
+    ]
+  },
+];
+
+// --- Build week ticks ---
+function buildHeader() {
+  const months = [
+    { name: 'Abril',  start: '2026-04-01', end: '2026-05-01' },
+    { name: 'Mayo',   start: '2026-05-01', end: '2026-06-01' },
+    { name: 'Junio',  start: '2026-06-01', end: '2026-07-01' },
+  ];
+
+  let monthHtml = '<div class="time-header">';
+  months.forEach(m => {
+    const mStart = p(m.start);
+    const mEnd   = p(m.end);
+    const mW     = mEnd - mStart;
+
+    // collect weeks inside this month
+    let weeks = [];
+    let cur = new Date(m.start);
+    const mEndDate = new Date(m.end);
+    while (cur < mEndDate) {
+      const next = new Date(cur); next.setDate(next.getDate() + 7);
+      const wEnd = next < mEndDate ? next : mEndDate;
+      const wStartPct = p(cur.toISOString().slice(0,10));
+      const wEndPct   = p(wEnd.toISOString().slice(0,10));
+      const wW = wEndPct - wStartPct;
+      weeks.push({ label: `${cur.getDate()}/${cur.getMonth()+1}`, w: wW });
+      cur = next;
+    }
+
+    monthHtml += `<div class="month-block" style="width:${mW}%">
+      <div class="month-name">${m.name}</div>
+      <div class="weeks-row">`;
+    weeks.forEach(w => {
+      monthHtml += `<div class="week-tick" style="width:${w.w/mW*100}%">${w.label}</div>`;
+    });
+    monthHtml += `</div></div>`;
+  });
+  monthHtml += '</div>';
+  return monthHtml;
+}
+
+function buildRows() {
+  const todayPct = p('2026-04-08');
+  let html = '';
+
+  projects.forEach(proj => {
+    if (proj.section) {
+      html += `<div class="section-row">
+        <div class="section-label">${proj.section}</div>
+        <div class="section-line"></div>
+      </div>`;
+      return;
+    }
+
+    const c = COLORS[proj.type];
+    html += `<div class="project-row">
+      <div class="project-label">
+        <div class="project-name">${proj.name}</div>
+        <div class="project-tag">${proj.tag}</div>
+      </div>
+      <div class="track">
+        <div class="today-marker" style="left:${todayPct}%"></div>`;
+
+    proj.bars.forEach((b, i) => {
+      const left = p(b.s);
+      const w    = p(b.e) - left;
+      const minW = 1.5;
+      const actualW = Math.max(w, minW);
+
+      const topOffset = proj.bars.length > 1
+        ? (i === 0 ? '-14px' : '6px')
+        : '0px';
+
+      if (b.beta) {
+        html += `<div class="bar beta" style="
+          left:${left}%; width:${actualW}%;
+          border-color:${c.border};
+          color:${c.border};
+          top: calc(50% + ${topOffset});
+        ">
+          ${b.label}
+          <div class="tooltip">
+            <div class="t-name">${proj.name}</div>
+            <div class="t-phase" style="color:${c.border}">${b.phase}</div>
+            <div class="t-dates">${fmtDate(b.s)} → ${fmtDate(b.e)}</div>
+          </div>
+        </div>`;
+      } else {
+        html += `<div class="bar" style="
+          left:${left}%; width:${actualW}%;
+          background:${c.solid};
+          color:${c.text};
+          top: calc(50% + ${topOffset});
+        ">
+          ${b.label}
+          <div class="tooltip">
+            <div class="t-name">${proj.name}</div>
+            <div class="t-phase" style="color:${c.solid}">${b.phase}</div>
+            <div class="t-dates">${fmtDate(b.s)} → ${fmtDate(b.e)}</div>
+          </div>
+        </div>`;
+      }
+    });
+
+    html += `</div></div>`;
+
+    if (proj.note) {
+      html += `<div class="note-row">${proj.note}</div>`;
+    }
+  });
+
+  return html;
+}
+
+const container = document.getElementById('gantt-inner');
+container.innerHTML = buildHeader() + buildRows();
+</script>
+</body>
+</html>
