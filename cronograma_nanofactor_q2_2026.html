@@ -453,13 +453,20 @@ const COLORS = {
 };
 
 // Días desde START_DATE para una fecha string "YYYY-MM-DD"
+function nextWeekday(dateStr) {
+  const d = new Date(dateStr + 'T12:00:00');
+  if (d.getDay() === 6) d.setDate(d.getDate() + 2); // sábado → lunes
+  if (d.getDay() === 0) d.setDate(d.getDate() + 1); // domingo → lunes
+  return d.toISOString().slice(0, 10);
+}
+
 function daysFrom(dateStr) {
   const d = new Date(dateStr + 'T12:00:00');
   return (d - START_DATE) / 864e5;
 }
 
 function fmtDate(s) {
-  const d = new Date(s);
+  const d = new Date(s.includes('T') ? s : s + 'T12:00:00');
   const dias  = ['dom','lun','mar','mié','jue','vie','sáb'];
   const meses = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
   return `${dias[d.getDay()]} ${d.getDate()} ${meses[d.getMonth()]}`;
@@ -490,7 +497,7 @@ const projects = [
   {
     name: 'Claude Code × Redes Sociales', tag: 'I+D', type: 'exp',
     bars: [
-      { s: '2026-05-19', e: '2026-05-23', label: 'Experimento (4 días)', phase: 'Experimento' }
+      { s: '2026-05-19', e: '2026-05-25', label: 'Experimento (4 días)', phase: 'Experimento' }
     ]
   },
 
@@ -511,7 +518,7 @@ const projects = [
   {
     name: 'Integración Amazon → Tablero', tag: 'E-commerce', type: 'etl',
     bars: [
-      { s: '2026-04-28', e: '2026-05-02', label: 'Conexión + validación', phase: 'Desarrollo' }
+      { s: '2026-04-28', e: '2026-05-04', label: 'Conexión + validación', phase: 'Desarrollo' }
     ]
   },
 
@@ -526,17 +533,17 @@ const projects = [
   },
   {
     name: 'Ventas agentes IA Drea + TRG', tag: 'Drea · TRG', type: 'dash',
-    bars: [{ s: '2026-05-23', e: '2026-05-29', label: 'Diseño + build', phase: 'Desarrollo' }]
+    bars: [{ s: '2026-05-25', e: '2026-05-29', label: 'Diseño + build', phase: 'Desarrollo' }]
   },
 
   { section: 'Automatización' },
   {
     name: 'Flujo aprobación etiquetas', tag: 'Zoho Projects', type: 'auto',
-    bars: [{ s: '2026-05-05', e: '2026-05-09', label: 'Build + prueba', phase: 'Desarrollo' }]
+    bars: [{ s: '2026-05-05', e: '2026-05-11', label: 'Build + prueba', phase: 'Desarrollo' }]
   },
   {
     name: 'Flujo aprobación influencers', tag: 'Zoho Projects', type: 'auto',
-    bars: [{ s: '2026-05-12', e: '2026-05-16', label: 'Build + prueba', phase: 'Desarrollo' }]
+    bars: [{ s: '2026-05-12', e: '2026-05-18', label: 'Build + prueba', phase: 'Desarrollo' }]
   },
 
   { section: 'Gestión externa' },
@@ -649,8 +656,10 @@ function render() {
 
     // barras
     proj.bars.forEach((b, i) => {
-      const startDays = daysFrom(b.s);
-      const endDays   = daysFrom(b.e);
+      const bs = nextWeekday(b.s);
+      const be = nextWeekday(b.e);
+      const startDays = daysFrom(bs);
+      const endDays   = daysFrom(be) + 1; // +1 para cubrir hasta el final del día de entrega
       const durDays   = Math.max(endDays - startDays, TOTAL_DAYS * 0.015);
       const leftPct   = pct(startDays);
       const widthPct  = pct(startDays + durDays) - leftPct;
@@ -670,7 +679,7 @@ function render() {
       const tooltip = `<div class="tooltip">
         <div class="t-name">${proj.name}</div>
         <div class="t-phase" style="color:${c.solid}">${b.phase}</div>
-        <div class="t-dates">${fmtDate(b.s)} → ${fmtDate(b.e)}</div>
+        <div class="t-dates">${fmtDate(bs + 'T12:00:00')} → ${fmtDate(be + 'T12:00:00')}</div>
       </div>`;
 
       if (b.beta) {
