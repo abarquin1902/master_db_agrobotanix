@@ -1,0 +1,74 @@
+
+<h2 class="sr-only">Comparativa de plataformas de pago: PayPal, MercadoPago y Conekta para transferencias entre cuentas desde México</h2>
+
+<style>
+.grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; padding: 1rem 0; }
+.card { background: var(--color-background-primary); border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-lg); padding: 1rem 1.25rem; }
+.card.recommended { border: 2px solid var(--color-border-info); }
+.badge { display: inline-block; font-size: 11px; padding: 3px 10px; border-radius: var(--border-radius-md); margin-bottom: 10px; }
+.badge-info { background: var(--color-background-info); color: var(--color-text-info); }
+.badge-danger { background: var(--color-background-danger); color: var(--color-text-danger); }
+.badge-warning { background: var(--color-background-warning); color: var(--color-text-warning); }
+.badge-success { background: var(--color-background-success); color: var(--color-text-success); }
+.platform { font-size: 18px; font-weight: 500; margin: 0 0 4px; color: var(--color-text-primary); }
+.subtitle { font-size: 12px; color: var(--color-text-secondary); margin: 0 0 14px; }
+.row { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; padding: 7px 0; border-top: 0.5px solid var(--color-border-tertiary); }
+.row-label { font-size: 12px; color: var(--color-text-secondary); flex-shrink: 0; }
+.row-val { font-size: 12px; color: var(--color-text-primary); text-align: right; }
+.check { color: var(--color-text-success); font-weight: 500; }
+.cross { color: var(--color-text-danger); font-weight: 500; }
+.warn { color: var(--color-text-warning); font-weight: 500; }
+.alert { background: var(--color-background-warning); border: 0.5px solid var(--color-border-warning); border-radius: var(--border-radius-md); padding: 10px 14px; margin: 1rem 0 0; font-size: 12px; color: var(--color-text-warning); }
+.doc-link { font-size: 11px; color: var(--color-text-info); text-decoration: none; display: block; margin-top: 12px; }
+</style>
+
+<div class="grid">
+
+  <div class="card">
+    <div class="badge badge-danger">No disponible desde MX</div>
+    <p class="platform">PayPal Payouts</p>
+    <p class="subtitle">paypal.com</p>
+    <div class="row"><span class="row-label">Transferencia entre cuentas</span><span class="row-val check">✓ Sí</span></div>
+    <div class="row"><span class="row-label">Disponible desde México</span><span class="row-val cross">✗ No</span></div>
+    <div class="row"><span class="row-label">API Python</span><span class="row-val check">✓ Sí</span></div>
+    <div class="row"><span class="row-label">Tiempo de transferencia</span><span class="row-val">Minutos</span></div>
+    <div class="row"><span class="row-label">Requiere aprobación</span><span class="row-val warn">Sí, cuenta US/EU</span></div>
+    <div class="row"><span class="row-label">Costo de cuenta</span><span class="row-val">Gratis</span></div>
+    <div class="row"><span class="row-label">Error recibido</span><span class="row-val cross">PAYOUT_NOT_AVAILABLE</span></div>
+    <a class="doc-link" href="https://developer.paypal.com/docs/payouts/standard/reference/country-feature/" target="_blank">→ Documentación países soportados</a>
+  </div>
+
+  <div class="card">
+    <div class="badge badge-danger">No soporta transferencias</div>
+    <p class="platform">MercadoPago</p>
+    <p class="subtitle">mercadopago.com.mx</p>
+    <div class="row"><span class="row-label">Transferencia entre cuentas</span><span class="row-val cross">✗ No via API</span></div>
+    <div class="row"><span class="row-label">Disponible desde México</span><span class="row-val check">✓ Sí</span></div>
+    <div class="row"><span class="row-label">API Python</span><span class="row-val warn">Solo cobros</span></div>
+    <div class="row"><span class="row-label">Tiempo de transferencia</span><span class="row-val">N/A</span></div>
+    <div class="row"><span class="row-label">Retiro automático</span><span class="row-val warn">Manual desde dashboard</span></div>
+    <div class="row"><span class="row-label">Costo de cuenta</span><span class="row-val">Gratis</span></div>
+    <div class="row"><span class="row-label">Alternativa</span><span class="row-val">Retiro a CLABE bancaria</span></div>
+    <a class="doc-link" href="https://github.com/mercadopago/sdk-php/discussions/372" target="_blank">→ Confirmación oficial MP: no soportado</a>
+  </div>
+
+  <div class="card recommended">
+    <div class="badge badge-info">Opción viable ✓</div>
+    <p class="platform">Conekta</p>
+    <p class="subtitle">conekta.com</p>
+    <div class="row"><span class="row-label">Transferencia entre cuentas</span><span class="row-val check">✓ Sí (dispersión)</span></div>
+    <div class="row"><span class="row-label">Disponible desde México</span><span class="row-val check">✓ Sí</span></div>
+    <div class="row"><span class="row-label">API Python</span><span class="row-val check">✓ Sí, 2 endpoints</span></div>
+    <div class="row"><span class="row-label">Tiempo de transferencia</span><span class="row-val warn">Siguiente día hábil</span></div>
+    <div class="row"><span class="row-label">Tiempo real / minutos</span><span class="row-val cross">✗ No soportado</span></div>
+    <div class="row"><span class="row-label">Requiere aprobación</span><span class="row-val warn">Sí, vía ejecutivo</span></div>
+    <div class="row"><span class="row-label">Fondeo</span><span class="row-val">Solo desde cobros Conekta</span></div>
+    <a class="doc-link" href="https://developers.conekta.com/docs/generar-una-dispersi%C3%B3n-a-terceros-con-direct-api" target="_blank">→ Documentación dispersión a terceros</a>
+    <a class="doc-link" href="https://help.conekta.com/hc/es-419/articles/14379641123091" target="_blank">→ Cómo habilitar dispersiones</a>
+  </div>
+
+</div>
+
+<div class="alert">
+  ⚠ Ninguna de las tres plataformas soporta transferencias en tiempo real o en minutos desde México. Conekta es la única opción viable vía API, pero procesa al siguiente día hábil. Si el cliente requiere inmediatez, la única alternativa real es STP (contrato empresarial requerido).
+</div>
