@@ -13,13 +13,13 @@ app = FastAPI()
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
 @app.get("/", response_class=HTMLResponse)
-@app.head("/")  # <-- esto soluciona el 405
+@app.head("/")  # para solucionar el 405
 async def index():
     html = open("agrocker-generador.html", encoding="utf-8").read()
     api_key = os.getenv("ANTHROPIC_API_KEY", "")
     html = html.replace(
-        "const CLAUDE_API_KEY = window.__ENV__?.CLAUDE_API_KEY || '';",
-        f"const CLAUDE_API_KEY = '{api_key}';"
+        "const ANTHROPIC_API_KEY = window.__ENV__?.ANTHROPIC_API_KEY || '';",
+        f"const ANTHROPIC_API_KEY = '{api_key}';"
     ).replace(
         "const EXCEL_URL      = window.__ENV__?.EXCEL_URL      || '';",
         f"const EXCEL_URL      = '/static/textos.xlsx';"

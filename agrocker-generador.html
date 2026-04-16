@@ -298,7 +298,7 @@
 
 <script>
 // ── CONFIG ────────────────────────────────────────────────────────────────────
-const CLAUDE_API_KEY = window.__ENV__?.CLAUDE_API_KEY || '';
+const ANTHROPIC_API_KEY = window.__ENV__?.ANTHROPIC_API_KEY || '';
 
 const TEXTOS_BASE = {
   virus: [
@@ -606,14 +606,14 @@ JSON sin texto extra ni backticks:
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'x-api-key': CLAUDE_API_KEY,
+        'x-api-key': ANTHROPIC_API_KEY,
         'anthropic-version': '2023-06-01',
         'anthropic-dangerous-direct-browser-access': 'true'
       },
       body: JSON.stringify({
-        model: 'claude-opus-4-5',
-        max_tokens: 500,
-        temperature: 0.8,
+        model: 'claude-sonnet-4-6',
+        max_tokens: 5000,
+        temperature: 0.7,
         messages: [{ role: 'user', content: prompt }]
       })
     });
@@ -625,6 +625,7 @@ JSON sin texto extra ni backticks:
 
     const data = await res.json();
     let raw = data.content.map(b=>b.text||'').join('').replace(/```json|```/g,'').trim();
+    console.log('RAW response:', raw);
     const out = JSON.parse(raw);
 
     mainCopy = out.principal;
