@@ -5,282 +5,186 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Agrocker — Generador de Anuncios</title>
 <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Inter:wght@300;400;500&family=Syne:wght@700;800&display=swap" rel="stylesheet">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <style>
   :root {
-    --bg:      #0A0A0A;
-    --surface: #111111;
-    --s2:      #181818;
-    --border:  #1E1E1E;
-    --border2: #2C2C2C;
-    --lime:    #8DC63F;
-    --lime-gl: rgba(141,198,63,0.09);
-    --white:   #F0F0F0;
-    --muted:   #5A5A5A;
-    --muted2:  #383838;
+    --bg:#0A0A0A; --surface:#111; --s2:#181818; --border:#1E1E1E;
+    --border2:#2C2C2C; --lime:#8DC63F; --lime-gl:rgba(141,198,63,0.09);
+    --white:#F0F0F0; --muted:#5A5A5A; --muted2:#383838;
   }
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-  html, body { height: 100%; }
-  body {
-    font-family: 'Inter', sans-serif;
-    background: var(--bg);
-    color: var(--white);
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-  }
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+  html,body{height:100%;}
+  body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--white);min-height:100vh;display:flex;flex-direction:column;}
 
-  /* NAV */
-  nav {
-    height: 58px;
-    border-bottom: 1px solid var(--border);
-    display: flex;
-    align-items: center;
-    padding: 0 2rem;
-    gap: 1rem;
-    flex-shrink: 0;
-  }
-  .logo-script {
-    font-family: 'Great Vibes', cursive;
-    font-size: 30px;
-    color: var(--white);
-    line-height: 1;
-  }
-  .nav-divider { width: 1px; height: 20px; background: var(--border2); }
-  .nav-sub {
-    font-size: 11px; color: var(--muted);
-    letter-spacing: 0.08em; text-transform: uppercase;
-  }
-  .nav-sep { flex: 1; }
-  .status-row { display: flex; align-items: center; gap: 7px; font-size: 12px; color: var(--muted); }
-  .status-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--lime); animation: blink 2.5s ease-in-out infinite; }
-  @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.2} }
+  nav{height:58px;border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 2rem;gap:1rem;flex-shrink:0;}
+  .logo-script{font-family:'Great Vibes',cursive;font-size:30px;color:var(--white);line-height:1;}
+  .nav-div{width:1px;height:20px;background:var(--border2);}
+  .nav-sub{font-size:11px;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;}
+  .nav-sep{flex:1;}
+  .status-row{display:flex;align-items:center;gap:7px;font-size:12px;color:var(--muted);}
+  .sdot{width:6px;height:6px;border-radius:50%;background:var(--lime);animation:blink 2.5s ease-in-out infinite;}
+  @keyframes blink{0%,100%{opacity:1}50%{opacity:.2}}
 
-  /* LAYOUT */
-  .app {
-    flex: 1;
-    display: grid;
-    grid-template-columns: 320px 1fr;
-    overflow: hidden;
-    min-height: 0;
-  }
+  .app{flex:1;display:grid;grid-template-columns:320px 1fr;overflow:hidden;min-height:0;}
 
-  /* SIDEBAR */
-  .sidebar {
-    border-right: 1px solid var(--border);
-    overflow-y: auto;
-    padding: 1.5rem;
-    display: flex;
-    flex-direction: column;
-    gap: 1.2rem;
-  }
-  .sidebar::-webkit-scrollbar { width: 3px; }
-  .sidebar::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 4px; }
+  .sidebar{border-right:1px solid var(--border);overflow-y:auto;padding:1.5rem;display:flex;flex-direction:column;gap:1.1rem;}
+  .sidebar::-webkit-scrollbar{width:3px;}
+  .sidebar::-webkit-scrollbar-thumb{background:var(--border2);border-radius:4px;}
 
-  .fl { display: flex; flex-direction: column; gap: 5px; }
-  .lbl {
-    font-size: 10px; font-weight: 500;
-    letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted);
-  }
-  input[type=text], select {
-    background: var(--s2); border: 1px solid var(--border2); border-radius: 8px;
-    padding: 9px 13px; font-family: 'Inter', sans-serif; font-size: 13.5px;
-    color: var(--white); width: 100%; transition: border 0.15s;
-  }
-  input[type=text]::placeholder { color: var(--muted); }
-  input[type=text]:focus, select:focus { outline: none; border-color: var(--lime); }
-  select option { background: #1a1a1a; }
+  .fl{display:flex;flex-direction:column;gap:5px;}
+  .lbl{font-size:10px;font-weight:500;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);}
 
-  .sep { height: 1px; background: var(--border); flex-shrink: 0; }
+  select{background:var(--s2);border:1px solid var(--border2);border-radius:8px;padding:9px 13px;
+    font-family:'Inter',sans-serif;font-size:13.5px;color:var(--white);width:100%;transition:border .15s;
+    appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%235A5A5A' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+    background-repeat:no-repeat;background-position:right 12px center;padding-right:32px;cursor:pointer;}
+  select:focus{outline:none;border-color:var(--lime);}
+  select option{background:#1a1a1a;}
+  select:disabled{opacity:.35;cursor:not-allowed;}
 
-  /* CATEGORY PILLS */
-  .cat-row { display: flex; gap: 6px; }
-  .cat-pill {
-    flex: 1; padding: 8px 4px; border-radius: 8px; border: 1px solid var(--border2);
-    background: transparent; color: var(--muted); font-family: 'Inter', sans-serif;
-    font-size: 12px; font-weight: 500; cursor: pointer; text-align: center; transition: all 0.15s;
-  }
-  .cat-pill:hover { border-color: var(--muted2); color: var(--white); }
-  .cat-pill.active { background: var(--lime-gl); border-color: var(--lime); color: var(--lime); }
+  .sep{height:1px;background:var(--border);flex-shrink:0;}
 
-  /* TEMPLATE LIST */
-  .tpl-scroll {
-    display: flex; flex-direction: column; gap: 5px;
-    max-height: 200px; overflow-y: auto; padding-right: 2px;
-  }
-  .tpl-scroll::-webkit-scrollbar { width: 3px; }
-  .tpl-scroll::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 4px; }
-  .tpl-item {
-    padding: 10px 12px; border: 1px solid var(--border2); border-radius: 8px;
-    font-size: 12px; line-height: 1.65; color: var(--muted); cursor: pointer; transition: all 0.15s;
-  }
-  .tpl-item:hover { border-color: var(--muted2); color: #bbb; }
-  .tpl-item.active { border-color: var(--lime); background: var(--lime-gl); color: var(--white); }
-  .tpl-empty { font-size: 12px; color: var(--muted2); text-align: center; padding: 1rem 0; font-style: italic; }
+  .cat-row{display:flex;gap:6px;}
+  .cat-pill{flex:1;padding:8px 4px;border-radius:8px;border:1px solid var(--border2);
+    background:transparent;color:var(--muted);font-family:'Inter',sans-serif;font-size:12px;
+    font-weight:500;cursor:pointer;text-align:center;transition:all .15s;}
+  .cat-pill:hover{border-color:var(--muted2);color:var(--white);}
+  .cat-pill.active{background:var(--lime-gl);border-color:var(--lime);color:var(--lime);}
 
-  /* IMAGE UPLOAD */
-  .upload-zone {
-    border: 1.5px dashed var(--border2); border-radius: 10px;
-    padding: 1.1rem; text-align: center; cursor: pointer;
-    transition: all 0.2s; position: relative; background: var(--s2);
-  }
-  .upload-zone:hover { border-color: var(--lime); background: var(--lime-gl); }
-  .upload-zone.has-img { border-color: var(--lime); border-style: solid; }
-  .upload-zone input[type=file] { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
-  .upload-icon { font-size: 20px; margin-bottom: 5px; }
-  .upload-zone p { font-size: 12px; color: var(--muted); line-height: 1.5; }
-  .upload-zone strong { color: #aaa; font-weight: 500; }
+  .tpl-scroll{display:flex;flex-direction:column;gap:5px;max-height:190px;overflow-y:auto;padding-right:2px;}
+  .tpl-scroll::-webkit-scrollbar{width:3px;}
+  .tpl-scroll::-webkit-scrollbar-thumb{background:var(--border2);border-radius:4px;}
+  .tpl-item{padding:10px 12px;border:1px solid var(--border2);border-radius:8px;
+    font-size:12px;line-height:1.65;color:var(--muted);cursor:pointer;transition:all .15s;}
+  .tpl-item:hover{border-color:var(--muted2);color:#bbb;}
+  .tpl-item.active{border-color:var(--lime);background:var(--lime-gl);color:var(--white);}
+  .tpl-empty{font-size:12px;color:var(--muted2);text-align:center;padding:1rem 0;font-style:italic;}
 
-  /* CONTROLS */
-  .controls-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-  .color-row { display: flex; align-items: center; gap: 8px; }
-  .color-row input[type=color] {
-    width: 34px; height: 34px; padding: 2px; border-radius: 6px;
-    border: 1px solid var(--border2); background: var(--s2); cursor: pointer;
-  }
-  .color-row span { font-size: 11px; color: var(--muted); font-family: monospace; }
-  .range-row { display: flex; flex-direction: column; gap: 5px; }
-  .range-header { display: flex; justify-content: space-between; align-items: center; }
-  .range-val { font-size: 11px; color: var(--lime); }
-  input[type=range] { width: 100%; accent-color: var(--lime); cursor: pointer; }
+  .upload-zone{border:1.5px dashed var(--border2);border-radius:10px;padding:1rem;text-align:center;
+    cursor:pointer;transition:all .2s;position:relative;background:var(--s2);}
+  .upload-zone:hover{border-color:var(--lime);background:var(--lime-gl);}
+  .upload-zone.has-img{border-color:var(--lime);border-style:solid;}
+  .upload-zone input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;}
+  .upload-icon{font-size:20px;margin-bottom:5px;}
+  .upload-zone p{font-size:12px;color:var(--muted);line-height:1.5;}
+  .upload-zone strong{color:#aaa;font-weight:500;}
 
-  /* ERROR */
-  .err {
-    font-size: 12px; color: #f09090;
-    background: rgba(224,82,82,0.07); border: 1px solid rgba(224,82,82,0.2);
-    border-radius: 8px; padding: 10px 13px; display: none; line-height: 1.5;
-  }
-  .err.show { display: block; }
+  .controls-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+  .color-row{display:flex;align-items:center;gap:8px;}
+  .color-row input[type=color]{width:34px;height:34px;padding:2px;border-radius:6px;border:1px solid var(--border2);background:var(--s2);cursor:pointer;}
+  .color-row span{font-size:11px;color:var(--muted);font-family:monospace;}
+  .range-row{display:flex;flex-direction:column;gap:5px;}
+  .range-hdr{display:flex;justify-content:space-between;align-items:center;}
+  .range-val{font-size:11px;color:var(--lime);}
+  input[type=range]{width:100%;accent-color:var(--lime);cursor:pointer;}
 
-  /* GENERATE BTN */
-  .btn-gen {
-    width: 100%; padding: 12px; background: var(--lime); color: #0A0A0A;
-    border: none; border-radius: 10px; font-family: 'Syne', sans-serif;
-    font-size: 14px; font-weight: 700; cursor: pointer; transition: all 0.2s;
-    display: flex; align-items: center; justify-content: center; gap: 8px;
-    letter-spacing: 0.03em; flex-shrink: 0;
-  }
-  .btn-gen:hover:not(:disabled) { background: #9EDB45; transform: translateY(-1px); }
-  .btn-gen:disabled { opacity: 0.3; cursor: not-allowed; transform: none; }
+  .err{font-size:12px;color:#f09090;background:rgba(224,82,82,.07);border:1px solid rgba(224,82,82,.2);
+    border-radius:8px;padding:10px 13px;display:none;line-height:1.5;}
+  .err.show{display:block;}
 
-  /* MAIN */
-  .main { display: flex; flex-direction: column; overflow: hidden; min-height: 0; }
+  .btn-gen{width:100%;padding:12px;background:var(--lime);color:#0A0A0A;border:none;border-radius:10px;
+    font-family:'Syne',sans-serif;font-size:14px;font-weight:700;cursor:pointer;transition:all .2s;
+    display:flex;align-items:center;justify-content:center;gap:8px;letter-spacing:.03em;flex-shrink:0;}
+  .btn-gen:hover:not(:disabled){background:#9EDB45;transform:translateY(-1px);}
+  .btn-gen:disabled{opacity:.3;cursor:not-allowed;transform:none;}
 
-  /* CANVAS AREA */
-  .canvas-wrap {
-    flex: 1; display: flex; align-items: center; justify-content: center;
-    padding: 1.5rem; background: var(--bg); overflow: hidden; min-height: 0;
-  }
-  .canvas-placeholder {
-    display: flex; flex-direction: column; align-items: center;
-    justify-content: center; gap: 14px; color: var(--muted2); text-align: center;
-  }
-  .canvas-placeholder p { font-size: 13px; color: var(--muted); line-height: 1.7; }
-  canvas {
-    max-width: 100%; max-height: 100%; object-fit: contain;
-    border-radius: 8px;
-    box-shadow: 0 0 0 1px var(--border2), 0 16px 48px rgba(0,0,0,0.7);
-    display: none;
-  }
+  .main{display:flex;flex-direction:column;overflow:hidden;min-height:0;}
 
-  /* VARIANTS BAR */
-  .variants-bar {
-    border-top: 1px solid var(--border);
-    padding: 0.75rem 1.5rem;
-    display: none; flex-wrap: wrap; gap: 8px; align-items: center; flex-shrink: 0;
-  }
-  .variants-bar.show { display: flex; }
-  .var-lbl { font-size: 10px; color: var(--muted); letter-spacing: 0.08em; text-transform: uppercase; width: 100%; margin-bottom: 2px; }
-  .var-chip {
-    padding: 5px 14px; border: 1px solid var(--border2); border-radius: 20px;
-    font-size: 11.5px; color: var(--muted); cursor: pointer; transition: all 0.15s;
-    max-width: 340px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
-  }
-  .var-chip:hover { border-color: var(--lime); color: var(--lime); }
-  .var-chip.applied { border-color: var(--lime); color: var(--lime); background: var(--lime-gl); }
+  .canvas-wrap{flex:1;display:flex;align-items:center;justify-content:center;
+    padding:1.5rem;background:var(--bg);overflow:hidden;min-height:0;}
+  .canvas-ph{display:flex;flex-direction:column;align-items:center;justify-content:center;
+    gap:14px;color:var(--muted2);text-align:center;}
+  .canvas-ph p{font-size:13px;color:var(--muted);line-height:1.7;}
+  canvas{max-width:100%;max-height:100%;border-radius:8px;
+    box-shadow:0 0 0 1px var(--border2),0 16px 48px rgba(0,0,0,.7);display:none;}
 
-  /* BOTTOM BAR */
-  .bottom-bar {
-    border-top: 1px solid var(--border); padding: 0.8rem 1.5rem;
-    display: flex; align-items: center; gap: 10px; flex-shrink: 0;
-  }
-  .copy-preview {
-    flex: 1; font-size: 12.5px; color: var(--muted); font-style: italic;
-    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-  }
-  .copy-preview.has { color: var(--white); font-style: normal; }
-  .btn-sm {
-    padding: 7px 16px; border-radius: 8px; font-family: 'Inter', sans-serif;
-    font-size: 12px; font-weight: 500; cursor: pointer; transition: all 0.15s;
-    display: flex; align-items: center; gap: 6px; white-space: nowrap;
-  }
-  .btn-outline {
-    background: transparent; border: 1px solid var(--border2); color: var(--muted);
-  }
-  .btn-outline:hover:not(:disabled) { border-color: var(--lime); color: var(--lime); }
-  .btn-outline:disabled { opacity: 0.3; cursor: not-allowed; }
-  .btn-solid { background: var(--lime); border: none; color: #0A0A0A; }
-  .btn-solid:hover:not(:disabled) { background: #9EDB45; }
-  .btn-solid:disabled { opacity: 0.3; cursor: not-allowed; }
+  .variants-bar{border-top:1px solid var(--border);padding:.75rem 1.5rem;
+    display:none;flex-wrap:wrap;gap:8px;align-items:center;flex-shrink:0;}
+  .variants-bar.show{display:flex;}
+  .var-lbl{font-size:10px;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;width:100%;margin-bottom:2px;}
+  .var-chip{padding:5px 14px;border:1px solid var(--border2);border-radius:20px;
+    font-size:11.5px;color:var(--muted);cursor:pointer;transition:all .15s;
+    max-width:340px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .var-chip:hover{border-color:var(--lime);color:var(--lime);}
+  .var-chip.applied{border-color:var(--lime);color:var(--lime);background:var(--lime-gl);}
 
-  /* SPINNER */
-  .spin {
-    width: 14px; height: 14px; border: 2px solid rgba(10,10,10,0.25);
-    border-top-color: #0A0A0A; border-radius: 50%; animation: rot 0.65s linear infinite;
-  }
-  @keyframes rot { to { transform: rotate(360deg); } }
+  .bottom-bar{border-top:1px solid var(--border);padding:.8rem 1.5rem;
+    display:flex;align-items:center;gap:10px;flex-shrink:0;}
+  .copy-preview{flex:1;font-size:12.5px;color:var(--muted);font-style:italic;
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .copy-preview.has{color:var(--white);font-style:normal;}
+  .btn-sm{padding:7px 16px;border-radius:8px;font-family:'Inter',sans-serif;font-size:12px;
+    font-weight:500;cursor:pointer;transition:all .15s;display:flex;align-items:center;gap:6px;white-space:nowrap;}
+  .btn-outline{background:transparent;border:1px solid var(--border2);color:var(--muted);}
+  .btn-outline:hover:not(:disabled){border-color:var(--lime);color:var(--lime);}
+  .btn-outline:disabled{opacity:.3;cursor:not-allowed;}
+  .btn-solid{background:var(--lime);border:none;color:#0A0A0A;}
+  .btn-solid:hover:not(:disabled){background:#9EDB45;}
+  .btn-solid:disabled{opacity:.3;cursor:not-allowed;}
+
+  .spin{width:14px;height:14px;border:2px solid rgba(10,10,10,.25);border-top-color:#0A0A0A;
+    border-radius:50%;animation:rot .65s linear infinite;}
+  @keyframes rot{to{transform:rotate(360deg)}}
 </style>
 </head>
 <body>
 
 <nav>
   <div class="logo-script">Agrobotanix</div>
-  <div class="nav-divider"></div>
+  <div class="nav-div"></div>
   <div class="nav-sub">Generador de Anuncios</div>
   <div class="nav-sep"></div>
   <div class="status-row">
-    <div class="status-dot"></div>
+    <div class="sdot"></div>
     <span id="statusTxt">Listo</span>
   </div>
 </nav>
 
 <div class="app">
-  <!-- SIDEBAR -->
   <aside class="sidebar">
 
+    <!-- DROPDOWNS DEPENDIENTES -->
     <div class="fl">
       <div class="lbl">Estado</div>
-      <input type="text" id="estado" placeholder="ej. Sinaloa, Jalisco...">
+      <select id="selEstado" onchange="onEstado()">
+        <option value="">— Selecciona un estado —</option>
+      </select>
     </div>
     <div class="fl">
       <div class="lbl">Cultivo</div>
-      <input type="text" id="cultivo" placeholder="ej. jitomate, pepino...">
+      <select id="selCultivo" onchange="onCultivo()" disabled>
+        <option value="">— Primero elige un estado —</option>
+      </select>
     </div>
     <div class="fl">
-      <div class="lbl">Patógeno / Enfermedad</div>
-      <input type="text" id="patogeno" placeholder="ej. botrytis, xanthomonas...">
+      <div class="lbl">Patógeno</div>
+      <select id="selPatogeno" onchange="onPatogeno()" disabled>
+        <option value="">— Primero elige un cultivo —</option>
+      </select>
     </div>
 
     <div class="sep"></div>
 
+    <!-- CATEGORÍA -->
     <div class="fl">
       <div class="lbl">Categoría</div>
       <div class="cat-row">
-        <button class="cat-pill active" data-cat="virus" onclick="setCat('virus')">🦠 Virus</button>
-        <button class="cat-pill" data-cat="bacteria" onclick="setCat('bacteria')">🔬 Bacterias</button>
-        <button class="cat-pill" data-cat="hongo" onclick="setCat('hongo')">🍄 Hongos</button>
+        <button class="cat-pill active" data-cat="virus"     onclick="setCat('virus')">🦠 Virus</button>
+        <button class="cat-pill"        data-cat="bacterias" onclick="setCat('bacterias')">🔬 Bacterias</button>
+        <button class="cat-pill"        data-cat="hongos"    onclick="setCat('hongos')">🍄 Hongos</button>
       </div>
     </div>
 
+    <!-- TEXTOS BASE -->
     <div class="fl">
       <div class="lbl">Texto base <span id="tplCount" style="color:var(--muted2)"></span></div>
       <div class="tpl-scroll" id="tplList">
-        <div class="tpl-empty">Cargando textos...</div>
+        <div class="tpl-empty">Elige estado, cultivo y patógeno primero</div>
       </div>
     </div>
 
     <div class="sep"></div>
 
+    <!-- IMAGEN -->
     <div class="fl">
       <div class="lbl">Imagen base</div>
       <div class="upload-zone" id="uploadZone">
@@ -290,6 +194,7 @@
       </div>
     </div>
 
+    <!-- POSICIÓN -->
     <div class="fl">
       <div class="lbl">Posición del texto</div>
       <select id="txtPos">
@@ -299,6 +204,7 @@
       </select>
     </div>
 
+    <!-- COLORES -->
     <div class="controls-grid">
       <div class="fl">
         <div class="lbl">Color texto</div>
@@ -316,16 +222,27 @@
       </div>
     </div>
 
+    <!-- TAMAÑO FUENTE -->
     <div class="range-row fl">
-      <div class="range-header">
+      <div class="range-hdr">
         <div class="lbl">Tamaño de fuente</div>
         <div class="range-val" id="fontSizeVal">48px</div>
       </div>
       <input type="range" id="fontSize" min="18" max="120" value="48">
     </div>
 
+    <!-- ANCHO LETRA (letter-spacing) -->
     <div class="range-row fl">
-      <div class="range-header">
+      <div class="range-hdr">
+        <div class="lbl">Ancho de letra (espaciado)</div>
+        <div class="range-val" id="letterSpacingVal">0px</div>
+      </div>
+      <input type="range" id="letterSpacing" min="-5" max="30" value="0">
+    </div>
+
+    <!-- FONDO TEXTO -->
+    <div class="range-row fl">
+      <div class="range-hdr">
         <div class="lbl">Fondo del texto</div>
         <div class="range-val" id="bgOpacityVal">0%</div>
       </div>
@@ -343,17 +260,15 @@
 
   </aside>
 
-  <!-- MAIN -->
   <main class="main">
-
-    <div class="canvas-wrap" id="canvasWrap">
-      <div class="canvas-placeholder" id="placeholder">
+    <div class="canvas-wrap">
+      <div class="canvas-ph" id="placeholder">
         <svg width="56" height="56" viewBox="0 0 56 56" fill="none">
           <rect x="6" y="10" width="44" height="36" rx="4" stroke="#333" stroke-width="1.5"/>
           <circle cx="19" cy="23" r="5" stroke="#333" stroke-width="1.5"/>
           <path d="M6 38l13-10 9 8 7-6 13 8" stroke="#333" stroke-width="1.5" stroke-linejoin="round"/>
         </svg>
-        <p>Sube una imagen base<br>y selecciona un texto para comenzar</p>
+        <p>Configura los campos de la izquierda<br>y sube una imagen base para comenzar</p>
       </div>
       <canvas id="cvs"></canvas>
     </div>
@@ -378,125 +293,168 @@
         Descargar imagen
       </button>
     </div>
-
   </main>
 </div>
 
 <script>
 // ── CONFIG ────────────────────────────────────────────────────────────────────
 const CLAUDE_API_KEY = window.__ENV__?.CLAUDE_API_KEY || '';
-const EXCEL_URL      = window.__ENV__?.EXCEL_URL      || '';
+
+const TEXTOS_BASE = {
+  virus: [
+    'Si el virus ..... te está quitando la producción de {cultivo}, prueba Agrocker antes de que empieces a perderle',
+    '¿Eres de los que cree que no existe nada para el virus ..... en {cultivo}?',
+    '¿Eres de los que arranca plantas de {cultivo} cuando tienen virus .....?',
+    '¿Eres de los que sigue perdiendo cosecha de {cultivo} por virus .....?',
+    '¿Qué prefieres? ¿Seguir perdiendo tu {cultivo} por el virus ..... o innovar a una mejor forma de producir?',
+    '¿Si crees que no hay nada para combatir ..... en {cultivo}, ya probaste Agrocker?'
+  ],
+  bacterias: [
+    '¿Exportando calidad o encuarentenando tus cultivos de {cultivo}?',
+    '¿Eres de los que cree que ..... en {cultivo} no tiene solución?',
+    '¿Eres de los que sigue perdiendo su {cultivo} por .....?',
+    'Para dejar de perder tu {cultivo} por ..... primero tienes que abrirte a producir con la más alta tecnología',
+    'Sigues perdiendo tu {cultivo} con ..... porque sigues aplicando el agroquímico que ya no sirve',
+    '¿Crees que no hay orgánico que pueda erradicar ..... en {cultivo}? ¿Ya probaste los nano sistémicos?',
+    'No te des por vencido con ..... en {cultivo}. Prueba Agrocker, el primer nano sistémico verde'
+  ],
+  hongos: [
+    'No pierdas tu producción de {cultivo} por .....',
+    '¿Cosechando mucho o sobreviviendo a ..... en {cultivo}?',
+    '¿Los agroquímicos ya dejaron de servirte vs ..... en {cultivo}? Prueba la nueva generación de nano sistémicos verdes con Agrocker',
+    '¿Solucionando ..... o perdiendo tu {cultivo}? Mejora la forma en la que produces, prueba Agrocker',
+    '¿Sabías que puedes recuperar tu {cultivo} si tienes .....? ¿Ya probaste Agrocker?',
+    'No te des por vencido con ..... en {cultivo}. Prueba Agrocker, el primer nano sistémico verde'
+  ]
+};
+
+// ── DATOS DEL EXCEL (inyectados desde el servidor o hardcoded aquí) ────────────
+const AGRO_DATA = [{"estado": "Baja California", "cultivo": "Arandano", "virus": [{"nombre": "blueberry scorch virus", "completo": "Blueberry scorch virus (BlScV)"}, {"nombre": "raspberry bushy dwarf virus", "completo": "Raspberry bushy dwarf virus (RBDV)"}, {"nombre": "blueberry red ringspot virus", "completo": "Blueberry red ringspot virus (BRRV)"}], "bacterias": [{"nombre": "xanthomonas", "completo": "Xanthomonas fragariae"}, {"nombre": "strawberry witches’ broom phytoplasma", "completo": "fitoplasma “escoba de bruja” de fresa"}, {"nombre": "pseudomonas", "completo": "Pseudomonas syringae"}], "hongos": [{"nombre": "pudrición de corona", "completo": "Neopestalotiopsis spp. (ej. N. clavispora, N. rosae)"}, {"nombre": "phytophthora", "completo": "Phytophthora spp. (P. cinnamomi, P. fragariae, P. cactorum)"}, {"nombre": "rhizoctonia / fusarium", "completo": "Rhizoctonia solani / Fusarium oxysporum"}]}, {"estado": "Baja California", "cultivo": "Hortaliza (Chile, Pepino, Jitomate, Tomate)", "virus": [{"nombre": "TYLCV", "completo": "Tomato yellow leaf curl virus"}, {"nombre": "Bronceado", "completo": "Tomato spotted wilt virus (TSWV)"}, {"nombre": "ToBRFV", "completo": "Tomato brown rugose fruit virus"}], "bacterias": [{"nombre": "Pudrición bacteriana", "completo": "Ralstonia solanacearum (antes Pseudomonas)"}, {"nombre": "Cancro", "completo": "Clavibacter michiganensis subsp. michiganensis"}, {"nombre": "Peca bacteriana", "completo": "Xanthomonas campestris pv. vesicatoria"}], "hongos": [{"nombre": "Mildiu", "completo": "Phytophthora infestans"}, {"nombre": "Marchitez vascular", "completo": "Fusarium oxysporum f. sp. lycopersici"}, {"nombre": "Mancha foliar", "completo": "Alternaria solani"}]}, {"estado": "Baja California", "cultivo": "Vid", "virus": [{"nombre": "Virus del enrollado", "completo": "Grapevine leafroll-associated virus (GLRaV)"}, {"nombre": "Degeneración infecciosa", "completo": "Grapevine fanleaf virus (GFLV)"}], "bacterias": [{"nombre": "Clorosis bacteriana", "completo": "Xylella fastidiosa subsp. fastidiosa"}, {"nombre": "Agalla de la corona", "completo": "Agrobacterium spp."}], "hongos": [{"nombre": "Mildiu velloso", "completo": "Plasmopara viticola"}, {"nombre": "Apoplejía / Decaimiento", "completo": "Phaeomoniella chlamydospora / Phaeoacremonium spp."}, {"nombre": "Muerte de brazos", "completo": "Eutypa lata"}]}, {"estado": "Chiapas", "cultivo": "Cafe", "virus": [], "bacterias": [{"nombre": "Bacteriosis foliar", "completo": "Pseudomonas syringae"}, {"nombre": "Tizón bacteriano", "completo": "Pseudomonas cichorii"}, {"nombre": "Necrosis bacteriana", "completo": "Pseudomonas corrugata"}], "hongos": [{"nombre": "Roya amarilla", "completo": "Hemileia vastatrix"}, {"nombre": "Cáncer del tronco", "completo": "Ceratocystis fimbriata"}, {"nombre": "Mancha ocular", "completo": "Cercospora coffeicola"}]}, {"estado": "Chiapas", "cultivo": "Mango", "virus": [{"nombre": "Malformación compleja", "completo": "Aceria mangifera"}], "bacterias": [{"nombre": "Muerte de yemas", "completo": "Pseudomonas syringae pv. syringae"}, {"nombre": "Bacteriosis", "completo": "Xanthomonas spp."}], "hongos": [{"nombre": "fusarium", "completo": "Fusarium oxysporum f. sp. mangiferae"}, {"nombre": "Gomosis", "completo": "Phytophthora palmivora"}, {"nombre": "Marchitez vascular", "completo": "Verticillium dahliae"}]}, {"estado": "Chiapas", "cultivo": "Papaya", "virus": [{"nombre": "Virus de la mancha anular de la papaya", "completo": "Papaya ringspot virus (PRSV)"}, {"nombre": "Virus del mosaico del pepino en papaya", "completo": "Cucumber mosaic virus(CMV)"}, {"nombre": "Begomovirus en papaya", "completo": "Begomovirusspp."}], "bacterias": [{"nombre": "Mancha bacteriana de la papaya", "completo": "Xanthomonas campestris pv. caricae"}, {"nombre": "Pudrición bacteriana", "completo": "Pectobacterium carotovorum"}, {"nombre": "Mancha bacteriana", "completo": "Pseudomonas syringae"}], "hongos": [{"nombre": "Pudrición por phytophthora", "completo": "Phytophthora palmivora"}, {"nombre": "Marchitez por fusarium", "completo": "Fusarium oxysporum"}, {"nombre": "Antracnosis", "completo": "Colletotrichum gloeosporioides"}]}, {"estado": "Chiapas", "cultivo": "Pimienta", "virus": [{"nombre": "Virus rugoso del tomate", "completo": "Tomato brown rugose fruit virus(ToBRFV)"}, {"nombre": "Virus del mosaico del tabaco", "completo": "Tobacco mosaic virus (TMV)"}, {"nombre": "Virus del mosaico del pepino", "completo": "Cucumber mosaic virus (CMV)"}], "bacterias": [{"nombre": "Marchitez bacteriana", "completo": "Ralstonia solanacearum"}, {"nombre": "Mancha bacteriana del chile", "completo": "Xanthomonasspp."}, {"nombre": "Pudrición bacteriana", "completo": "Pectobacterium carotovorum"}], "hongos": [{"nombre": "Marchitez por fusarium", "completo": "Fusarium oxysporum f. sp. capsici"}, {"nombre": "Pudrición por phytophthora", "completo": "Phytophthora capsici"}, {"nombre": "Antracnosis del chile", "completo": "Colletotrichum spp."}]}, {"estado": "Chiapas", "cultivo": "Platano", "virus": [{"nombre": "Cogollo racimoso", "completo": "Banana bunchy top virus (BBTV)"}, {"nombre": "Estriado foliar", "completo": "Banana streak virus (BSV)"}, {"nombre": "Mosaico foliar", "completo": "Banana mosaic virus (BMV) / Cucumber mosaic virus (CMV)"}], "bacterias": [{"nombre": "Marchitez bacteriana", "completo": "Ralstonia solanacearum raza 2"}, {"nombre": "Pudrición vascular", "completo": "Xanthomonas campestris pv. musacearum"}, {"nombre": "Erwinia", "completo": "erwinia"}], "hongos": [{"nombre": "Mancha negra foliar", "completo": "Mycosphaerella fijiensis (Pseudocercospora fijiensis)"}, {"nombre": "Marchitez por Fusarium", "completo": "Fusarium oxysporum f. sp. cubense"}, {"nombre": "Pudrición de dedos", "completo": "Verticillium theobromae / Trachysphaera spp."}]}, {"estado": "Chihuahua", "cultivo": "Durazno", "virus": [{"nombre": "Enrollamiento de la hoja del duraznero", "completo": "Plum pox virus(PPV)"}, {"nombre": "Enanismo del duraznero", "completo": "Peach dwarf virus"}, {"nombre": "Virus de la mancha anular", "completo": "Prunus necrotic ringspot virus(PNRSV)"}], "bacterias": [{"nombre": "Cáncer bacteriano del duraznero", "completo": "Pseudomonas syringae pv. syringae"}, {"nombre": "Mancha bacteriana", "completo": "Xanthomonas arboricola pv. pruni"}, {"nombre": "Agalla bacteriana", "completo": "Agrobacterium tumefaciens"}], "hongos": [{"nombre": "Pudrición parda", "completo": "Monilinia fructicola"}, {"nombre": "Marchitez por verticillium", "completo": "Verticillium dahliae"}, {"nombre": "Enrollamiento de la hoja", "completo": "Taphrina deformans"}]}, {"estado": "Chihuahua", "cultivo": "Nogal", "virus": [], "bacterias": [{"nombre": "Tizón bacteriano", "completo": "Xanthomonas arboricola pv. juglandis"}, {"nombre": "Exudación negra", "completo": "Brenneria nigrifluens"}, {"nombre": "Complejo vascular", "completo": "Complejo fúngico-bacteriano"}], "hongos": [{"nombre": "Defoliación foliar", "completo": "Mycosphaerella caryigena"}, {"nombre": "Podredumbre de raíz", "completo": "Phytophthora cinnamomi"}, {"nombre": "Podredumbre blanca de raíz", "completo": "Armillaria mellea"}]}, {"estado": "Coahuila", "cultivo": "Nogal", "virus": [], "bacterias": [{"nombre": "Tizón bacteriano", "completo": "Xanthomonas arboricola pv. juglandis"}, {"nombre": "Exudación negra", "completo": "Brenneria nigrifluens"}, {"nombre": "Complejo vascular", "completo": "Complejo fúngico-bacteriano"}], "hongos": [{"nombre": "Defoliación foliar", "completo": "Mycosphaerella caryigena"}, {"nombre": "Podredumbre de raíz", "completo": "Phytophthora cinnamomi"}, {"nombre": "Podredumbre blanca de raíz", "completo": "Armillaria mellea"}]}, {"estado": "Coahuila", "cultivo": "Vid", "virus": [{"nombre": "Virus del enrollado", "completo": "Grapevine leafroll-associated virus (GLRaV)"}, {"nombre": "Degeneración infecciosa", "completo": "Grapevine fanleaf virus (GFLV)"}], "bacterias": [{"nombre": "Clorosis bacteriana", "completo": "Xylella fastidiosa subsp. fastidiosa"}, {"nombre": "Agalla de la corona", "completo": "Agrobacterium spp."}], "hongos": [{"nombre": "Mildiu velloso", "completo": "Plasmopara viticola"}, {"nombre": "Apoplejía / Decaimiento", "completo": "Phaeomoniella chlamydospora / Phaeoacremonium spp."}, {"nombre": "Muerte de brazos", "completo": "Eutypa lata"}]}, {"estado": "Colima", "cultivo": "Citricos (Naranja, Mandarina, Limon)", "virus": [{"nombre": "CTV / VTC", "completo": "Citrus tristeza virus"}, {"nombre": "CiLV", "completo": "Citrus leprosis virus"}, {"nombre": "Enfermedad de descortezamiento", "completo": "Citrus exocortis viroid"}], "bacterias": [{"nombre": "cancrosis bacteriana", "completo": "Xanthomonas citri subsp. citri"}, {"nombre": "Dragón amarillo / Enverdecimiento", "completo": "Candidatus Liberibacter asiaticus"}, {"nombre": "CVC", "completo": "Xylella fastidiosa subsp. pauca"}], "hongos": [{"nombre": "Podredumbre de raíz y base del tronco", "completo": "Phytophthora cinnamomi / P. citrophthora"}, {"nombre": "Dieback", "completo": "Lasiodiplodia theobromae"}, {"nombre": "Mal de Armillaria", "completo": "Armillaria mellea"}]}, {"estado": "Colima", "cultivo": "Guanabana", "virus": [{"nombre": "Virus del mosaico del pepino en anonáceas", "completo": "Cucumber mosaic virus (CMV)"}, {"nombre": "Begomovirus en anonáceas", "completo": "Begomovirusspp."}, {"nombre": "Virus del mosaico del tabaco", "completo": "Tobacco mosaic virus(TMV)"}], "bacterias": [{"nombre": "Mancha bacteriana foliar", "completo": "Xanthomonasspp."}, {"nombre": "Pudrición bacteriana", "completo": "Pectobacterium carotovorum"}, {"nombre": "Mancha foliar bacteriana", "completo": "Pseudomonas syringae"}], "hongos": [{"nombre": "Pudrición radicular por phytophthora", "completo": "Phytophthora palmivora"}, {"nombre": "Pudrición de raíces", "completo": "Rosellinia necatrix"}, {"nombre": "Marchitez por fusarium", "completo": "Fusarium oxysporum"}]}, {"estado": "Colima", "cultivo": "Platano", "virus": [{"nombre": "Cogollo racimoso", "completo": "Banana bunchy top virus (BBTV)"}, {"nombre": "Estriado foliar", "completo": "Banana streak virus (BSV)"}, {"nombre": "Mosaico foliar", "completo": "Banana mosaic virus (BMV) / Cucumber mosaic virus (CMV)"}], "bacterias": [{"nombre": "Marchitez bacteriana", "completo": "Ralstonia solanacearum raza 2"}, {"nombre": "Pudrición vascular", "completo": "Xanthomonas campestris pv. musacearum"}, {"nombre": "Erwinia", "completo": "erwinia"}], "hongos": [{"nombre": "Mancha negra foliar", "completo": "Mycosphaerella fijiensis (Pseudocercospora fijiensis)"}, {"nombre": "Marchitez por Fusarium", "completo": "Fusarium oxysporum f. sp. cubense"}, {"nombre": "Pudrición de dedos", "completo": "Verticillium theobromae / Trachysphaera spp."}]}, {"estado": "Durango", "cultivo": "Nogal", "virus": [], "bacterias": [{"nombre": "Tizón bacteriano", "completo": "Xanthomonas arboricola pv. juglandis"}, {"nombre": "Exudación negra", "completo": "Brenneria nigrifluens"}, {"nombre": "Complejo vascular", "completo": "Complejo fúngico-bacteriano"}], "hongos": [{"nombre": "Defoliación foliar", "completo": "Mycosphaerella caryigena"}, {"nombre": "Podredumbre de raíz", "completo": "Phytophthora cinnamomi"}, {"nombre": "Podredumbre blanca de raíz", "completo": "Armillaria mellea"}]}, {"estado": "Edomex", "cultivo": "Aguacate", "virus": [{"nombre": "Sunblotch / Rayito de sol", "completo": "Avocado sunblotch viroid (ASBVd)"}], "bacterias": [], "hongos": [{"nombre": "Podredumbre de raíz", "completo": "Phytophthora cinnamomi"}, {"nombre": "Podredumbre blanca de raíz", "completo": "Rosellinia necatrix"}, {"nombre": "Pudrición del fruto", "completo": "Colletotrichum gloeosporioides"}]}, {"estado": "Edomex", "cultivo": "Calabaza", "virus": [{"nombre": "Virus del mosaico de la sandía", "completo": "Watermelon mosaic virus (WMV)"}, {"nombre": "Virus del mosaico amarillo del calabacín", "completo": "Zucchini yellow mosaic virus (ZYMV)"}, {"nombre": "Virus del mosaico del pepino", "completo": "Cucumber mosaic virus(CMV)"}], "bacterias": [{"nombre": "Mancha bacteriana de cucurbitáceas", "completo": "Xanthomonas cucurbitae"}, {"nombre": "Pudrición bacteriana", "completo": "Pectobacterium carotovorum"}, {"nombre": "Pudrición bacteriana", "completo": "Erwinia spp."}], "hongos": [{"nombre": "Marchitez por fusarium", "completo": "Fusarium oxysporum f. sp. cucumerinum"}, {"nombre": "Pudrición por phytophthora", "completo": "Phytophthora capsici"}, {"nombre": "Mildiu", "completo": "Pseudoperonospora cubensis"}]}, {"estado": "Edomex", "cultivo": "Durazno", "virus": [{"nombre": "Enrollamiento de la hoja del duraznero", "completo": "Plum pox virus(PPV)"}, {"nombre": "Enanismo del duraznero", "completo": "Peach dwarf virus"}, {"nombre": "Virus de la mancha anular", "completo": "Prunus necrotic ringspot virus(PNRSV)"}], "bacterias": [{"nombre": "Cáncer bacteriano del duraznero", "completo": "Pseudomonas syringae pv. syringae"}, {"nombre": "Mancha bacteriana", "completo": "Xanthomonas arboricola pv. pruni"}, {"nombre": "Agalla bacteriana", "completo": "Agrobacterium tumefaciens"}], "hongos": [{"nombre": "Pudrición parda", "completo": "Monilinia fructicola"}, {"nombre": "Marchitez por verticillium", "completo": "Verticillium dahliae"}, {"nombre": "Enrollamiento de la hoja", "completo": "Taphrina deformans"}]}, {"estado": "Edomex", "cultivo": "Frambuesa", "virus": [{"nombre": "Rizado foliar", "completo": "Raspberry leaf curl virus"}, {"nombre": "Estríado de cañas", "completo": "Tobacco streak virus"}, {"nombre": "Manchas foliares", "completo": "Raspberry leaf mottle virus"}], "bacterias": [], "hongos": [{"nombre": "Inhibición de yemas", "completo": "Didymella applanata"}, {"nombre": "Pudrición radicular", "completo": "Phytophthora spp."}, {"nombre": "Pudrición basal", "completo": "Phytophthora cactorum"}]}, {"estado": "Edomex", "cultivo": "Fresa", "virus": [{"nombre": "Decaimiento viral", "completo": "Strawberry pallidosis associated virus (SPaV)"}, {"nombre": "Virus del moteado", "completo": "Strawberry mottle virus (SMoV)"}, {"nombre": "Virus del enrollamiento", "completo": "Strawberry crinkle virus (SCV)"}], "bacterias": [{"nombre": "Bacteriosis foliar", "completo": "Xanthomonas fragariae"}], "hongos": [{"nombre": "Pudrición de corona y fruto", "completo": "Colletotrichum acutatum / C. fragariae / C. gloeosporioides"}, {"nombre": "Podredumbre gris", "completo": "Botrytis cinerea"}, {"nombre": "Cenicilla", "completo": "Podosphaera aphanis (Sphaerotheca macularis)"}]}, {"estado": "Guanajuato", "cultivo": "Calabaza", "virus": [{"nombre": "Virus del mosaico de la sandía", "completo": "Watermelon mosaic virus (WMV)"}, {"nombre": "Virus del mosaico amarillo del calabacín", "completo": "Zucchini yellow mosaic virus (ZYMV)"}, {"nombre": "Virus del mosaico del pepino", "completo": "Cucumber mosaic virus(CMV)"}], "bacterias": [{"nombre": "Mancha bacteriana de cucurbitáceas", "completo": "Xanthomonas cucurbitae"}, {"nombre": "Pudrición bacteriana", "completo": "Pectobacterium carotovorum"}, {"nombre": "Pudrición bacteriana", "completo": "Erwinia spp."}], "hongos": [{"nombre": "Marchitez por fusarium", "completo": "Fusarium oxysporum f. sp. cucumerinum"}, {"nombre": "Pudrición por phytophthora", "completo": "Phytophthora capsici"}, {"nombre": "Mildiu", "completo": "Pseudoperonospora cubensis"}]}, {"estado": "Guanajuato", "cultivo": "Fresa", "virus": [{"nombre": "Decaimiento viral", "completo": "Strawberry pallidosis associated virus (SPaV)"}, {"nombre": "Virus del moteado", "completo": "Strawberry mottle virus (SMoV)"}, {"nombre": "Virus del enrollamiento", "completo": "Strawberry crinkle virus (SCV)"}], "bacterias": [{"nombre": "Bacteriosis foliar", "completo": "Xanthomonas fragariae"}], "hongos": [{"nombre": "Pudrición de corona y fruto", "completo": "Colletotrichum acutatum / C. fragariae / C. gloeosporioides"}, {"nombre": "Podredumbre gris", "completo": "Botrytis cinerea"}, {"nombre": "Cenicilla", "completo": "Podosphaera aphanis (Sphaerotheca macularis)"}]}, {"estado": "Guanajuato", "cultivo": "Hortaliza (Chile, Pepino, Jitomate, Tomate)", "virus": [{"nombre": "TYLCV", "completo": "Tomato yellow leaf curl virus"}, {"nombre": "Bronceado", "completo": "Tomato spotted wilt virus (TSWV)"}, {"nombre": "ToBRFV", "completo": "Tomato brown rugose fruit virus"}], "bacterias": [{"nombre": "Pudrición bacteriana", "completo": "Ralstonia solanacearum (antes Pseudomonas)"}, {"nombre": "Cancro", "completo": "Clavibacter michiganensis subsp. michiganensis"}, {"nombre": "Peca bacteriana", "completo": "Xanthomonas campestris pv. vesicatoria"}], "hongos": [{"nombre": "Mildiu", "completo": "Phytophthora infestans"}, {"nombre": "Marchitez vascular", "completo": "Fusarium oxysporum f. sp. lycopersici"}, {"nombre": "Mancha foliar", "completo": "Alternaria solani"}]}, {"estado": "Guerrero", "cultivo": "Guanabana", "virus": [{"nombre": "Virus del mosaico del pepino en anonáceas", "completo": "Cucumber mosaic virus (CMV)"}, {"nombre": "Begomovirus en anonáceas", "completo": "Begomovirusspp."}, {"nombre": "Virus del mosaico del tabaco", "completo": "Tobacco mosaic virus(TMV)"}], "bacterias": [{"nombre": "Mancha bacteriana foliar", "completo": "Xanthomonasspp."}, {"nombre": "Pudrición bacteriana", "completo": "Pectobacterium carotovorum"}, {"nombre": "Mancha foliar bacteriana", "completo": "Pseudomonas syringae"}], "hongos": [{"nombre": "Pudrición radicular por phytophthora", "completo": "Phytophthora palmivora"}, {"nombre": "Pudrición de raíces", "completo": "Rosellinia necatrix"}, {"nombre": "Marchitez por fusarium", "completo": "Fusarium oxysporum"}]}, {"estado": "Guerrero", "cultivo": "Mango", "virus": [{"nombre": "Malformación compleja", "completo": "Aceria mangifera"}], "bacterias": [{"nombre": "Muerte de yemas", "completo": "Pseudomonas syringae pv. syringae"}, {"nombre": "Bacteriosis", "completo": "Xanthomonas spp."}], "hongos": [{"nombre": "fusarium", "completo": "Fusarium oxysporum f. sp. mangiferae"}, {"nombre": "Gomosis", "completo": "Phytophthora palmivora"}, {"nombre": "Marchitez vascular", "completo": "Verticillium dahliae"}]}, {"estado": "Jalisco", "cultivo": "Aguacate", "virus": [{"nombre": "Sunblotch / Rayito de sol", "completo": "Avocado sunblotch viroid (ASBVd)"}], "bacterias": [], "hongos": [{"nombre": "Podredumbre de raíz", "completo": "Phytophthora cinnamomi"}, {"nombre": "Podredumbre blanca de raíz", "completo": "Rosellinia necatrix"}, {"nombre": "Pudrición del fruto", "completo": "Colletotrichum gloeosporioides"}]}, {"estado": "Jalisco", "cultivo": "Arandano", "virus": [{"nombre": "blueberry scorch virus", "completo": "Blueberry scorch virus (BlScV)"}, {"nombre": "raspberry bushy dwarf virus", "completo": "Raspberry bushy dwarf virus (RBDV)"}, {"nombre": "blueberry red ringspot virus", "completo": "Blueberry red ringspot virus (BRRV)"}], "bacterias": [{"nombre": "xanthomonas", "completo": "Xanthomonas fragariae"}, {"nombre": "strawberry witches’ broom phytoplasma", "completo": "fitoplasma “escoba de bruja” de fresa"}, {"nombre": "pseudomonas", "completo": "Pseudomonas syringae"}], "hongos": [{"nombre": "pudrición de corona", "completo": "Neopestalotiopsis spp. (ej. N. clavispora, N. rosae)"}, {"nombre": "phytophthora", "completo": "Phytophthora spp. (P. cinnamomi, P. fragariae, P. cactorum)"}, {"nombre": "rhizoctonia / fusarium", "completo": "Rhizoctonia solani / Fusarium oxysporum"}]}, {"estado": "Jalisco", "cultivo": "Calabaza", "virus": [{"nombre": "Virus del mosaico de la sandía", "completo": "Watermelon mosaic virus (WMV)"}, {"nombre": "Virus del mosaico amarillo del calabacín", "completo": "Zucchini yellow mosaic virus (ZYMV)"}, {"nombre": "Virus del mosaico del pepino", "completo": "Cucumber mosaic virus(CMV)"}], "bacterias": [{"nombre": "Mancha bacteriana de cucurbitáceas", "completo": "Xanthomonas cucurbitae"}, {"nombre": "Pudrición bacteriana", "completo": "Pectobacterium carotovorum"}, {"nombre": "Pudrición bacteriana", "completo": "Erwinia spp."}], "hongos": [{"nombre": "Marchitez por fusarium", "completo": "Fusarium oxysporum f. sp. cucumerinum"}, {"nombre": "Pudrición por phytophthora", "completo": "Phytophthora capsici"}, {"nombre": "Mildiu", "completo": "Pseudoperonospora cubensis"}]}, {"estado": "Jalisco", "cultivo": "Citricos (Naranja, Mandarina, Limon)", "virus": [{"nombre": "CTV / VTC", "completo": "Citrus tristeza virus"}, {"nombre": "CiLV", "completo": "Citrus leprosis virus"}, {"nombre": "Enfermedad de descortezamiento", "completo": "Citrus exocortis viroid"}], "bacterias": [{"nombre": "cancrosis bacteriana", "completo": "Xanthomonas citri subsp. citri"}, {"nombre": "Dragón amarillo / Enverdecimiento", "completo": "Candidatus Liberibacter asiaticus"}, {"nombre": "CVC", "completo": "Xylella fastidiosa subsp. pauca"}], "hongos": [{"nombre": "Podredumbre de raíz y base del tronco", "completo": "Phytophthora cinnamomi / P. citrophthora"}, {"nombre": "Dieback", "completo": "Lasiodiplodia theobromae"}, {"nombre": "Mal de Armillaria", "completo": "Armillaria mellea"}]}, {"estado": "Jalisco", "cultivo": "Frambuesa", "virus": [{"nombre": "Rizado foliar", "completo": "Raspberry leaf curl virus"}, {"nombre": "Estríado de cañas", "completo": "Tobacco streak virus"}, {"nombre": "Manchas foliares", "completo": "Raspberry leaf mottle virus"}], "bacterias": [], "hongos": [{"nombre": "Inhibición de yemas", "completo": "Didymella applanata"}, {"nombre": "Pudrición radicular", "completo": "Phytophthora spp."}, {"nombre": "Pudrición basal", "completo": "Phytophthora cactorum"}]}, {"estado": "Jalisco", "cultivo": "Fresa", "virus": [{"nombre": "Decaimiento viral", "completo": "Strawberry pallidosis associated virus (SPaV)"}, {"nombre": "Virus del moteado", "completo": "Strawberry mottle virus (SMoV)"}, {"nombre": "Virus del enrollamiento", "completo": "Strawberry crinkle virus (SCV)"}], "bacterias": [{"nombre": "Bacteriosis foliar", "completo": "Xanthomonas fragariae"}], "hongos": [{"nombre": "Pudrición de corona y fruto", "completo": "Colletotrichum acutatum / C. fragariae / C. gloeosporioides"}, {"nombre": "Podredumbre gris", "completo": "Botrytis cinerea"}, {"nombre": "Cenicilla", "completo": "Podosphaera aphanis (Sphaerotheca macularis)"}]}, {"estado": "Jalisco", "cultivo": "Hortaliza (Chile, Pepino, Jitomate, Tomate)", "virus": [{"nombre": "TYLCV", "completo": "Tomato yellow leaf curl virus"}, {"nombre": "Bronceado", "completo": "Tomato spotted wilt virus (TSWV)"}, {"nombre": "ToBRFV", "completo": "Tomato brown rugose fruit virus"}], "bacterias": [{"nombre": "Pudrición bacteriana", "completo": "Ralstonia solanacearum (antes Pseudomonas)"}, {"nombre": "Cancro", "completo": "Clavibacter michiganensis subsp. michiganensis"}, {"nombre": "Peca bacteriana", "completo": "Xanthomonas campestris pv. vesicatoria"}], "hongos": [{"nombre": "Mildiu", "completo": "Phytophthora infestans"}, {"nombre": "Marchitez vascular", "completo": "Fusarium oxysporum f. sp. lycopersici"}, {"nombre": "Mancha foliar", "completo": "Alternaria solani"}]}, {"estado": "Jalisco", "cultivo": "Mango", "virus": [{"nombre": "Malformación compleja", "completo": "Aceria mangifera"}], "bacterias": [{"nombre": "Muerte de yemas", "completo": "Pseudomonas syringae pv. syringae"}, {"nombre": "Bacteriosis", "completo": "Xanthomonas spp."}], "hongos": [{"nombre": "fusarium", "completo": "Fusarium oxysporum f. sp. mangiferae"}, {"nombre": "Gomosis", "completo": "Phytophthora palmivora"}, {"nombre": "Marchitez vascular", "completo": "Verticillium dahliae"}]}, {"estado": "Jalisco", "cultivo": "Sandia", "virus": [{"nombre": "Virus del mosaico de la sandía", "completo": "Watermelon mosaic virus(WMV)"}, {"nombre": "Virus del mosaico amarillo del calabacín", "completo": "Zucchini yellow mosaic virus (ZYMV)"}, {"nombre": "Virus del mosaico del pepino", "completo": "Cucumber mosaic virus(CMV)"}], "bacterias": [{"nombre": "Mancha bacteriana", "completo": "Acidovorax citrulli"}, {"nombre": "Pudrición bacteriana", "completo": "Pectobacterium carotovorum"}, {"nombre": "Mancha bacteriana", "completo": "Xanthomonas cucurbitae"}], "hongos": [{"nombre": "Marchitez por fusarium", "completo": "Fusarium oxysporum f. sp. niveum"}, {"nombre": "Pudrición por phytophthora", "completo": "Phytophthora capsici"}, {"nombre": "Mildiu", "completo": "Pseudoperonospora cubensis"}]}, {"estado": "Jalisco", "cultivo": "Zarzamora", "virus": [{"nombre": "tobacco ringspot virus", "completo": "Tobacco ringspot virus (TRSV)"}, {"nombre": "arabis mosaic virus", "completo": "Arabis mosaic virus (ArMV)"}, {"nombre": "raspberry latent virus", "completo": "Raspberry latent virus"}], "bacterias": [{"nombre": "strawberry witches’ broom phytoplasma", "completo": "fitoplasma “escoba de bruja” de fresa"}, {"nombre": "pseudomonas", "completo": "Pseudomonas syringae"}, {"nombre": "xanthomonas", "completo": "Xanthomonas fragariae"}], "hongos": [{"nombre": "phytophthora", "completo": "Phytophthora spp. (P. cinnamomi, P. fragariae, P. cactorum)"}, {"nombre": "fusarium / rhizoctonia", "completo": "Fusarium oxysporum / Rhizoctonia solani"}, {"nombre": "botrytis", "completo": "Botrytis cinerea"}]}, {"estado": "Michoacan", "cultivo": "Aguacate", "virus": [{"nombre": "Sunblotch / Rayito de sol", "completo": "Avocado sunblotch viroid (ASBVd)"}], "bacterias": [], "hongos": [{"nombre": "Podredumbre de raíz", "completo": "Phytophthora cinnamomi"}, {"nombre": "Podredumbre blanca de raíz", "completo": "Rosellinia necatrix"}, {"nombre": "Pudrición del fruto", "completo": "Colletotrichum gloeosporioides"}]}, {"estado": "Michoacan", "cultivo": "Arandano", "virus": [{"nombre": "blueberry scorch virus", "completo": "Blueberry scorch virus (BlScV)"}, {"nombre": "raspberry bushy dwarf virus", "completo": "Raspberry bushy dwarf virus (RBDV)"}, {"nombre": "blueberry red ringspot virus", "completo": "Blueberry red ringspot virus (BRRV)"}], "bacterias": [{"nombre": "xanthomonas", "completo": "Xanthomonas fragariae"}, {"nombre": "strawberry witches’ broom phytoplasma", "completo": "fitoplasma “escoba de bruja” de fresa"}, {"nombre": "pseudomonas", "completo": "Pseudomonas syringae"}], "hongos": [{"nombre": "pudrición de corona", "completo": "Neopestalotiopsis spp. (ej. N. clavispora, N. rosae)"}, {"nombre": "phytophthora", "completo": "Phytophthora spp. (P. cinnamomi, P. fragariae, P. cactorum)"}, {"nombre": "rhizoctonia / fusarium", "completo": "Rhizoctonia solani / Fusarium oxysporum"}]}, {"estado": "Michoacan", "cultivo": "Citricos (Naranja, Mandarina, Limon)", "virus": [{"nombre": "CTV / VTC", "completo": "Citrus tristeza virus"}, {"nombre": "CiLV", "completo": "Citrus leprosis virus"}, {"nombre": "Enfermedad de descortezamiento", "completo": "Citrus exocortis viroid"}], "bacterias": [{"nombre": "cancrosis bacteriana", "completo": "Xanthomonas citri subsp. citri"}, {"nombre": "Dragón amarillo / Enverdecimiento", "completo": "Candidatus Liberibacter asiaticus"}, {"nombre": "CVC", "completo": "Xylella fastidiosa subsp. pauca"}], "hongos": [{"nombre": "Podredumbre de raíz y base del tronco", "completo": "Phytophthora cinnamomi / P. citrophthora"}, {"nombre": "Dieback", "completo": "Lasiodiplodia theobromae"}, {"nombre": "Mal de Armillaria", "completo": "Armillaria mellea"}]}, {"estado": "Michoacan", "cultivo": "Durazno", "virus": [{"nombre": "Enrollamiento de la hoja del duraznero", "completo": "Plum pox virus(PPV)"}, {"nombre": "Enanismo del duraznero", "completo": "Peach dwarf virus"}, {"nombre": "Virus de la mancha anular", "completo": "Prunus necrotic ringspot virus(PNRSV)"}], "bacterias": [{"nombre": "Cáncer bacteriano del duraznero", "completo": "Pseudomonas syringae pv. syringae"}, {"nombre": "Mancha bacteriana", "completo": "Xanthomonas arboricola pv. pruni"}, {"nombre": "Agalla bacteriana", "completo": "Agrobacterium tumefaciens"}], "hongos": [{"nombre": "Pudrición parda", "completo": "Monilinia fructicola"}, {"nombre": "Marchitez por verticillium", "completo": "Verticillium dahliae"}, {"nombre": "Enrollamiento de la hoja", "completo": "Taphrina deformans"}]}, {"estado": "Michoacan", "cultivo": "Frambuesa", "virus": [{"nombre": "Rizado foliar", "completo": "Raspberry leaf curl virus"}, {"nombre": "Estríado de cañas", "completo": "Tobacco streak virus"}, {"nombre": "Manchas foliares", "completo": "Raspberry leaf mottle virus"}], "bacterias": [], "hongos": [{"nombre": "Inhibición de yemas", "completo": "Didymella applanata"}, {"nombre": "Pudrición radicular", "completo": "Phytophthora spp."}, {"nombre": "Pudrición basal", "completo": "Phytophthora cactorum"}]}, {"estado": "Michoacan", "cultivo": "Fresa", "virus": [{"nombre": "Decaimiento viral", "completo": "Strawberry pallidosis associated virus (SPaV)"}, {"nombre": "Virus del moteado", "completo": "Strawberry mottle virus (SMoV)"}, {"nombre": "Virus del enrollamiento", "completo": "Strawberry crinkle virus (SCV)"}], "bacterias": [{"nombre": "Bacteriosis foliar", "completo": "Xanthomonas fragariae"}], "hongos": [{"nombre": "Pudrición de corona y fruto", "completo": "Colletotrichum acutatum / C. fragariae / C. gloeosporioides"}, {"nombre": "Podredumbre gris", "completo": "Botrytis cinerea"}, {"nombre": "Cenicilla", "completo": "Podosphaera aphanis (Sphaerotheca macularis)"}]}, {"estado": "Michoacan", "cultivo": "Guanabana", "virus": [{"nombre": "Virus del mosaico del pepino en anonáceas", "completo": "Cucumber mosaic virus (CMV)"}, {"nombre": "Begomovirus en anonáceas", "completo": "Begomovirusspp."}, {"nombre": "Virus del mosaico del tabaco", "completo": "Tobacco mosaic virus(TMV)"}], "bacterias": [{"nombre": "Mancha bacteriana foliar", "completo": "Xanthomonasspp."}, {"nombre": "Pudrición bacteriana", "completo": "Pectobacterium carotovorum"}, {"nombre": "Mancha foliar bacteriana", "completo": "Pseudomonas syringae"}], "hongos": [{"nombre": "Pudrición radicular por phytophthora", "completo": "Phytophthora palmivora"}, {"nombre": "Pudrición de raíces", "completo": "Rosellinia necatrix"}, {"nombre": "Marchitez por fusarium", "completo": "Fusarium oxysporum"}]}, {"estado": "Michoacan", "cultivo": "Mango", "virus": [{"nombre": "Malformación compleja", "completo": "Aceria mangifera"}], "bacterias": [{"nombre": "Muerte de yemas", "completo": "Pseudomonas syringae pv. syringae"}, {"nombre": "Bacteriosis", "completo": "Xanthomonas spp."}], "hongos": [{"nombre": "fusarium", "completo": "Fusarium oxysporum f. sp. mangiferae"}, {"nombre": "Gomosis", "completo": "Phytophthora palmivora"}, {"nombre": "Marchitez vascular", "completo": "Verticillium dahliae"}]}, {"estado": "Michoacan", "cultivo": "Sandia", "virus": [{"nombre": "Virus del mosaico de la sandía", "completo": "Watermelon mosaic virus(WMV)"}, {"nombre": "Virus del mosaico amarillo del calabacín", "completo": "Zucchini yellow mosaic virus (ZYMV)"}, {"nombre": "Virus del mosaico del pepino", "completo": "Cucumber mosaic virus(CMV)"}], "bacterias": [{"nombre": "Mancha bacteriana", "completo": "Acidovorax citrulli"}, {"nombre": "Pudrición bacteriana", "completo": "Pectobacterium carotovorum"}, {"nombre": "Mancha bacteriana", "completo": "Xanthomonas cucurbitae"}], "hongos": [{"nombre": "Marchitez por fusarium", "completo": "Fusarium oxysporum f. sp. niveum"}, {"nombre": "Pudrición por phytophthora", "completo": "Phytophthora capsici"}, {"nombre": "Mildiu", "completo": "Pseudoperonospora cubensis"}]}, {"estado": "Michoacan", "cultivo": "Zarzamora", "virus": [{"nombre": "tobacco ringspot virus", "completo": "Tobacco ringspot virus (TRSV)"}, {"nombre": "arabis mosaic virus", "completo": "Arabis mosaic virus (ArMV)"}, {"nombre": "raspberry latent virus", "completo": "Raspberry latent virus"}], "bacterias": [{"nombre": "strawberry witches’ broom phytoplasma", "completo": "fitoplasma “escoba de bruja” de fresa"}, {"nombre": "pseudomonas", "completo": "Pseudomonas syringae"}, {"nombre": "xanthomonas", "completo": "Xanthomonas fragariae"}], "hongos": [{"nombre": "phytophthora", "completo": "Phytophthora spp. (P. cinnamomi, P. fragariae, P. cactorum)"}, {"nombre": "fusarium / rhizoctonia", "completo": "Fusarium oxysporum / Rhizoctonia solani"}, {"nombre": "botrytis", "completo": "Botrytis cinerea"}]}, {"estado": "Nayarit", "cultivo": "Aguacate", "virus": [{"nombre": "Sunblotch / Rayito de sol", "completo": "Avocado sunblotch viroid (ASBVd)"}], "bacterias": [], "hongos": [{"nombre": "Podredumbre de raíz", "completo": "Phytophthora cinnamomi"}, {"nombre": "Podredumbre blanca de raíz", "completo": "Rosellinia necatrix"}, {"nombre": "Pudrición del fruto", "completo": "Colletotrichum gloeosporioides"}]}, {"estado": "Nayarit", "cultivo": "Guanabana", "virus": [{"nombre": "Virus del mosaico del pepino en anonáceas", "completo": "Cucumber mosaic virus (CMV)"}, {"nombre": "Begomovirus en anonáceas", "completo": "Begomovirusspp."}, {"nombre": "Virus del mosaico del tabaco", "completo": "Tobacco mosaic virus(TMV)"}], "bacterias": [{"nombre": "Mancha bacteriana foliar", "completo": "Xanthomonasspp."}, {"nombre": "Pudrición bacteriana", "completo": "Pectobacterium carotovorum"}, {"nombre": "Mancha foliar bacteriana", "completo": "Pseudomonas syringae"}], "hongos": [{"nombre": "Pudrición radicular por phytophthora", "completo": "Phytophthora palmivora"}, {"nombre": "Pudrición de raíces", "completo": "Rosellinia necatrix"}, {"nombre": "Marchitez por fusarium", "completo": "Fusarium oxysporum"}]}, {"estado": "Nayarit", "cultivo": "Mango", "virus": [{"nombre": "Malformación compleja", "completo": "Aceria mangifera"}], "bacterias": [{"nombre": "Muerte de yemas", "completo": "Pseudomonas syringae pv. syringae"}, {"nombre": "Bacteriosis", "completo": "Xanthomonas spp."}], "hongos": [{"nombre": "fusarium", "completo": "Fusarium oxysporum f. sp. mangiferae"}, {"nombre": "Gomosis", "completo": "Phytophthora palmivora"}, {"nombre": "Marchitez vascular", "completo": "Verticillium dahliae"}]}, {"estado": "Oaxaca", "cultivo": "Cafe", "virus": [], "bacterias": [{"nombre": "Bacteriosis foliar", "completo": "Pseudomonas syringae"}, {"nombre": "Tizón bacteriano", "completo": "Pseudomonas cichorii"}, {"nombre": "Necrosis bacteriana", "completo": "Pseudomonas corrugata"}], "hongos": [{"nombre": "Roya amarilla", "completo": "Hemileia vastatrix"}, {"nombre": "Cáncer del tronco", "completo": "Ceratocystis fimbriata"}, {"nombre": "Mancha ocular", "completo": "Cercospora coffeicola"}]}, {"estado": "Oaxaca", "cultivo": "Papaya", "virus": [{"nombre": "Virus de la mancha anular de la papaya", "completo": "Papaya ringspot virus (PRSV)"}, {"nombre": "Virus del mosaico del pepino en papaya", "completo": "Cucumber mosaic virus(CMV)"}, {"nombre": "MOSAICO en papaya", "completo": "Begomovirusspp."}], "bacterias": [{"nombre": "Mancha bacteriana de la papaya", "completo": "Xanthomonas campestris pv. caricae"}, {"nombre": "Pudrición bacteriana", "completo": "Pectobacterium carotovorum"}, {"nombre": "Mancha bacteriana", "completo": "Pseudomonas syringae"}], "hongos": [{"nombre": "Pudrición por phytophthora", "completo": "Phytophthora palmivora"}, {"nombre": "Marchitez por fusarium", "completo": "Fusarium oxysporum"}, {"nombre": "Antracnosis", "completo": "Colletotrichum gloeosporioides"}]}, {"estado": "Oaxaca", "cultivo": "Pimienta", "virus": [{"nombre": "Virus rugoso del tomate", "completo": "Tomato brown rugose fruit virus(ToBRFV)"}, {"nombre": "Virus del mosaico del tabaco", "completo": "Tobacco mosaic virus (TMV)"}, {"nombre": "Virus del mosaico del pepino", "completo": "Cucumber mosaic virus (CMV)"}], "bacterias": [{"nombre": "Marchitez bacteriana", "completo": "Ralstonia solanacearum"}, {"nombre": "Mancha bacteriana del chile", "completo": "Xanthomonasspp."}, {"nombre": "Pudrición bacteriana", "completo": "Pectobacterium carotovorum"}], "hongos": [{"nombre": "Marchitez por fusarium", "completo": "Fusarium oxysporum f. sp. capsici"}, {"nombre": "Pudrición por phytophthora", "completo": "Phytophthora capsici"}, {"nombre": "Antracnosis del chile", "completo": "Colletotrichum spp."}]}, {"estado": "Puebla", "cultivo": "Cafe", "virus": [], "bacterias": [{"nombre": "Bacteriosis foliar", "completo": "Pseudomonas syringae"}, {"nombre": "Tizón bacteriano", "completo": "Pseudomonas cichorii"}, {"nombre": "Necrosis bacteriana", "completo": "Pseudomonas corrugata"}], "hongos": [{"nombre": "Roya amarilla", "completo": "Hemileia vastatrix"}, {"nombre": "Cáncer del tronco", "completo": "Ceratocystis fimbriata"}, {"nombre": "Mancha ocular", "completo": "Cercospora coffeicola"}]}, {"estado": "Puebla", "cultivo": "Calabaza", "virus": [{"nombre": "Virus del mosaico de la sandía", "completo": "Watermelon mosaic virus (WMV)"}, {"nombre": "Virus del mosaico amarillo del calabacín", "completo": "Zucchini yellow mosaic virus (ZYMV)"}, {"nombre": "Virus del mosaico del pepino", "completo": "Cucumber mosaic virus(CMV)"}], "bacterias": [{"nombre": "Mancha bacteriana de cucurbitáceas", "completo": "Xanthomonas cucurbitae"}, {"nombre": "Pudrición bacteriana", "completo": "Pectobacterium carotovorum"}, {"nombre": "Pudrición bacteriana", "completo": "Erwinia spp."}], "hongos": [{"nombre": "Marchitez por fusarium", "completo": "Fusarium oxysporum f. sp. cucumerinum"}, {"nombre": "Pudrición por phytophthora", "completo": "Phytophthora capsici"}, {"nombre": "Mildiu", "completo": "Pseudoperonospora cubensis"}]}, {"estado": "Puebla", "cultivo": "Durazno", "virus": [{"nombre": "Enrollamiento de la hoja del duraznero", "completo": "Plum pox virus(PPV)"}, {"nombre": "Enanismo del duraznero", "completo": "Peach dwarf virus"}, {"nombre": "Virus de la mancha anular", "completo": "Prunus necrotic ringspot virus(PNRSV)"}], "bacterias": [{"nombre": "Cáncer bacteriano del duraznero", "completo": "Pseudomonas syringae pv. syringae"}, {"nombre": "Mancha bacteriana", "completo": "Xanthomonas arboricola pv. pruni"}, {"nombre": "Agalla bacteriana", "completo": "Agrobacterium tumefaciens"}], "hongos": [{"nombre": "Pudrición parda", "completo": "Monilinia fructicola"}, {"nombre": "Marchitez por verticillium", "completo": "Verticillium dahliae"}, {"nombre": "Enrollamiento de la hoja", "completo": "Taphrina deformans"}]}, {"estado": "Puebla", "cultivo": "Hortaliza (Chile, Pepino, Jitomate, Tomate)", "virus": [{"nombre": "TYLCV", "completo": "Tomato yellow leaf curl virus"}, {"nombre": "Bronceado", "completo": "Tomato spotted wilt virus (TSWV)"}, {"nombre": "ToBRFV", "completo": "Tomato brown rugose fruit virus"}], "bacterias": [{"nombre": "Pudrición bacteriana", "completo": "Ralstonia solanacearum (antes Pseudomonas)"}, {"nombre": "Cancro", "completo": "Clavibacter michiganensis subsp. michiganensis"}, {"nombre": "Peca bacteriana", "completo": "Xanthomonas campestris pv. vesicatoria"}], "hongos": [{"nombre": "Mildiu", "completo": "Phytophthora infestans"}, {"nombre": "Marchitez vascular", "completo": "Fusarium oxysporum f. sp. lycopersici"}, {"nombre": "Mancha foliar", "completo": "Alternaria solani"}]}, {"estado": "Queretaro", "cultivo": "Hortaliza (Chile, Pepino, Jitomate, Tomate)", "virus": [{"nombre": "TYLCV", "completo": "Tomato yellow leaf curl virus"}, {"nombre": "Bronceado", "completo": "Tomato spotted wilt virus (TSWV)"}, {"nombre": "ToBRFV", "completo": "Tomato brown rugose fruit virus"}], "bacterias": [{"nombre": "Pudrición bacteriana", "completo": "Ralstonia solanacearum (antes Pseudomonas)"}, {"nombre": "Cancro", "completo": "Clavibacter michiganensis subsp. michiganensis"}, {"nombre": "Peca bacteriana", "completo": "Xanthomonas campestris pv. vesicatoria"}], "hongos": [{"nombre": "Mildiu", "completo": "Phytophthora infestans"}, {"nombre": "Marchitez vascular", "completo": "Fusarium oxysporum f. sp. lycopersici"}, {"nombre": "Mancha foliar", "completo": "Alternaria solani"}]}, {"estado": "San Luis Potosi", "cultivo": "Citricos (Naranja, Mandarina, Limon)", "virus": [{"nombre": "CTV / VTC", "completo": "Citrus tristeza virus"}, {"nombre": "CiLV", "completo": "Citrus leprosis virus"}, {"nombre": "Enfermedad de descortezamiento", "completo": "Citrus exocortis viroid"}], "bacterias": [{"nombre": "cancrosis bacteriana", "completo": "Xanthomonas citri subsp. citri"}, {"nombre": "Dragón amarillo / Enverdecimiento", "completo": "Candidatus Liberibacter asiaticus"}, {"nombre": "CVC", "completo": "Xylella fastidiosa subsp. pauca"}], "hongos": [{"nombre": "Podredumbre de raíz y base del tronco", "completo": "Phytophthora cinnamomi / P. citrophthora"}, {"nombre": "Dieback", "completo": "Lasiodiplodia theobromae"}, {"nombre": "Mal de Armillaria", "completo": "Armillaria mellea"}]}, {"estado": "Sinaloa", "cultivo": "Arandano", "virus": [{"nombre": "blueberry scorch virus", "completo": "Blueberry scorch virus (BlScV)"}, {"nombre": "raspberry bushy dwarf virus", "completo": "Raspberry bushy dwarf virus (RBDV)"}, {"nombre": "blueberry red ringspot virus", "completo": "Blueberry red ringspot virus (BRRV)"}], "bacterias": [{"nombre": "xanthomonas", "completo": "Xanthomonas fragariae"}, {"nombre": "strawberry witches’ broom phytoplasma", "completo": "fitoplasma “escoba de bruja” de fresa"}, {"nombre": "pseudomonas", "completo": "Pseudomonas syringae"}], "hongos": [{"nombre": "pudrición de corona", "completo": "Neopestalotiopsis spp. (ej. N. clavispora, N. rosae)"}, {"nombre": "phytophthora", "completo": "Phytophthora spp. (P. cinnamomi, P. fragariae, P. cactorum)"}, {"nombre": "rhizoctonia / fusarium", "completo": "Rhizoctonia solani / Fusarium oxysporum"}]}, {"estado": "Sinaloa", "cultivo": "Calabaza", "virus": [{"nombre": "Virus del mosaico de la sandía", "completo": "Watermelon mosaic virus (WMV)"}, {"nombre": "Virus del mosaico amarillo del calabacín", "completo": "Zucchini yellow mosaic virus (ZYMV)"}, {"nombre": "Virus del mosaico del pepino", "completo": "Cucumber mosaic virus(CMV)"}], "bacterias": [{"nombre": "Mancha bacteriana de cucurbitáceas", "completo": "Xanthomonas cucurbitae"}, {"nombre": "Pudrición bacteriana", "completo": "Pectobacterium carotovorum"}, {"nombre": "Pudrición bacteriana", "completo": "Erwinia spp."}], "hongos": [{"nombre": "Marchitez por fusarium", "completo": "Fusarium oxysporum f. sp. cucumerinum"}, {"nombre": "Pudrición por phytophthora", "completo": "Phytophthora capsici"}, {"nombre": "Mildiu", "completo": "Pseudoperonospora cubensis"}]}, {"estado": "Sinaloa", "cultivo": "Hortaliza (Chile, Pepino, Jitomate, Tomate)", "virus": [{"nombre": "TYLCV", "completo": "Tomato yellow leaf curl virus"}, {"nombre": "Bronceado", "completo": "Tomato spotted wilt virus (TSWV)"}, {"nombre": "ToBRFV", "completo": "Tomato brown rugose fruit virus"}], "bacterias": [{"nombre": "Pudrición bacteriana", "completo": "Ralstonia solanacearum (antes Pseudomonas)"}, {"nombre": "Cancro", "completo": "Clavibacter michiganensis subsp. michiganensis"}, {"nombre": "Peca bacteriana", "completo": "Xanthomonas campestris pv. vesicatoria"}], "hongos": [{"nombre": "Mildiu", "completo": "Phytophthora infestans"}, {"nombre": "Marchitez vascular", "completo": "Fusarium oxysporum f. sp. lycopersici"}, {"nombre": "Mancha foliar", "completo": "Alternaria solani"}]}, {"estado": "Sinaloa", "cultivo": "Mango", "virus": [{"nombre": "Malformación compleja", "completo": "Aceria mangifera"}], "bacterias": [{"nombre": "Muerte de yemas", "completo": "Pseudomonas syringae pv. syringae"}, {"nombre": "Bacteriosis", "completo": "Xanthomonas spp."}], "hongos": [{"nombre": "fusarium", "completo": "Fusarium oxysporum f. sp. mangiferae"}, {"nombre": "Gomosis", "completo": "Phytophthora palmivora"}, {"nombre": "Marchitez vascular", "completo": "Verticillium dahliae"}]}, {"estado": "Sinaloa", "cultivo": "Sandia", "virus": [{"nombre": "Virus del mosaico de la sandía", "completo": "Watermelon mosaic virus(WMV)"}, {"nombre": "Virus del mosaico amarillo del calabacín", "completo": "Zucchini yellow mosaic virus (ZYMV)"}, {"nombre": "Virus del mosaico del pepino", "completo": "Cucumber mosaic virus(CMV)"}], "bacterias": [{"nombre": "Mancha bacteriana", "completo": "Acidovorax citrulli"}, {"nombre": "Pudrición bacteriana", "completo": "Pectobacterium carotovorum"}, {"nombre": "Mancha bacteriana", "completo": "Xanthomonas cucurbitae"}], "hongos": [{"nombre": "Marchitez por fusarium", "completo": "Fusarium oxysporum f. sp. niveum"}, {"nombre": "Pudrición por phytophthora", "completo": "Phytophthora capsici"}, {"nombre": "Mildiu", "completo": "Pseudoperonospora cubensis"}]}, {"estado": "Sonora", "cultivo": "Calabaza", "virus": [{"nombre": "Virus del mosaico de la sandía", "completo": "Watermelon mosaic virus (WMV)"}, {"nombre": "Virus del mosaico amarillo del calabacín", "completo": "Zucchini yellow mosaic virus (ZYMV)"}, {"nombre": "Virus del mosaico del pepino", "completo": "Cucumber mosaic virus(CMV)"}], "bacterias": [{"nombre": "Mancha bacteriana de cucurbitáceas", "completo": "Xanthomonas cucurbitae"}, {"nombre": "Pudrición bacteriana", "completo": "Pectobacterium carotovorum"}, {"nombre": "Pudrición bacteriana", "completo": "Erwinia spp."}], "hongos": [{"nombre": "Marchitez por fusarium", "completo": "Fusarium oxysporum f. sp. cucumerinum"}, {"nombre": "Pudrición por phytophthora", "completo": "Phytophthora capsici"}, {"nombre": "Mildiu", "completo": "Pseudoperonospora cubensis"}]}, {"estado": "Sonora", "cultivo": "Hortaliza (Chile, Pepino, Jitomate, Tomate)", "virus": [{"nombre": "TYLCV", "completo": "Tomato yellow leaf curl virus"}, {"nombre": "Bronceado", "completo": "Tomato spotted wilt virus (TSWV)"}, {"nombre": "ToBRFV", "completo": "Tomato brown rugose fruit virus"}], "bacterias": [{"nombre": "Pudrición bacteriana", "completo": "Ralstonia solanacearum (antes Pseudomonas)"}, {"nombre": "Cancro", "completo": "Clavibacter michiganensis subsp. michiganensis"}, {"nombre": "Peca bacteriana", "completo": "Xanthomonas campestris pv. vesicatoria"}], "hongos": [{"nombre": "Mildiu", "completo": "Phytophthora infestans"}, {"nombre": "Marchitez vascular", "completo": "Fusarium oxysporum f. sp. lycopersici"}, {"nombre": "Mancha foliar", "completo": "Alternaria solani"}]}, {"estado": "Sonora", "cultivo": "Nogal", "virus": [], "bacterias": [{"nombre": "Tizón bacteriano", "completo": "Xanthomonas arboricola pv. juglandis"}, {"nombre": "Exudación negra", "completo": "Brenneria nigrifluens"}, {"nombre": "Complejo vascular", "completo": "Complejo fúngico-bacteriano"}], "hongos": [{"nombre": "Defoliación foliar", "completo": "Mycosphaerella caryigena"}, {"nombre": "Podredumbre de raíz", "completo": "Phytophthora cinnamomi"}, {"nombre": "Podredumbre blanca de raíz", "completo": "Armillaria mellea"}]}, {"estado": "Sonora", "cultivo": "Sandia", "virus": [{"nombre": "Virus del mosaico de la sandía", "completo": "Watermelon mosaic virus(WMV)"}, {"nombre": "Virus del mosaico amarillo del calabacín", "completo": "Zucchini yellow mosaic virus (ZYMV)"}, {"nombre": "Virus del mosaico del pepino", "completo": "Cucumber mosaic virus(CMV)"}], "bacterias": [{"nombre": "Mancha bacteriana", "completo": "Acidovorax citrulli"}, {"nombre": "Pudrición bacteriana", "completo": "Pectobacterium carotovorum"}, {"nombre": "Mancha bacteriana", "completo": "Xanthomonas cucurbitae"}], "hongos": [{"nombre": "Marchitez por fusarium", "completo": "Fusarium oxysporum f. sp. niveum"}, {"nombre": "Pudrición por phytophthora", "completo": "Phytophthora capsici"}, {"nombre": "Mildiu", "completo": "Pseudoperonospora cubensis"}]}, {"estado": "Sonora", "cultivo": "Vid", "virus": [{"nombre": "Virus del enrollado", "completo": "Grapevine leafroll-associated virus (GLRaV)"}, {"nombre": "Degeneración infecciosa", "completo": "Grapevine fanleaf virus (GFLV)"}], "bacterias": [{"nombre": "Clorosis bacteriana", "completo": "Xylella fastidiosa subsp. fastidiosa"}, {"nombre": "Agalla de la corona", "completo": "Agrobacterium spp."}], "hongos": [{"nombre": "Mildiu velloso", "completo": "Plasmopara viticola"}, {"nombre": "Apoplejía / Decaimiento", "completo": "Phaeomoniella chlamydospora / Phaeoacremonium spp."}, {"nombre": "Muerte de brazos", "completo": "Eutypa lata"}]}, {"estado": "Tabasco", "cultivo": "Papaya", "virus": [{"nombre": "Virus de la mancha anular de la papaya", "completo": "Papaya ringspot virus (PRSV)"}, {"nombre": "Virus del mosaico del pepino en papaya", "completo": "Cucumber mosaic virus(CMV)"}, {"nombre": "VIRUS MOSAICO en papaya", "completo": "Begomovirusspp."}], "bacterias": [{"nombre": "Mancha bacteriana de la papaya", "completo": "Xanthomonas campestris pv. caricae"}, {"nombre": "Pudrición bacteriana", "completo": "Pectobacterium carotovorum"}, {"nombre": "Mancha bacteriana", "completo": "Pseudomonas syringae"}], "hongos": [{"nombre": "Pudrición por phytophthora", "completo": "Phytophthora palmivora"}, {"nombre": "Marchitez por fusarium", "completo": "Fusarium oxysporum"}, {"nombre": "Antracnosis", "completo": "Colletotrichum gloeosporioides"}]}, {"estado": "Tabasco", "cultivo": "Platano", "virus": [{"nombre": "Cogollo racimoso", "completo": "Banana bunchy top virus (BBTV)"}, {"nombre": "Estriado foliar", "completo": "Banana streak virus (BSV)"}, {"nombre": "Mosaico foliar", "completo": "Banana mosaic virus (BMV) / Cucumber mosaic virus (CMV)"}], "bacterias": [{"nombre": "Marchitez bacteriana", "completo": "Ralstonia solanacearum raza 2"}, {"nombre": "Pudrición vascular", "completo": "Xanthomonas campestris pv. musacearum"}, {"nombre": "Erwinia", "completo": "erwinia"}], "hongos": [{"nombre": "Mancha negra foliar", "completo": "Mycosphaerella fijiensis (Pseudocercospora fijiensis)"}, {"nombre": "Marchitez por Fusarium", "completo": "Fusarium oxysporum f. sp. cubense"}, {"nombre": "Pudrición de dedos", "completo": "Verticillium theobromae / Trachysphaera spp."}]}, {"estado": "Tamaulipas", "cultivo": "Citricos (Naranja, Mandarina, Limon)", "virus": [{"nombre": "CTV / VTC", "completo": "Citrus tristeza virus"}, {"nombre": "CiLV", "completo": "Citrus leprosis virus"}, {"nombre": "Enfermedad de descortezamiento", "completo": "Citrus exocortis viroid"}], "bacterias": [{"nombre": "cancrosis bacteriana", "completo": "Xanthomonas citri subsp. citri"}, {"nombre": "Dragón amarillo / Enverdecimiento", "completo": "Candidatus Liberibacter asiaticus"}, {"nombre": "CVC", "completo": "Xylella fastidiosa subsp. pauca"}], "hongos": [{"nombre": "Podredumbre de raíz y base del tronco", "completo": "Phytophthora cinnamomi / P. citrophthora"}, {"nombre": "Dieback", "completo": "Lasiodiplodia theobromae"}, {"nombre": "Mal de Armillaria", "completo": "Armillaria mellea"}]}, {"estado": "Veracruz", "cultivo": "Cafe", "virus": [], "bacterias": [{"nombre": "Bacteriosis foliar", "completo": "Pseudomonas syringae"}, {"nombre": "Tizón bacteriano", "completo": "Pseudomonas cichorii"}, {"nombre": "Necrosis bacteriana", "completo": "Pseudomonas corrugata"}], "hongos": [{"nombre": "Roya amarilla", "completo": "Hemileia vastatrix"}, {"nombre": "Cáncer del tronco", "completo": "Ceratocystis fimbriata"}, {"nombre": "Mancha ocular", "completo": "Cercospora coffeicola"}]}, {"estado": "Veracruz", "cultivo": "Citricos (Naranja, Mandarina, Limon)", "virus": [{"nombre": "CTV / VTC", "completo": "Citrus tristeza virus"}, {"nombre": "CiLV", "completo": "Citrus leprosis virus"}, {"nombre": "Enfermedad de descortezamiento", "completo": "Citrus exocortis viroid"}], "bacterias": [{"nombre": "cancrosis bacteriana", "completo": "Xanthomonas citri subsp. citri"}, {"nombre": "Dragón amarillo / Enverdecimiento", "completo": "Candidatus Liberibacter asiaticus"}, {"nombre": "CVC", "completo": "Xylella fastidiosa subsp. pauca"}], "hongos": [{"nombre": "Podredumbre de raíz y base del tronco", "completo": "Phytophthora cinnamomi / P. citrophthora"}, {"nombre": "Dieback", "completo": "Lasiodiplodia theobromae"}, {"nombre": "Mal de Armillaria", "completo": "Armillaria mellea"}]}, {"estado": "Veracruz", "cultivo": "Mango", "virus": [{"nombre": "Malformación compleja", "completo": "Aceria mangifera"}], "bacterias": [{"nombre": "Muerte de yemas", "completo": "Pseudomonas syringae pv. syringae"}, {"nombre": "Bacteriosis", "completo": "Xanthomonas spp."}], "hongos": [{"nombre": "fusarium", "completo": "Fusarium oxysporum f. sp. mangiferae"}, {"nombre": "Gomosis", "completo": "Phytophthora palmivora"}, {"nombre": "Marchitez vascular", "completo": "Verticillium dahliae"}]}, {"estado": "Veracruz", "cultivo": "Papaya", "virus": [{"nombre": "Virus de la mancha anular de la papaya", "completo": "Papaya ringspot virus (PRSV)"}, {"nombre": "Virus del mosaico del pepino en papaya", "completo": "Cucumber mosaic virus(CMV)"}, {"nombre": "Begomovirus en papaya", "completo": "Begomovirusspp."}], "bacterias": [{"nombre": "Mancha bacteriana de la papaya", "completo": "Xanthomonas campestris pv. caricae"}, {"nombre": "Pudrición bacteriana", "completo": "Pectobacterium carotovorum"}, {"nombre": "Mancha bacteriana", "completo": "Pseudomonas syringae"}], "hongos": [{"nombre": "Pudrición por phytophthora", "completo": "Phytophthora palmivora"}, {"nombre": "Marchitez por fusarium", "completo": "Fusarium oxysporum"}, {"nombre": "Antracnosis", "completo": "Colletotrichum gloeosporioides"}]}, {"estado": "Veracruz", "cultivo": "Pimienta", "virus": [{"nombre": "Virus rugoso del tomate", "completo": "Tomato brown rugose fruit virus(ToBRFV)"}, {"nombre": "Virus del mosaico del tabaco", "completo": "Tobacco mosaic virus (TMV)"}, {"nombre": "Virus del mosaico del pepino", "completo": "Cucumber mosaic virus (CMV)"}], "bacterias": [{"nombre": "Marchitez bacteriana", "completo": "Ralstonia solanacearum"}, {"nombre": "Mancha bacteriana del chile", "completo": "Xanthomonasspp."}, {"nombre": "Pudrición bacteriana", "completo": "Pectobacterium carotovorum"}], "hongos": [{"nombre": "Marchitez por fusarium", "completo": "Fusarium oxysporum f. sp. capsici"}, {"nombre": "Pudrición por phytophthora", "completo": "Phytophthora capsici"}, {"nombre": "Antracnosis del chile", "completo": "Colletotrichum spp."}]}, {"estado": "Veracruz", "cultivo": "Platano", "virus": [{"nombre": "Cogollo racimoso", "completo": "Banana bunchy top virus (BBTV)"}, {"nombre": "Estriado foliar", "completo": "Banana streak virus (BSV)"}, {"nombre": "Mosaico foliar", "completo": "Banana mosaic virus (BMV) / Cucumber mosaic virus (CMV)"}], "bacterias": [{"nombre": "Marchitez bacteriana", "completo": "Ralstonia solanacearum raza 2"}, {"nombre": "Pudrición vascular", "completo": "Xanthomonas campestris pv. musacearum"}, {"nombre": "Erwinia", "completo": "erwinia"}], "hongos": [{"nombre": "Mancha negra foliar", "completo": "Mycosphaerella fijiensis (Pseudocercospora fijiensis)"}, {"nombre": "Marchitez por Fusarium", "completo": "Fusarium oxysporum f. sp. cubense"}, {"nombre": "Pudrición de dedos", "completo": "Verticillium theobromae / Trachysphaera spp."}]}, {"estado": "Veracruz", "cultivo": "Sandia", "virus": [{"nombre": "Virus del mosaico de la sandía", "completo": "Watermelon mosaic virus(WMV)"}, {"nombre": "Virus del mosaico amarillo del calabacín", "completo": "Zucchini yellow mosaic virus (ZYMV)"}, {"nombre": "Virus del mosaico del pepino", "completo": "Cucumber mosaic virus(CMV)"}], "bacterias": [{"nombre": "Mancha bacteriana", "completo": "Acidovorax citrulli"}, {"nombre": "Pudrición bacteriana", "completo": "Pectobacterium carotovorum"}, {"nombre": "Mancha bacteriana", "completo": "Xanthomonas cucurbitae"}], "hongos": [{"nombre": "Marchitez por fusarium", "completo": "Fusarium oxysporum f. sp. niveum"}, {"nombre": "Pudrición por phytophthora", "completo": "Phytophthora capsici"}, {"nombre": "Mildiu", "completo": "Pseudoperonospora cubensis"}]}, {"estado": "Yucatan", "cultivo": "Citricos (Naranja, Mandarina, Limon)", "virus": [{"nombre": "CTV / VTC", "completo": "Citrus tristeza virus"}, {"nombre": "CiLV", "completo": "Citrus leprosis virus"}, {"nombre": "Enfermedad de descortezamiento", "completo": "Citrus exocortis viroid"}], "bacterias": [{"nombre": "cancrosis bacteriana", "completo": "Xanthomonas citri subsp. citri"}, {"nombre": "Dragón amarillo / Enverdecimiento", "completo": "Candidatus Liberibacter asiaticus"}, {"nombre": "CVC", "completo": "Xylella fastidiosa subsp. pauca"}], "hongos": [{"nombre": "Podredumbre de raíz y base del tronco", "completo": "Phytophthora cinnamomi / P. citrophthora"}, {"nombre": "Dieback", "completo": "Lasiodiplodia theobromae"}, {"nombre": "Mal de Armillaria", "completo": "Armillaria mellea"}]}, {"estado": "Yucatan", "cultivo": "Papaya", "virus": [{"nombre": "Virus de la mancha anular de la papaya", "completo": "Papaya ringspot virus (PRSV)"}, {"nombre": "Virus del mosaico del pepino en papaya", "completo": "Cucumber mosaic virus(CMV)"}, {"nombre": "MOSAICO EN PAPAYA", "completo": "Begomovirusspp."}], "bacterias": [{"nombre": "Mancha bacteriana de la papaya", "completo": "Xanthomonas campestris pv. caricae"}, {"nombre": "Pudrición bacteriana", "completo": "Pectobacterium carotovorum"}, {"nombre": "Mancha bacteriana", "completo": "Pseudomonas syringae"}], "hongos": [{"nombre": "Pudrición por phytophthora", "completo": "Phytophthora palmivora"}, {"nombre": "Marchitez por fusarium", "completo": "Fusarium oxysporum"}, {"nombre": "Antracnosis", "completo": "Colletotrichum gloeosporioides"}]}, {"estado": "Zacatecas", "cultivo": "Durazno", "virus": [{"nombre": "Enrollamiento de la hoja del duraznero", "completo": "Plum pox virus(PPV)"}, {"nombre": "Enanismo del duraznero", "completo": "Peach dwarf virus"}, {"nombre": "Virus de la mancha anular", "completo": "Prunus necrotic ringspot virus(PNRSV)"}], "bacterias": [{"nombre": "Cáncer bacteriano del duraznero", "completo": "Pseudomonas syringae pv. syringae"}, {"nombre": "Mancha bacteriana", "completo": "Xanthomonas arboricola pv. pruni"}, {"nombre": "Agalla bacteriana", "completo": "Agrobacterium tumefaciens"}], "hongos": [{"nombre": "Pudrición parda", "completo": "Monilinia fructicola"}, {"nombre": "Marchitez por verticillium", "completo": "Verticillium dahliae"}, {"nombre": "Enrollamiento de la hoja", "completo": "Taphrina deformans"}]}];
 
 // ── STATE ─────────────────────────────────────────────────────────────────────
-let texts    = { virus: [], bacteria: [], hongo: [] };
 let cat      = 'virus';
 let selIdx   = null;
 let baseImg  = null;
 let mainCopy = '';
+let currentPatogeno = '';
+let currentCultivo  = '';
+let currentEstado   = '';
 
 const cvs = document.getElementById('cvs');
 const ctx = cvs.getContext('2d');
 
-// ── EXCEL ─────────────────────────────────────────────────────────────────────
-async function loadExcel() {
-  try {
-    if (!EXCEL_URL) {
-      texts = {
-        virus: [
-          'Si el virus ..... te está quitando la producción, prueba Agrocker antes de que empieces a perderle',
-          '¿Eres de los que cree que no existe nada para el virus .....?',
-          '¿Eres de los que arranca plantas cuando tienen virus .....?',
-          '¿Eres de los que sigue perdiendo cosecha por virus ....?',
-          '¿Qué prefieres? ¿Seguir perdiendo tu cosecha por el virus ..... o innovar a una mejor forma de producir?',
-          '¿Si eres de los que cree que no hay nada para combatir ..... ya probaste Agrocker .....?'
-        ],
-        bacteria: [
-          '¿Exportando calidad o encuarentenando tus cultivos?',
-          '¿Eres de los que cree que el ..... no tiene solución?',
-          '¿Eres de los que sigue perdiendo su cultivo por ......?',
-          'Para dejar de perder tu producción por ..... primero tienes que abrirte a producir con la más alta tecnología',
-          'Sigues perdiendo tu producción con .... porque sigues aplicando el agroquímico que ya no sirve',
-          '¿Seguro crees que no hay orgánico que pueda erradicar .....? ¿Ya probaste los nano sistémicos?',
-          'No te des por vencido con la ..... Prueba Agrocker, el primer nano sistémico verde'
-        ],
-        hongo: [
-          'No pierdas tu producción por .......',
-          '¿Cosechando mucho o sobreviviendo a ......?',
-          '¿Los agroquímicos ya dejaron de servirte vs .....? Prueba la nueva generación de nano sistémicos verdes con Agrocker',
-          '¿Solucionando la ..... o perdiendo tu producción? Mejora la forma en la que produces, prueba Agrocker',
-          'Sabías que puedes recuperar tu cultivo si tienes ....... ¿Ya probaste Agrocker?',
-          'No te des por vencido con la ..... Prueba Agrocker, el primer nano sistémico verde'
-        ]
-      };
-      renderTpls();
-      return;
-    }
-
-    const res  = await fetch(EXCEL_URL);
-    if (!res.ok) throw new Error('No se pudo cargar el archivo Excel');
-    const buf  = await res.arrayBuffer();
-    const wb   = XLSX.read(new Uint8Array(buf), { type: 'array' });
-    const ws   = wb.Sheets[wb.SheetNames[0]];
-    const rows = XLSX.utils.sheet_to_json(ws, { header: 1 });
-    const hdrs = rows[0] || [];
-
-    const colsOf = kw => hdrs.reduce((a, h, i) => {
-      if (h && h.toString().toLowerCase().includes(kw)) a.push(i);
-      return a;
-    }, []);
-
-    const extract = cols => {
-      const out = [];
-      rows.slice(2).forEach(row =>
-        cols.forEach(ci => {
-          const v = row[ci];
-          if (v && v.toString().trim().length > 10) out.push(v.toString().trim());
-        })
-      );
-      return [...new Set(out)];
-    };
-
-    texts.virus    = extract(colsOf('virus'));
-    texts.bacteria = extract([...new Set([...colsOf('bacteria'), ...colsOf('bacter')])]);
-    texts.hongo    = extract([...new Set([...colsOf('hongo'), ...colsOf('hong')])]);
-    renderTpls();
-
-  } catch (err) {
-    document.getElementById('tplList').innerHTML =
-      `<div class="tpl-empty" style="color:#f09090">${err.message}</div>`;
-  }
+// ── DROPDOWNS DEPENDIENTES ───────────────────────────────────────────────────
+function initDropdowns() {
+  const estados = [...new Set(AGRO_DATA.map(d => d.estado))].sort();
+  const sel = document.getElementById('selEstado');
+  estados.forEach(e => {
+    const opt = document.createElement('option');
+    opt.value = e; opt.textContent = e;
+    sel.appendChild(opt);
+  });
 }
 
-// ── CATEGORY / TEMPLATES ──────────────────────────────────────────────────────
+function onEstado() {
+  const estado = document.getElementById('selEstado').value;
+  currentEstado = estado;
+  currentCultivo = ''; currentPatogeno = '';
+  selIdx = null;
+
+  const selC = document.getElementById('selCultivo');
+  const selP = document.getElementById('selPatogeno');
+
+  selC.innerHTML = '<option value="">— Selecciona un cultivo —</option>';
+  selP.innerHTML = '<option value="">— Primero elige un cultivo —</option>';
+  selC.disabled = !estado;
+  selP.disabled = true;
+
+  if (!estado) { checkReady(); renderTpls(); return; }
+
+  const cultivos = [...new Set(
+    AGRO_DATA.filter(d => d.estado === estado).map(d => d.cultivo)
+  )].sort();
+
+  cultivos.forEach(c => {
+    const opt = document.createElement('option');
+    opt.value = c; opt.textContent = c;
+    selC.appendChild(opt);
+  });
+
+  checkReady(); renderTpls();
+}
+
+function onCultivo() {
+  const estado  = document.getElementById('selEstado').value;
+  const cultivo = document.getElementById('selCultivo').value;
+  currentCultivo = cultivo;
+  currentPatogeno = '';
+  selIdx = null;
+
+  const selP = document.getElementById('selPatogeno');
+  selP.innerHTML = '<option value="">— Selecciona un patógeno —</option>';
+  selP.disabled = !cultivo;
+
+  if (!cultivo) { checkReady(); renderTpls(); return; }
+
+  const row = AGRO_DATA.find(d => d.estado === estado && d.cultivo === cultivo);
+  if (!row) { checkReady(); renderTpls(); return; }
+
+  const patogenos = row[cat] || [];
+  patogenos.forEach(p => {
+    const opt = document.createElement('option');
+    opt.value = p.completo;
+    opt.textContent = `${p.nombre} — ${p.completo.length > 45 ? p.completo.slice(0,43)+'…' : p.completo}`;
+    selP.appendChild(opt);
+  });
+
+  checkReady(); renderTpls();
+}
+
+function onPatogeno() {
+  currentPatogeno = document.getElementById('selPatogeno').value;
+  selIdx = null;
+  checkReady(); renderTpls();
+}
+
+// Cuando cambia la categoría, refrescar el dropdown de patógenos
 function setCat(c) {
   cat = c; selIdx = null;
   document.querySelectorAll('.cat-pill').forEach(p =>
     p.classList.toggle('active', p.dataset.cat === c)
   );
-  renderTpls(); checkReady();
+  // Re-poblar patógenos con la nueva categoría
+  onCultivo();
+  renderTpls();
+  checkReady();
 }
 
+// ── TEMPLATES ─────────────────────────────────────────────────────────────────
 function renderTpls() {
   const list  = document.getElementById('tplList');
   const count = document.getElementById('tplCount');
-  const items = texts[cat];
-  if (!items?.length) {
-    list.innerHTML = '<div class="tpl-empty">Sin textos en esta categoría</div>';
+  const items = TEXTOS_BASE[cat];
+
+  if (!currentPatogeno) {
+    list.innerHTML = '<div class="tpl-empty">Elige estado, cultivo y patógeno primero</div>';
     count.textContent = ''; return;
   }
+
   count.textContent = `(${items.length})`;
   list.innerHTML = '';
   items.forEach((t, i) => {
+    const preview = t.replace('{cultivo}', currentCultivo || 'cultivo')
+                     .replace('.....', currentPatogeno.split('(')[0].trim())
+                     .replace('....', currentPatogeno.split('(')[0].trim());
     const el = document.createElement('div');
     el.className = 'tpl-item' + (i === selIdx ? ' active' : '');
-    el.textContent = t;
+    el.textContent = preview;
     el.onclick = () => { selIdx = i; renderTpls(); checkReady(); };
     list.appendChild(el);
   });
 }
 
 function checkReady() {
-  document.getElementById('btnGen').disabled = selIdx === null;
+  document.getElementById('btnGen').disabled = !(selIdx !== null && currentPatogeno);
 }
 
 // ── IMAGE UPLOAD ──────────────────────────────────────────────────────────────
@@ -522,54 +480,45 @@ function loadImg(file) {
 // ── CANVAS ────────────────────────────────────────────────────────────────────
 function drawCanvas(text) {
   if (!baseImg) return;
-
-  const W = baseImg.naturalWidth;
-  const H = baseImg.naturalHeight;
-  cvs.width  = W;
-  cvs.height = H;
-  ctx.clearRect(0, 0, W, H);
-  ctx.drawImage(baseImg, 0, 0, W, H);
+  const W = baseImg.naturalWidth, H = baseImg.naturalHeight;
+  cvs.width = W; cvs.height = H;
+  ctx.clearRect(0,0,W,H);
+  ctx.drawImage(baseImg,0,0,W,H);
 
   if (text) {
-    const fontSize  = parseInt(document.getElementById('fontSize').value);
-    const color     = document.getElementById('txtColor').value;
-    const shadow    = document.getElementById('shadowColor').value;
-    const bgOpacity = parseInt(document.getElementById('bgOpacity').value) / 100;
-    const pos       = document.getElementById('txtPos').value;
+    const fontSize     = parseInt(document.getElementById('fontSize').value);
+    const color        = document.getElementById('txtColor').value;
+    const shadow       = document.getElementById('shadowColor').value;
+    const bgOpacity    = parseInt(document.getElementById('bgOpacity').value) / 100;
+    const pos          = document.getElementById('txtPos').value;
+    const letterSpacing= parseInt(document.getElementById('letterSpacing').value);
 
     ctx.font = `bold ${fontSize}px Syne, sans-serif`;
-    ctx.textAlign    = 'center';
-    ctx.textBaseline = 'middle';
+    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
 
     const maxW  = W * 0.82;
-    const lines = wrapText(ctx, text, maxW);
+    const lines = wrapText(ctx, text, maxW, letterSpacing);
     const lineH = fontSize * 1.4;
     const blockH = lines.length * lineH;
-
-    const centerY = pos === 'top'    ? H * 0.18
-                  : pos === 'bottom' ? H * 0.82
-                  : H * 0.5;
+    const centerY = pos==='top' ? H*.18 : pos==='bottom' ? H*.82 : H*.5;
 
     if (bgOpacity > 0) {
       const pad = fontSize * 0.55;
       ctx.fillStyle = `rgba(0,0,0,${bgOpacity})`;
-      roundRect(ctx, W/2 - maxW/2 - pad, centerY - blockH/2 - pad, maxW + pad*2, blockH + pad*2, 14);
+      roundRect(ctx, W/2-maxW/2-pad, centerY-blockH/2-pad, maxW+pad*2, blockH+pad*2, 14);
       ctx.fill();
     }
 
-    ctx.shadowColor   = shadow;
-    ctx.shadowBlur    = fontSize * 0.45;
-    ctx.shadowOffsetX = 0;
-    ctx.shadowOffsetY = fontSize * 0.05;
+    ctx.shadowColor = shadow; ctx.shadowBlur = fontSize*.45;
+    ctx.shadowOffsetX = 0; ctx.shadowOffsetY = fontSize*.05;
     ctx.fillStyle = color;
 
     lines.forEach((line, i) => {
-      const y = centerY - blockH/2 + i * lineH + lineH/2;
-      ctx.fillText(line, W/2, y);
+      const y = centerY - blockH/2 + i*lineH + lineH/2;
+      drawTextWithSpacing(ctx, line, W/2, y, letterSpacing);
     });
 
-    ctx.shadowColor = 'transparent';
-    ctx.shadowBlur  = 0;
+    ctx.shadowColor = 'transparent'; ctx.shadowBlur = 0;
   }
 
   document.getElementById('placeholder').style.display = 'none';
@@ -577,12 +526,29 @@ function drawCanvas(text) {
   document.getElementById('btnDl').disabled = false;
 }
 
-function wrapText(ctx, text, maxW) {
+function drawTextWithSpacing(ctx, text, x, y, spacing) {
+  if (spacing === 0) { ctx.fillText(text, x, y); return; }
+  // Calcular ancho total para centrar
+  let totalW = 0;
+  for (const ch of text) totalW += ctx.measureText(ch).width + spacing;
+  totalW -= spacing;
+  let cx = x - totalW / 2;
+  for (const ch of text) {
+    ctx.fillText(ch, cx + ctx.measureText(ch).width/2, y);
+    cx += ctx.measureText(ch).width + spacing;
+  }
+}
+
+function wrapText(ctx, text, maxW, spacing) {
   const words = text.split(' ');
   const lines = []; let cur = '';
+  const measure = t => spacing === 0
+    ? ctx.measureText(t).width
+    : [...t].reduce((a,c) => a + ctx.measureText(c).width + spacing, 0) - spacing;
+
   for (const w of words) {
-    const test = cur ? cur + ' ' + w : w;
-    if (ctx.measureText(test).width > maxW && cur) { lines.push(cur); cur = w; }
+    const test = cur ? cur+' '+w : w;
+    if (measure(test) > maxW && cur) { lines.push(cur); cur = w; }
     else cur = test;
   }
   if (cur) lines.push(cur);
@@ -591,50 +557,46 @@ function wrapText(ctx, text, maxW) {
 
 function roundRect(ctx, x, y, w, h, r) {
   ctx.beginPath();
-  ctx.moveTo(x+r, y);
-  ctx.lineTo(x+w-r, y);  ctx.quadraticCurveTo(x+w, y, x+w, y+r);
-  ctx.lineTo(x+w, y+h-r); ctx.quadraticCurveTo(x+w, y+h, x+w-r, y+h);
-  ctx.lineTo(x+r, y+h);  ctx.quadraticCurveTo(x, y+h, x, y+h-r);
-  ctx.lineTo(x, y+r);    ctx.quadraticCurveTo(x, y, x+r, y);
-  ctx.closePath();
+  ctx.moveTo(x+r,y); ctx.lineTo(x+w-r,y); ctx.quadraticCurveTo(x+w,y,x+w,y+r);
+  ctx.lineTo(x+w,y+h-r); ctx.quadraticCurveTo(x+w,y+h,x+w-r,y+h);
+  ctx.lineTo(x+r,y+h); ctx.quadraticCurveTo(x,y+h,x,y+h-r);
+  ctx.lineTo(x,y+r); ctx.quadraticCurveTo(x,y,x+r,y); ctx.closePath();
 }
 
-// Redraw en tiempo real
-['txtPos','txtColor','shadowColor','fontSize','bgOpacity'].forEach(id => {
+['txtPos','txtColor','shadowColor','fontSize','letterSpacing','bgOpacity'].forEach(id => {
   document.getElementById(id).addEventListener('input', () => {
     const v = document.getElementById(id).value;
-    if (id === 'fontSize')    document.getElementById('fontSizeVal').textContent  = v + 'px';
-    if (id === 'bgOpacity')   document.getElementById('bgOpacityVal').textContent = v + '%';
-    if (id === 'txtColor')    document.getElementById('txtColorVal').textContent  = v;
-    if (id === 'shadowColor') document.getElementById('shadowColorVal').textContent = v;
+    if (id==='fontSize')      document.getElementById('fontSizeVal').textContent      = v+'px';
+    if (id==='bgOpacity')     document.getElementById('bgOpacityVal').textContent     = v+'%';
+    if (id==='txtColor')      document.getElementById('txtColorVal').textContent      = v;
+    if (id==='shadowColor')   document.getElementById('shadowColorVal').textContent   = v;
+    if (id==='letterSpacing') document.getElementById('letterSpacingVal').textContent = v+'px';
     if (mainCopy && baseImg) drawCanvas(mainCopy);
   });
 });
 
 // ── GENERATE ──────────────────────────────────────────────────────────────────
 async function generate() {
-  const estado  = document.getElementById('estado').value.trim()   || 'el estado';
-  const cultivo = document.getElementById('cultivo').value.trim()  || 'el cultivo';
-  const patog   = document.getElementById('patogeno').value.trim() || 'el patógeno';
-  const base    = texts[cat][selIdx];
+  const base = TEXTOS_BASE[cat][selIdx];
+  const patNombre = currentPatogeno.split('(')[0].trim();
 
   hideErr(); setLoading(true);
 
-  const prompt = `Eres experto en marketing agrícola para México. Creas copies para Agrocker, nano sistémicos verdes de Agrobotanix que combaten ${cat}.
+  const prompt = `Eres experto en marketing agrícola para México. Creas copies para Agrocker, nano sistémicos verdes de Agrobotanix.
 
-DATOS:
-- Estado: ${estado}
-- Cultivo: ${cultivo}
-- Patógeno: ${patog}
-- Tipo: ${cat}
-- Texto base: "${base}"
+DATOS DEL ANUNCIO:
+- Estado: ${currentEstado}
+- Cultivo: ${currentCultivo}
+- Patógeno: ${currentPatogeno}
+- Categoría: ${cat}
+- Texto base: "${base.replace('{cultivo}', currentCultivo).replace('.....', patNombre).replace('....', patNombre)}"
 
 INSTRUCCIONES:
-1. Los "...." en el texto base son marcadores — reemplázalos con el patógeno o cultivo.
-2. Copy principal: impactante, directo, honesto. Tono de agrónomo que conoce el campo mexicano.
-3. 2 variantes con diferente ángulo emocional.
-4. Menciona "Agrocker" o "nano sistémico verde" cuando sea natural.
-5. Máximo 2 líneas por copy. Sin hashtags ni emojis.
+1. Copy principal: impactante, directo, honesto. Habla como agrónomo que conoce el campo mexicano.
+2. Usa el nombre del patógeno y el cultivo de forma natural.
+3. Menciona "Agrocker" o "nano sistémico verde" cuando sume.
+4. Máximo 2 líneas por copy. Sin hashtags ni emojis.
+5. 2 variantes con diferente ángulo emocional.
 
 JSON sin texto extra ni backticks:
 {"principal":"...","variante1":"...","variante2":"..."}`;
@@ -651,36 +613,29 @@ JSON sin texto extra ni backticks:
       body: JSON.stringify({
         model: 'claude-opus-4-5',
         max_tokens: 500,
+        temperature: 0.8,
         messages: [{ role: 'user', content: prompt }]
       })
     });
 
     if (!res.ok) {
-      const e = await res.json().catch(() => ({}));
+      const e = await res.json().catch(()=>({}));
       throw new Error(e.error?.message || `HTTP ${res.status}`);
     }
 
     const data = await res.json();
-    let raw = data.content.map(b => b.text || '').join('').replace(/```json|```/g, '').trim();
+    let raw = data.content.map(b=>b.text||'').join('').replace(/```json|```/g,'').trim();
     const out = JSON.parse(raw);
 
     mainCopy = out.principal;
-
-    // Preview en bottom bar
     const prev = document.getElementById('copyPreview');
-    prev.textContent = mainCopy;
-    prev.classList.add('has');
-
-    // Habilitar botones
+    prev.textContent = mainCopy; prev.classList.add('has');
     document.getElementById('btnCopyTxt').disabled = false;
 
-    // Dibujar en canvas
     if (baseImg) drawCanvas(mainCopy);
-
-    // Variantes
     renderVariants([out.variante1, out.variante2].filter(Boolean));
 
-  } catch (err) {
+  } catch(err) {
     showErr('Error al generar: ' + err.message);
   } finally {
     setLoading(false);
@@ -691,22 +646,19 @@ JSON sin texto extra ni backticks:
 function renderVariants(vars) {
   const bar = document.getElementById('variantsBar');
   while (bar.children.length > 1) bar.removeChild(bar.lastChild);
-
   vars.forEach(v => {
     const chip = document.createElement('div');
-    chip.className = 'var-chip';
-    chip.title = v;
-    chip.textContent = v.length > 70 ? v.slice(0, 68) + '…' : v;
+    chip.className = 'var-chip'; chip.title = v;
+    chip.textContent = v.length > 70 ? v.slice(0,68)+'…' : v;
     chip.onclick = () => {
       mainCopy = v;
       document.getElementById('copyPreview').textContent = v;
       if (baseImg) drawCanvas(v);
-      document.querySelectorAll('.var-chip').forEach(c => c.classList.remove('applied'));
+      document.querySelectorAll('.var-chip').forEach(c=>c.classList.remove('applied'));
       chip.classList.add('applied');
     };
     bar.appendChild(chip);
   });
-
   bar.classList.add('show');
 }
 
@@ -718,38 +670,29 @@ function setLoading(on) {
     btn.innerHTML = '<div class="spin"></div> Generando...';
     document.getElementById('statusTxt').textContent = 'Generando...';
   } else {
-    btn.disabled = selIdx === null;
+    btn.disabled = !(selIdx !== null && currentPatogeno);
     btn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg> Generar anuncio`;
     document.getElementById('statusTxt').textContent = 'Listo';
   }
 }
-
 function download() {
   if (!baseImg) return;
   const a = document.createElement('a');
   a.download = `agrocker-${Date.now()}.png`;
-  a.href = cvs.toDataURL('image/png');
-  a.click();
+  a.href = cvs.toDataURL('image/png'); a.click();
 }
-
 function copyText() {
   if (!mainCopy) return;
-  navigator.clipboard.writeText(mainCopy).catch(() => {});
+  navigator.clipboard.writeText(mainCopy).catch(()=>{});
   const btn = document.getElementById('btnCopyTxt');
   btn.textContent = '✓ Copiado';
-  setTimeout(() => {
-    btn.innerHTML = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-      <rect x="9" y="9" width="13" height="13" rx="2"/>
-      <path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/>
-    </svg> Copiar texto`;
-  }, 1500);
+  setTimeout(()=>{ btn.innerHTML=`<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg> Copiar texto`; }, 1500);
 }
-
-function showErr(msg) { const e = document.getElementById('errBox'); e.textContent = msg; e.classList.add('show'); }
+function showErr(msg) { const e=document.getElementById('errBox'); e.textContent=msg; e.classList.add('show'); }
 function hideErr() { document.getElementById('errBox').classList.remove('show'); }
 
 // ── INIT ──────────────────────────────────────────────────────────────────────
-loadExcel();
+initDropdowns();
 </script>
 </body>
 </html>
