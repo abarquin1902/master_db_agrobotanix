@@ -1,0 +1,755 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Agrocker — Generador de Anuncios</title>
+<link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Inter:wght@300;400;500&family=Syne:wght@700;800&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+  :root {
+    --bg:      #0A0A0A;
+    --surface: #111111;
+    --s2:      #181818;
+    --border:  #1E1E1E;
+    --border2: #2C2C2C;
+    --lime:    #8DC63F;
+    --lime-gl: rgba(141,198,63,0.09);
+    --white:   #F0F0F0;
+    --muted:   #5A5A5A;
+    --muted2:  #383838;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; }
+  body {
+    font-family: 'Inter', sans-serif;
+    background: var(--bg);
+    color: var(--white);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* NAV */
+  nav {
+    height: 58px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    padding: 0 2rem;
+    gap: 1rem;
+    flex-shrink: 0;
+  }
+  .logo-script {
+    font-family: 'Great Vibes', cursive;
+    font-size: 30px;
+    color: var(--white);
+    line-height: 1;
+  }
+  .nav-divider { width: 1px; height: 20px; background: var(--border2); }
+  .nav-sub {
+    font-size: 11px; color: var(--muted);
+    letter-spacing: 0.08em; text-transform: uppercase;
+  }
+  .nav-sep { flex: 1; }
+  .status-row { display: flex; align-items: center; gap: 7px; font-size: 12px; color: var(--muted); }
+  .status-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--lime); animation: blink 2.5s ease-in-out infinite; }
+  @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.2} }
+
+  /* LAYOUT */
+  .app {
+    flex: 1;
+    display: grid;
+    grid-template-columns: 320px 1fr;
+    overflow: hidden;
+    min-height: 0;
+  }
+
+  /* SIDEBAR */
+  .sidebar {
+    border-right: 1px solid var(--border);
+    overflow-y: auto;
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.2rem;
+  }
+  .sidebar::-webkit-scrollbar { width: 3px; }
+  .sidebar::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 4px; }
+
+  .fl { display: flex; flex-direction: column; gap: 5px; }
+  .lbl {
+    font-size: 10px; font-weight: 500;
+    letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted);
+  }
+  input[type=text], select {
+    background: var(--s2); border: 1px solid var(--border2); border-radius: 8px;
+    padding: 9px 13px; font-family: 'Inter', sans-serif; font-size: 13.5px;
+    color: var(--white); width: 100%; transition: border 0.15s;
+  }
+  input[type=text]::placeholder { color: var(--muted); }
+  input[type=text]:focus, select:focus { outline: none; border-color: var(--lime); }
+  select option { background: #1a1a1a; }
+
+  .sep { height: 1px; background: var(--border); flex-shrink: 0; }
+
+  /* CATEGORY PILLS */
+  .cat-row { display: flex; gap: 6px; }
+  .cat-pill {
+    flex: 1; padding: 8px 4px; border-radius: 8px; border: 1px solid var(--border2);
+    background: transparent; color: var(--muted); font-family: 'Inter', sans-serif;
+    font-size: 12px; font-weight: 500; cursor: pointer; text-align: center; transition: all 0.15s;
+  }
+  .cat-pill:hover { border-color: var(--muted2); color: var(--white); }
+  .cat-pill.active { background: var(--lime-gl); border-color: var(--lime); color: var(--lime); }
+
+  /* TEMPLATE LIST */
+  .tpl-scroll {
+    display: flex; flex-direction: column; gap: 5px;
+    max-height: 200px; overflow-y: auto; padding-right: 2px;
+  }
+  .tpl-scroll::-webkit-scrollbar { width: 3px; }
+  .tpl-scroll::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 4px; }
+  .tpl-item {
+    padding: 10px 12px; border: 1px solid var(--border2); border-radius: 8px;
+    font-size: 12px; line-height: 1.65; color: var(--muted); cursor: pointer; transition: all 0.15s;
+  }
+  .tpl-item:hover { border-color: var(--muted2); color: #bbb; }
+  .tpl-item.active { border-color: var(--lime); background: var(--lime-gl); color: var(--white); }
+  .tpl-empty { font-size: 12px; color: var(--muted2); text-align: center; padding: 1rem 0; font-style: italic; }
+
+  /* IMAGE UPLOAD */
+  .upload-zone {
+    border: 1.5px dashed var(--border2); border-radius: 10px;
+    padding: 1.1rem; text-align: center; cursor: pointer;
+    transition: all 0.2s; position: relative; background: var(--s2);
+  }
+  .upload-zone:hover { border-color: var(--lime); background: var(--lime-gl); }
+  .upload-zone.has-img { border-color: var(--lime); border-style: solid; }
+  .upload-zone input[type=file] { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
+  .upload-icon { font-size: 20px; margin-bottom: 5px; }
+  .upload-zone p { font-size: 12px; color: var(--muted); line-height: 1.5; }
+  .upload-zone strong { color: #aaa; font-weight: 500; }
+
+  /* CONTROLS */
+  .controls-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .color-row { display: flex; align-items: center; gap: 8px; }
+  .color-row input[type=color] {
+    width: 34px; height: 34px; padding: 2px; border-radius: 6px;
+    border: 1px solid var(--border2); background: var(--s2); cursor: pointer;
+  }
+  .color-row span { font-size: 11px; color: var(--muted); font-family: monospace; }
+  .range-row { display: flex; flex-direction: column; gap: 5px; }
+  .range-header { display: flex; justify-content: space-between; align-items: center; }
+  .range-val { font-size: 11px; color: var(--lime); }
+  input[type=range] { width: 100%; accent-color: var(--lime); cursor: pointer; }
+
+  /* ERROR */
+  .err {
+    font-size: 12px; color: #f09090;
+    background: rgba(224,82,82,0.07); border: 1px solid rgba(224,82,82,0.2);
+    border-radius: 8px; padding: 10px 13px; display: none; line-height: 1.5;
+  }
+  .err.show { display: block; }
+
+  /* GENERATE BTN */
+  .btn-gen {
+    width: 100%; padding: 12px; background: var(--lime); color: #0A0A0A;
+    border: none; border-radius: 10px; font-family: 'Syne', sans-serif;
+    font-size: 14px; font-weight: 700; cursor: pointer; transition: all 0.2s;
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+    letter-spacing: 0.03em; flex-shrink: 0;
+  }
+  .btn-gen:hover:not(:disabled) { background: #9EDB45; transform: translateY(-1px); }
+  .btn-gen:disabled { opacity: 0.3; cursor: not-allowed; transform: none; }
+
+  /* MAIN */
+  .main { display: flex; flex-direction: column; overflow: hidden; min-height: 0; }
+
+  /* CANVAS AREA */
+  .canvas-wrap {
+    flex: 1; display: flex; align-items: center; justify-content: center;
+    padding: 1.5rem; background: var(--bg); overflow: hidden; min-height: 0;
+  }
+  .canvas-placeholder {
+    display: flex; flex-direction: column; align-items: center;
+    justify-content: center; gap: 14px; color: var(--muted2); text-align: center;
+  }
+  .canvas-placeholder p { font-size: 13px; color: var(--muted); line-height: 1.7; }
+  canvas {
+    max-width: 100%; max-height: 100%; object-fit: contain;
+    border-radius: 8px;
+    box-shadow: 0 0 0 1px var(--border2), 0 16px 48px rgba(0,0,0,0.7);
+    display: none;
+  }
+
+  /* VARIANTS BAR */
+  .variants-bar {
+    border-top: 1px solid var(--border);
+    padding: 0.75rem 1.5rem;
+    display: none; flex-wrap: wrap; gap: 8px; align-items: center; flex-shrink: 0;
+  }
+  .variants-bar.show { display: flex; }
+  .var-lbl { font-size: 10px; color: var(--muted); letter-spacing: 0.08em; text-transform: uppercase; width: 100%; margin-bottom: 2px; }
+  .var-chip {
+    padding: 5px 14px; border: 1px solid var(--border2); border-radius: 20px;
+    font-size: 11.5px; color: var(--muted); cursor: pointer; transition: all 0.15s;
+    max-width: 340px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  }
+  .var-chip:hover { border-color: var(--lime); color: var(--lime); }
+  .var-chip.applied { border-color: var(--lime); color: var(--lime); background: var(--lime-gl); }
+
+  /* BOTTOM BAR */
+  .bottom-bar {
+    border-top: 1px solid var(--border); padding: 0.8rem 1.5rem;
+    display: flex; align-items: center; gap: 10px; flex-shrink: 0;
+  }
+  .copy-preview {
+    flex: 1; font-size: 12.5px; color: var(--muted); font-style: italic;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .copy-preview.has { color: var(--white); font-style: normal; }
+  .btn-sm {
+    padding: 7px 16px; border-radius: 8px; font-family: 'Inter', sans-serif;
+    font-size: 12px; font-weight: 500; cursor: pointer; transition: all 0.15s;
+    display: flex; align-items: center; gap: 6px; white-space: nowrap;
+  }
+  .btn-outline {
+    background: transparent; border: 1px solid var(--border2); color: var(--muted);
+  }
+  .btn-outline:hover:not(:disabled) { border-color: var(--lime); color: var(--lime); }
+  .btn-outline:disabled { opacity: 0.3; cursor: not-allowed; }
+  .btn-solid { background: var(--lime); border: none; color: #0A0A0A; }
+  .btn-solid:hover:not(:disabled) { background: #9EDB45; }
+  .btn-solid:disabled { opacity: 0.3; cursor: not-allowed; }
+
+  /* SPINNER */
+  .spin {
+    width: 14px; height: 14px; border: 2px solid rgba(10,10,10,0.25);
+    border-top-color: #0A0A0A; border-radius: 50%; animation: rot 0.65s linear infinite;
+  }
+  @keyframes rot { to { transform: rotate(360deg); } }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="logo-script">Agrobotanix</div>
+  <div class="nav-divider"></div>
+  <div class="nav-sub">Generador de Anuncios</div>
+  <div class="nav-sep"></div>
+  <div class="status-row">
+    <div class="status-dot"></div>
+    <span id="statusTxt">Listo</span>
+  </div>
+</nav>
+
+<div class="app">
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+
+    <div class="fl">
+      <div class="lbl">Estado</div>
+      <input type="text" id="estado" placeholder="ej. Sinaloa, Jalisco...">
+    </div>
+    <div class="fl">
+      <div class="lbl">Cultivo</div>
+      <input type="text" id="cultivo" placeholder="ej. jitomate, pepino...">
+    </div>
+    <div class="fl">
+      <div class="lbl">Patógeno / Enfermedad</div>
+      <input type="text" id="patogeno" placeholder="ej. botrytis, xanthomonas...">
+    </div>
+
+    <div class="sep"></div>
+
+    <div class="fl">
+      <div class="lbl">Categoría</div>
+      <div class="cat-row">
+        <button class="cat-pill active" data-cat="virus" onclick="setCat('virus')">🦠 Virus</button>
+        <button class="cat-pill" data-cat="bacteria" onclick="setCat('bacteria')">🔬 Bacterias</button>
+        <button class="cat-pill" data-cat="hongo" onclick="setCat('hongo')">🍄 Hongos</button>
+      </div>
+    </div>
+
+    <div class="fl">
+      <div class="lbl">Texto base <span id="tplCount" style="color:var(--muted2)"></span></div>
+      <div class="tpl-scroll" id="tplList">
+        <div class="tpl-empty">Cargando textos...</div>
+      </div>
+    </div>
+
+    <div class="sep"></div>
+
+    <div class="fl">
+      <div class="lbl">Imagen base</div>
+      <div class="upload-zone" id="uploadZone">
+        <input type="file" accept="image/*" id="imgInput">
+        <div class="upload-icon">🖼️</div>
+        <p><strong>Arrastra la imagen aquí</strong><br>o haz clic para seleccionar</p>
+      </div>
+    </div>
+
+    <div class="fl">
+      <div class="lbl">Posición del texto</div>
+      <select id="txtPos">
+        <option value="top">Arriba</option>
+        <option value="center" selected>Centro</option>
+        <option value="bottom">Abajo</option>
+      </select>
+    </div>
+
+    <div class="controls-grid">
+      <div class="fl">
+        <div class="lbl">Color texto</div>
+        <div class="color-row">
+          <input type="color" id="txtColor" value="#FFFFFF">
+          <span id="txtColorVal">#FFFFFF</span>
+        </div>
+      </div>
+      <div class="fl">
+        <div class="lbl">Color sombra</div>
+        <div class="color-row">
+          <input type="color" id="shadowColor" value="#000000">
+          <span id="shadowColorVal">#000000</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="range-row fl">
+      <div class="range-header">
+        <div class="lbl">Tamaño de fuente</div>
+        <div class="range-val" id="fontSizeVal">48px</div>
+      </div>
+      <input type="range" id="fontSize" min="18" max="120" value="48">
+    </div>
+
+    <div class="range-row fl">
+      <div class="range-header">
+        <div class="lbl">Fondo del texto</div>
+        <div class="range-val" id="bgOpacityVal">0%</div>
+      </div>
+      <input type="range" id="bgOpacity" min="0" max="100" value="0">
+    </div>
+
+    <div class="err" id="errBox"></div>
+
+    <button class="btn-gen" id="btnGen" onclick="generate()" disabled>
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+        <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>
+      </svg>
+      Generar anuncio
+    </button>
+
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main">
+
+    <div class="canvas-wrap" id="canvasWrap">
+      <div class="canvas-placeholder" id="placeholder">
+        <svg width="56" height="56" viewBox="0 0 56 56" fill="none">
+          <rect x="6" y="10" width="44" height="36" rx="4" stroke="#333" stroke-width="1.5"/>
+          <circle cx="19" cy="23" r="5" stroke="#333" stroke-width="1.5"/>
+          <path d="M6 38l13-10 9 8 7-6 13 8" stroke="#333" stroke-width="1.5" stroke-linejoin="round"/>
+        </svg>
+        <p>Sube una imagen base<br>y selecciona un texto para comenzar</p>
+      </div>
+      <canvas id="cvs"></canvas>
+    </div>
+
+    <div class="variants-bar" id="variantsBar">
+      <div class="var-lbl">Variantes — clic para aplicar a la imagen</div>
+    </div>
+
+    <div class="bottom-bar">
+      <div class="copy-preview" id="copyPreview">El copy generado aparecerá aquí...</div>
+      <button class="btn-sm btn-outline" id="btnCopyTxt" onclick="copyText()" disabled>
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <rect x="9" y="9" width="13" height="13" rx="2"/>
+          <path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/>
+        </svg>
+        Copiar texto
+      </button>
+      <button class="btn-sm btn-solid" id="btnDl" onclick="download()" disabled>
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/>
+        </svg>
+        Descargar imagen
+      </button>
+    </div>
+
+  </main>
+</div>
+
+<script>
+// ── CONFIG ────────────────────────────────────────────────────────────────────
+const CLAUDE_API_KEY = window.__ENV__?.CLAUDE_API_KEY || '';
+const EXCEL_URL      = window.__ENV__?.EXCEL_URL      || '';
+
+// ── STATE ─────────────────────────────────────────────────────────────────────
+let texts    = { virus: [], bacteria: [], hongo: [] };
+let cat      = 'virus';
+let selIdx   = null;
+let baseImg  = null;
+let mainCopy = '';
+
+const cvs = document.getElementById('cvs');
+const ctx = cvs.getContext('2d');
+
+// ── EXCEL ─────────────────────────────────────────────────────────────────────
+async function loadExcel() {
+  try {
+    if (!EXCEL_URL) {
+      texts = {
+        virus: [
+          'Si el virus ..... te está quitando la producción, prueba Agrocker antes de que empieces a perderle',
+          '¿Eres de los que cree que no existe nada para el virus .....?',
+          '¿Eres de los que arranca plantas cuando tienen virus .....?',
+          '¿Eres de los que sigue perdiendo cosecha por virus ....?',
+          '¿Qué prefieres? ¿Seguir perdiendo tu cosecha por el virus ..... o innovar a una mejor forma de producir?',
+          '¿Si eres de los que cree que no hay nada para combatir ..... ya probaste Agrocker .....?'
+        ],
+        bacteria: [
+          '¿Exportando calidad o encuarentenando tus cultivos?',
+          '¿Eres de los que cree que el ..... no tiene solución?',
+          '¿Eres de los que sigue perdiendo su cultivo por ......?',
+          'Para dejar de perder tu producción por ..... primero tienes que abrirte a producir con la más alta tecnología',
+          'Sigues perdiendo tu producción con .... porque sigues aplicando el agroquímico que ya no sirve',
+          '¿Seguro crees que no hay orgánico que pueda erradicar .....? ¿Ya probaste los nano sistémicos?',
+          'No te des por vencido con la ..... Prueba Agrocker, el primer nano sistémico verde'
+        ],
+        hongo: [
+          'No pierdas tu producción por .......',
+          '¿Cosechando mucho o sobreviviendo a ......?',
+          '¿Los agroquímicos ya dejaron de servirte vs .....? Prueba la nueva generación de nano sistémicos verdes con Agrocker',
+          '¿Solucionando la ..... o perdiendo tu producción? Mejora la forma en la que produces, prueba Agrocker',
+          'Sabías que puedes recuperar tu cultivo si tienes ....... ¿Ya probaste Agrocker?',
+          'No te des por vencido con la ..... Prueba Agrocker, el primer nano sistémico verde'
+        ]
+      };
+      renderTpls();
+      return;
+    }
+
+    const res  = await fetch(EXCEL_URL);
+    if (!res.ok) throw new Error('No se pudo cargar el archivo Excel');
+    const buf  = await res.arrayBuffer();
+    const wb   = XLSX.read(new Uint8Array(buf), { type: 'array' });
+    const ws   = wb.Sheets[wb.SheetNames[0]];
+    const rows = XLSX.utils.sheet_to_json(ws, { header: 1 });
+    const hdrs = rows[0] || [];
+
+    const colsOf = kw => hdrs.reduce((a, h, i) => {
+      if (h && h.toString().toLowerCase().includes(kw)) a.push(i);
+      return a;
+    }, []);
+
+    const extract = cols => {
+      const out = [];
+      rows.slice(2).forEach(row =>
+        cols.forEach(ci => {
+          const v = row[ci];
+          if (v && v.toString().trim().length > 10) out.push(v.toString().trim());
+        })
+      );
+      return [...new Set(out)];
+    };
+
+    texts.virus    = extract(colsOf('virus'));
+    texts.bacteria = extract([...new Set([...colsOf('bacteria'), ...colsOf('bacter')])]);
+    texts.hongo    = extract([...new Set([...colsOf('hongo'), ...colsOf('hong')])]);
+    renderTpls();
+
+  } catch (err) {
+    document.getElementById('tplList').innerHTML =
+      `<div class="tpl-empty" style="color:#f09090">${err.message}</div>`;
+  }
+}
+
+// ── CATEGORY / TEMPLATES ──────────────────────────────────────────────────────
+function setCat(c) {
+  cat = c; selIdx = null;
+  document.querySelectorAll('.cat-pill').forEach(p =>
+    p.classList.toggle('active', p.dataset.cat === c)
+  );
+  renderTpls(); checkReady();
+}
+
+function renderTpls() {
+  const list  = document.getElementById('tplList');
+  const count = document.getElementById('tplCount');
+  const items = texts[cat];
+  if (!items?.length) {
+    list.innerHTML = '<div class="tpl-empty">Sin textos en esta categoría</div>';
+    count.textContent = ''; return;
+  }
+  count.textContent = `(${items.length})`;
+  list.innerHTML = '';
+  items.forEach((t, i) => {
+    const el = document.createElement('div');
+    el.className = 'tpl-item' + (i === selIdx ? ' active' : '');
+    el.textContent = t;
+    el.onclick = () => { selIdx = i; renderTpls(); checkReady(); };
+    list.appendChild(el);
+  });
+}
+
+function checkReady() {
+  document.getElementById('btnGen').disabled = selIdx === null;
+}
+
+// ── IMAGE UPLOAD ──────────────────────────────────────────────────────────────
+document.getElementById('imgInput').addEventListener('change', e => loadImg(e.target.files[0]));
+const uz = document.getElementById('uploadZone');
+uz.addEventListener('dragover', e => e.preventDefault());
+uz.addEventListener('drop', e => { e.preventDefault(); loadImg(e.dataTransfer.files[0]); });
+
+function loadImg(file) {
+  if (!file) return;
+  const img = new Image();
+  img.onload = () => {
+    baseImg = img;
+    uz.classList.add('has-img');
+    uz.querySelector('.upload-icon').textContent = '✅';
+    uz.querySelector('p').innerHTML = `<strong>${file.name}</strong>`;
+    if (mainCopy) drawCanvas(mainCopy);
+    else drawCanvas('');
+  };
+  img.src = URL.createObjectURL(file);
+}
+
+// ── CANVAS ────────────────────────────────────────────────────────────────────
+function drawCanvas(text) {
+  if (!baseImg) return;
+
+  const W = baseImg.naturalWidth;
+  const H = baseImg.naturalHeight;
+  cvs.width  = W;
+  cvs.height = H;
+  ctx.clearRect(0, 0, W, H);
+  ctx.drawImage(baseImg, 0, 0, W, H);
+
+  if (text) {
+    const fontSize  = parseInt(document.getElementById('fontSize').value);
+    const color     = document.getElementById('txtColor').value;
+    const shadow    = document.getElementById('shadowColor').value;
+    const bgOpacity = parseInt(document.getElementById('bgOpacity').value) / 100;
+    const pos       = document.getElementById('txtPos').value;
+
+    ctx.font = `bold ${fontSize}px Syne, sans-serif`;
+    ctx.textAlign    = 'center';
+    ctx.textBaseline = 'middle';
+
+    const maxW  = W * 0.82;
+    const lines = wrapText(ctx, text, maxW);
+    const lineH = fontSize * 1.4;
+    const blockH = lines.length * lineH;
+
+    const centerY = pos === 'top'    ? H * 0.18
+                  : pos === 'bottom' ? H * 0.82
+                  : H * 0.5;
+
+    if (bgOpacity > 0) {
+      const pad = fontSize * 0.55;
+      ctx.fillStyle = `rgba(0,0,0,${bgOpacity})`;
+      roundRect(ctx, W/2 - maxW/2 - pad, centerY - blockH/2 - pad, maxW + pad*2, blockH + pad*2, 14);
+      ctx.fill();
+    }
+
+    ctx.shadowColor   = shadow;
+    ctx.shadowBlur    = fontSize * 0.45;
+    ctx.shadowOffsetX = 0;
+    ctx.shadowOffsetY = fontSize * 0.05;
+    ctx.fillStyle = color;
+
+    lines.forEach((line, i) => {
+      const y = centerY - blockH/2 + i * lineH + lineH/2;
+      ctx.fillText(line, W/2, y);
+    });
+
+    ctx.shadowColor = 'transparent';
+    ctx.shadowBlur  = 0;
+  }
+
+  document.getElementById('placeholder').style.display = 'none';
+  cvs.style.display = 'block';
+  document.getElementById('btnDl').disabled = false;
+}
+
+function wrapText(ctx, text, maxW) {
+  const words = text.split(' ');
+  const lines = []; let cur = '';
+  for (const w of words) {
+    const test = cur ? cur + ' ' + w : w;
+    if (ctx.measureText(test).width > maxW && cur) { lines.push(cur); cur = w; }
+    else cur = test;
+  }
+  if (cur) lines.push(cur);
+  return lines;
+}
+
+function roundRect(ctx, x, y, w, h, r) {
+  ctx.beginPath();
+  ctx.moveTo(x+r, y);
+  ctx.lineTo(x+w-r, y);  ctx.quadraticCurveTo(x+w, y, x+w, y+r);
+  ctx.lineTo(x+w, y+h-r); ctx.quadraticCurveTo(x+w, y+h, x+w-r, y+h);
+  ctx.lineTo(x+r, y+h);  ctx.quadraticCurveTo(x, y+h, x, y+h-r);
+  ctx.lineTo(x, y+r);    ctx.quadraticCurveTo(x, y, x+r, y);
+  ctx.closePath();
+}
+
+// Redraw en tiempo real
+['txtPos','txtColor','shadowColor','fontSize','bgOpacity'].forEach(id => {
+  document.getElementById(id).addEventListener('input', () => {
+    const v = document.getElementById(id).value;
+    if (id === 'fontSize')    document.getElementById('fontSizeVal').textContent  = v + 'px';
+    if (id === 'bgOpacity')   document.getElementById('bgOpacityVal').textContent = v + '%';
+    if (id === 'txtColor')    document.getElementById('txtColorVal').textContent  = v;
+    if (id === 'shadowColor') document.getElementById('shadowColorVal').textContent = v;
+    if (mainCopy && baseImg) drawCanvas(mainCopy);
+  });
+});
+
+// ── GENERATE ──────────────────────────────────────────────────────────────────
+async function generate() {
+  const estado  = document.getElementById('estado').value.trim()   || 'el estado';
+  const cultivo = document.getElementById('cultivo').value.trim()  || 'el cultivo';
+  const patog   = document.getElementById('patogeno').value.trim() || 'el patógeno';
+  const base    = texts[cat][selIdx];
+
+  hideErr(); setLoading(true);
+
+  const prompt = `Eres experto en marketing agrícola para México. Creas copies para Agrocker, nano sistémicos verdes de Agrobotanix que combaten ${cat}.
+
+DATOS:
+- Estado: ${estado}
+- Cultivo: ${cultivo}
+- Patógeno: ${patog}
+- Tipo: ${cat}
+- Texto base: "${base}"
+
+INSTRUCCIONES:
+1. Los "...." en el texto base son marcadores — reemplázalos con el patógeno o cultivo.
+2. Copy principal: impactante, directo, honesto. Tono de agrónomo que conoce el campo mexicano.
+3. 2 variantes con diferente ángulo emocional.
+4. Menciona "Agrocker" o "nano sistémico verde" cuando sea natural.
+5. Máximo 2 líneas por copy. Sin hashtags ni emojis.
+
+JSON sin texto extra ni backticks:
+{"principal":"...","variante1":"...","variante2":"..."}`;
+
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': CLAUDE_API_KEY,
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-direct-browser-access': 'true'
+      },
+      body: JSON.stringify({
+        model: 'claude-opus-4-5',
+        max_tokens: 500,
+        messages: [{ role: 'user', content: prompt }]
+      })
+    });
+
+    if (!res.ok) {
+      const e = await res.json().catch(() => ({}));
+      throw new Error(e.error?.message || `HTTP ${res.status}`);
+    }
+
+    const data = await res.json();
+    let raw = data.content.map(b => b.text || '').join('').replace(/```json|```/g, '').trim();
+    const out = JSON.parse(raw);
+
+    mainCopy = out.principal;
+
+    // Preview en bottom bar
+    const prev = document.getElementById('copyPreview');
+    prev.textContent = mainCopy;
+    prev.classList.add('has');
+
+    // Habilitar botones
+    document.getElementById('btnCopyTxt').disabled = false;
+
+    // Dibujar en canvas
+    if (baseImg) drawCanvas(mainCopy);
+
+    // Variantes
+    renderVariants([out.variante1, out.variante2].filter(Boolean));
+
+  } catch (err) {
+    showErr('Error al generar: ' + err.message);
+  } finally {
+    setLoading(false);
+  }
+}
+
+// ── VARIANTS ──────────────────────────────────────────────────────────────────
+function renderVariants(vars) {
+  const bar = document.getElementById('variantsBar');
+  while (bar.children.length > 1) bar.removeChild(bar.lastChild);
+
+  vars.forEach(v => {
+    const chip = document.createElement('div');
+    chip.className = 'var-chip';
+    chip.title = v;
+    chip.textContent = v.length > 70 ? v.slice(0, 68) + '…' : v;
+    chip.onclick = () => {
+      mainCopy = v;
+      document.getElementById('copyPreview').textContent = v;
+      if (baseImg) drawCanvas(v);
+      document.querySelectorAll('.var-chip').forEach(c => c.classList.remove('applied'));
+      chip.classList.add('applied');
+    };
+    bar.appendChild(chip);
+  });
+
+  bar.classList.add('show');
+}
+
+// ── UTILS ─────────────────────────────────────────────────────────────────────
+function setLoading(on) {
+  const btn = document.getElementById('btnGen');
+  if (on) {
+    btn.disabled = true;
+    btn.innerHTML = '<div class="spin"></div> Generando...';
+    document.getElementById('statusTxt').textContent = 'Generando...';
+  } else {
+    btn.disabled = selIdx === null;
+    btn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg> Generar anuncio`;
+    document.getElementById('statusTxt').textContent = 'Listo';
+  }
+}
+
+function download() {
+  if (!baseImg) return;
+  const a = document.createElement('a');
+  a.download = `agrocker-${Date.now()}.png`;
+  a.href = cvs.toDataURL('image/png');
+  a.click();
+}
+
+function copyText() {
+  if (!mainCopy) return;
+  navigator.clipboard.writeText(mainCopy).catch(() => {});
+  const btn = document.getElementById('btnCopyTxt');
+  btn.textContent = '✓ Copiado';
+  setTimeout(() => {
+    btn.innerHTML = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <rect x="9" y="9" width="13" height="13" rx="2"/>
+      <path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/>
+    </svg> Copiar texto`;
+  }, 1500);
+}
+
+function showErr(msg) { const e = document.getElementById('errBox'); e.textContent = msg; e.classList.add('show'); }
+function hideErr() { document.getElementById('errBox').classList.remove('show'); }
+
+// ── INIT ──────────────────────────────────────────────────────────────────────
+loadExcel();
+</script>
+</body>
+</html>
