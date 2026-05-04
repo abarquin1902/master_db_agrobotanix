@@ -1,0 +1,975 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Propuesta Técnica & Costos — Plataforma IA Generativa</title>
+<link href="https://fonts.googleapis.com/css2?family=Styrene+A:wght@400;500;600&family=Styrene+B:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Söhne:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;450;500;600;700&family=Source+Serif+4:ital,wght@0,300;0,400;0,600;1,300;1,400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #ffffff;
+    --surface: #f9f9f8;
+    --surface2: #f1f0ee;
+    --border: #e5e4e0;
+    --border2: #d4d3cf;
+    --accent: #d97706;
+    --accent2: #7c3aed;
+    --accent3: #dc2626;
+    --text: #1a1a18;
+    --text2: #3d3d3a;
+    --muted: #78786e;
+    --green: #16a34a;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    font-size: 15px;
+    line-height: 1.65;
+    overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .container {
+    max-width: 1060px;
+    margin: 0 auto;
+    padding: 0 40px;
+  }
+
+  /* HEADER */
+  header {
+    padding: 72px 0 56px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .tag {
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.12em;
+    color: var(--muted);
+    text-transform: uppercase;
+    margin-bottom: 20px;
+  }
+
+  h1 {
+    font-family: 'Source Serif 4', 'Georgia', serif;
+    font-size: clamp(32px, 5vw, 56px);
+    font-weight: 300;
+    line-height: 1.1;
+    letter-spacing: -0.01em;
+    color: var(--text);
+    margin-bottom: 8px;
+  }
+
+  h1 em {
+    font-style: italic;
+    color: var(--text2);
+  }
+
+  .header-sub {
+    font-size: 15px;
+    color: var(--muted);
+    margin-top: 16px;
+    max-width: 520px;
+    line-height: 1.6;
+  }
+
+  .header-pills {
+    margin-top: 28px;
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+
+  .pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 100px;
+    padding: 5px 14px;
+    font-size: 12px;
+    color: var(--text2);
+    font-weight: 450;
+  }
+
+  .pill-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--accent);
+    flex-shrink: 0;
+  }
+
+  /* SECTION */
+  section {
+    padding: 60px 0;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .section-label {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    color: var(--muted);
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+
+  h2 {
+    font-family: 'Source Serif 4', 'Georgia', serif;
+    font-size: clamp(20px, 2.5vw, 28px);
+    font-weight: 400;
+    letter-spacing: -0.01em;
+    color: var(--text);
+    margin-bottom: 28px;
+  }
+
+  h3 {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 8px;
+    letter-spacing: -0.01em;
+  }
+
+  p {
+    color: var(--text2);
+    font-size: 14px;
+    line-height: 1.65;
+  }
+
+  /* CARDS */
+  .cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 1px;
+    background: var(--border);
+    border: 1px solid var(--border);
+    margin-top: 20px;
+  }
+
+  .card {
+    background: var(--bg);
+    padding: 24px 24px 28px;
+    transition: background 0.2s;
+  }
+
+  .card:hover { background: var(--surface); }
+
+  .card-icon {
+    font-size: 20px;
+    margin-bottom: 14px;
+    display: block;
+    line-height: 1;
+  }
+
+  .card h3 { font-size: 13px; font-weight: 600; margin-bottom: 6px; }
+  .card p { font-size: 12.5px; color: var(--muted); line-height: 1.55; }
+
+  .price-tag {
+    display: block;
+    margin-top: 16px;
+    font-family: 'Source Serif 4', serif;
+    font-size: 22px;
+    font-weight: 600;
+    color: var(--text);
+    letter-spacing: -0.02em;
+  }
+
+  .price-sub {
+    font-size: 11.5px;
+    color: var(--muted);
+    margin-top: 3px;
+    display: block;
+    line-height: 1.4;
+  }
+
+  /* NOTA / INFO BOX */
+  .info-box {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--accent2);
+    padding: 18px 22px;
+    margin: 20px 0;
+    font-size: 13.5px;
+    color: var(--text2);
+    line-height: 1.65;
+  }
+
+  .info-box strong { color: var(--text); font-weight: 600; }
+
+  .nota {
+    font-size: 12.5px;
+    color: var(--muted);
+    border-left: 2px solid var(--border2);
+    padding-left: 14px;
+    margin-top: 16px;
+    line-height: 1.6;
+  }
+
+  /* BAR CHART */
+  .bar-section {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: 24px 28px;
+    margin-top: 28px;
+  }
+
+  .bar-title {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text2);
+    margin-bottom: 20px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+
+  .bar-row {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 14px;
+  }
+
+  .bar-label {
+    width: 150px;
+    font-size: 12px;
+    color: var(--muted);
+    flex-shrink: 0;
+  }
+
+  .bar-track {
+    flex: 1;
+    height: 6px;
+    background: var(--border);
+    position: relative;
+    border-radius: 2px;
+  }
+
+  .bar-fill {
+    height: 100%;
+    border-radius: 2px;
+  }
+
+  .bar-fill-gpt    { background: var(--accent3); width: 100%; }
+  .bar-fill-nano   { background: var(--accent2); width: 6.67%; }
+  .bar-fill-fine   { background: var(--green); width: 2%; }
+
+  .bar-val {
+    font-size: 12.5px;
+    font-weight: 600;
+    color: var(--text);
+    width: 80px;
+    text-align: right;
+    flex-shrink: 0;
+  }
+
+  /* VM GRID */
+  .vm-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-top: 24px;
+  }
+
+  @media (max-width: 680px) {
+    .vm-grid { grid-template-columns: 1fr; }
+    .container { padding: 0 20px; }
+    .header-pills { flex-direction: column; }
+    .summary-grid { grid-template-columns: 1fr; }
+  }
+
+  .vm-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: 24px;
+    position: relative;
+  }
+
+  .vm-card.recommended { border-color: var(--text); }
+
+  .vm-rec-badge {
+    position: absolute;
+    top: -1px; right: 18px;
+    font-size: 9.5px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    color: var(--bg);
+    background: var(--text);
+    padding: 3px 10px;
+    transform: translateY(-50%);
+    text-transform: uppercase;
+  }
+
+  .vm-card h3 { font-size: 15px; font-weight: 600; margin-bottom: 2px; }
+  .vm-sub { font-size: 12px; color: var(--muted); margin-bottom: 14px; }
+
+  .vm-price {
+    font-family: 'Source Serif 4', serif;
+    font-size: 30px;
+    font-weight: 600;
+    color: var(--text);
+    letter-spacing: -0.03em;
+    margin-bottom: 14px;
+    line-height: 1;
+  }
+
+  .vm-spec {
+    font-size: 12px;
+    color: var(--muted);
+    margin: 4px 0;
+    line-height: 1.4;
+  }
+
+  .vm-total {
+    margin-top: 16px;
+    padding-top: 16px;
+    border-top: 1px solid var(--border);
+    font-size: 12.5px;
+    color: var(--text2);
+    line-height: 1.5;
+  }
+
+  .vm-total strong { color: var(--text); font-weight: 600; }
+
+  /* COMPARE TABLE */
+  .compare-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+    margin-top: 20px;
+  }
+
+  .compare-table th {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--muted);
+    padding: 10px 16px;
+    text-align: left;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface);
+  }
+
+  .compare-table td {
+    padding: 13px 16px;
+    border-bottom: 1px solid var(--border);
+    color: var(--text2);
+    vertical-align: middle;
+  }
+
+  .compare-table tr:hover td { background: var(--surface); }
+  .compare-table td:first-child { color: var(--text); font-weight: 500; }
+
+  .badge {
+    display: inline-block;
+    padding: 2px 9px;
+    font-size: 10.5px;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    border-radius: 3px;
+    text-transform: uppercase;
+  }
+
+  .badge-green  { background: #dcfce7; color: #15803d; }
+  .badge-purple { background: #ede9fe; color: #6d28d9; }
+  .badge-amber  { background: #fef3c7; color: #b45309; }
+  .badge-gray   { background: var(--surface2); color: var(--muted); }
+
+  /* BD FEATURES */
+  .bd-features {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1px;
+    background: var(--border);
+    border: 1px solid var(--border);
+    margin-top: 20px;
+  }
+
+  .bd-feature {
+    background: var(--bg);
+    padding: 22px 20px;
+  }
+
+  .bd-feature .feature-num {
+    font-family: 'Source Serif 4', serif;
+    font-size: 28px;
+    font-weight: 300;
+    color: var(--border2);
+    line-height: 1;
+    margin-bottom: 10px;
+  }
+
+  .bd-feature h4 { font-size: 13px; font-weight: 600; margin-bottom: 5px; color: var(--text); }
+  .bd-feature p  { font-size: 12px; color: var(--muted); line-height: 1.5; }
+
+  /* TIMELINE */
+  .timeline { margin-top: 28px; position: relative; }
+
+  .timeline::before {
+    content: '';
+    position: absolute;
+    left: 7px; top: 8px; bottom: 8px;
+    width: 1px;
+    background: var(--border2);
+  }
+
+  .timeline-item {
+    display: flex;
+    gap: 28px;
+    margin-bottom: 24px;
+    padding-left: 32px;
+    position: relative;
+  }
+
+  .timeline-dot {
+    position: absolute;
+    left: 2px; top: 7px;
+    width: 11px; height: 11px;
+    border: 2px solid var(--border2);
+    background: var(--bg);
+    border-radius: 50%;
+    transition: border-color 0.2s;
+  }
+
+  .timeline-item:hover .timeline-dot { border-color: var(--text); }
+
+  .timeline-content {
+    flex: 1;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: 18px 22px;
+    transition: border-color 0.2s;
+  }
+
+  .timeline-item:hover .timeline-content { border-color: var(--border2); }
+
+  .timeline-period {
+    font-size: 10.5px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 5px;
+  }
+
+  .timeline-content h3 { font-size: 14px; font-weight: 600; margin-bottom: 10px; }
+
+  .timeline-tasks { list-style: none; }
+
+  .timeline-tasks li {
+    font-size: 12.5px;
+    color: var(--muted);
+    padding: 3px 0 3px 16px;
+    position: relative;
+    line-height: 1.5;
+  }
+
+  .timeline-tasks li::before {
+    content: '–';
+    position: absolute;
+    left: 0;
+    color: var(--border2);
+  }
+
+  /* SUMMARY MONTHLY */
+  .summary-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1px;
+    background: var(--border);
+    border: 1px solid var(--border);
+    margin-top: 28px;
+  }
+
+  .summary-cell {
+    background: var(--bg);
+    padding: 24px 22px;
+  }
+
+  .summary-cell .s-label {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 10px;
+    display: block;
+  }
+
+  .summary-cell .s-amount {
+    font-family: 'Source Serif 4', serif;
+    font-size: 28px;
+    font-weight: 600;
+    color: var(--text);
+    letter-spacing: -0.02em;
+    display: block;
+    line-height: 1;
+  }
+
+  .summary-cell .s-note {
+    font-size: 11.5px;
+    color: var(--muted);
+    margin-top: 6px;
+    display: block;
+    line-height: 1.4;
+  }
+
+  .total-row {
+    background: var(--text);
+    color: var(--bg);
+    padding: 24px 28px;
+    margin-top: 1px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 16px;
+  }
+
+  .total-row .t-label {
+    font-size: 13px;
+    font-weight: 500;
+    opacity: 0.7;
+  }
+
+  .total-row .t-note {
+    font-size: 11.5px;
+    opacity: 0.5;
+    margin-top: 4px;
+  }
+
+  .total-row .t-amount {
+    font-family: 'Source Serif 4', serif;
+    font-size: 36px;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    line-height: 1;
+  }
+
+  .divider {
+    height: 1px;
+    background: var(--border);
+    margin: 24px 0;
+  }
+
+  footer {
+    padding: 36px 0 48px;
+    text-align: center;
+  }
+
+  .q-box {
+    background: #fffbeb;
+    border: 1px solid #fde68a;
+    border-left: 3px solid var(--accent);
+    padding: 16px 20px;
+    margin: 20px 0;
+    font-size: 13.5px;
+    color: var(--text2);
+    line-height: 1.65;
+  }
+
+  .q-box strong { color: var(--text); }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <!-- HEADER -->
+  <header>
+    <div class="tag">Propuesta Técnica — Mayo 2026</div>
+    <h1>Infraestructura & Costos<br><em>Plataforma IA Generativa</em></h1>
+    <p class="header-sub">Propuesta de operación actual, plan de fine-tuning con LoRA sobre SDXL 1.0, base de datos maestra multimedia y cronograma de 3.5 meses.</p>
+    <div class="header-pills">
+      <span class="pill"><span class="pill-dot"></span>Duración: 3.5 meses</span>
+      <span class="pill"><span class="pill-dot"></span>Modelo base: SDXL 1.0</span>
+      <span class="pill"><span class="pill-dot"></span>Volumen: 200–300 imgs/mes</span>
+    </div>
+  </header>
+
+  <!-- SECCIÓN 1: ESTADO ACTUAL -->
+  <section>
+    <div class="section-label">01 — Estado Actual</div>
+    <h2>Costos Operativos — Solo APIs</h2>
+
+    <div class="cards">
+      <div class="card">
+        <span class="card-icon">⚙️</span>
+        <h3>Render — Backend API</h3>
+        <p>Hosting del backend principal. Plan Standard con RAM suficiente para carga moderada.</p>
+        <span class="price-tag">$25 USD</span>
+        <span class="price-sub">por mes</span>
+      </div>
+
+      <div class="card">
+        <span class="card-icon">🗄️</span>
+        <h3>Supabase Pro — BD + Storage</h3>
+        <p>Base de datos PostgreSQL + almacenamiento de media. Plan Pro incluye 100 GB de storage.</p>
+        <span class="price-tag">$25 USD</span>
+        <span class="price-sub">por mes</span>
+      </div>
+
+      <div class="card">
+        <span class="card-icon">🤖</span>
+        <h3>GPT vía API <span style="font-weight:400; color:var(--muted)">(sin fine-tune)</span></h3>
+        <p>Generación de imágenes con calidad alta. Se consume directamente vía API de OpenAI, sin modelo propio.</p>
+        <span class="price-tag">$3.00 MXN</span>
+        <span class="price-sub">por imagen · 300 imgs/mes = $900 MXN/mes</span>
+      </div>
+
+      <div class="card">
+        <span class="card-icon">🍌</span>
+        <h3>NanoBanana 2 vía OpenRouter <span style="font-weight:400; color:var(--muted)">(sin fine-tune)</span></h3>
+        <p>Modelo open source consumido directamente vía API de OpenRouter. Sin modelo propio, sin fine-tuning.</p>
+        <span class="price-tag">$0.20 MXN</span>
+        <span class="price-sub">por imagen · 300 imgs/mes = $60 MXN/mes</span>
+      </div>
+    </div>
+
+    <div class="bar-section">
+      <div class="bar-title">Costo comparativo por 300 imágenes / mes</div>
+      <div class="bar-row">
+        <span class="bar-label">GPT (sin fine-tune)</span>
+        <div class="bar-track"><div class="bar-fill bar-fill-gpt"></div></div>
+        <span class="bar-val">$900 MXN</span>
+      </div>
+      <div class="bar-row">
+        <span class="bar-label">NanoBanana 2 (sin fine-tune)</span>
+        <div class="bar-track"><div class="bar-fill bar-fill-nano"></div></div>
+        <span class="bar-val">$60 MXN</span>
+      </div>
+      <div class="bar-row">
+        <span class="bar-label">Modelo fine-tuned</span>
+        <div class="bar-track"><div class="bar-fill bar-fill-fine"></div></div>
+        <span class="bar-val">~$18 MXN*</span>
+      </div>
+      <p class="nota" style="margin-top:14px;">*Estimado post fine-tuning con inferencia propia en RunPod serverless. El ahorro en APIs de LLMs es el primer beneficio tangible tras el fine-tuning.</p>
+    </div>
+  </section>
+
+  <!-- SECCIÓN 2: PROPUESTA FINE-TUNING -->
+  <section>
+    <div class="section-label">02 — Propuesta de Fine-Tuning</div>
+    <h2>Entrenamiento LoRA sobre SDXL 1.0</h2>
+
+    <div class="info-box">
+      El modelo base propuesto es <strong>stabilityai/stable-diffusion-xl-base-1.0</strong> — el modelo open source con más descargas en HuggingFace. Usar LoRA (Low-Rank Adaptation) permite adaptar el modelo a un estilo visual propio con pesos ligeros (~200–500 MB), sin reentrenar todo el modelo desde cero. Esto reduce el costo de entrenamiento y, a escala, también el de inferencia.
+    </div>
+
+    <div class="cards">
+      <div class="card">
+        <span class="card-icon">✅</span>
+        <h3>Por qué SDXL + LoRA</h3>
+        <p>Es el modelo open source más descargado en HuggingFace. Herramientas maduras como kohya_ss y diffusers, documentación amplia y comunidad activa.</p>
+      </div>
+      <div class="card">
+        <span class="card-icon">⚠️</span>
+        <h3>Requisito de VRAM</h3>
+        <p>SDXL requiere mínimo <strong>24 GB de VRAM</strong>. La RTX 4090 es la GPU más costo-eficiente que cubre este requerimiento.</p>
+      </div>
+      <div class="card">
+        <span class="card-icon">📈</span>
+        <h3>¿Cuándo se ve el ahorro?</h3>
+        <p>Con 200–300 imgs/mes el principal beneficio es el <strong>control de estilo</strong>. El ahorro en gasto es visible a partir de <strong>~1,500 generaciones/mes</strong>, donde la diferencia vs APIs externas se vuelve sustancial.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- SECCIÓN 3: VM -->
+  <section>
+    <div class="section-label">03 — Máquina Virtual GPU</div>
+    <h2>Opciones de Renta para Entrenamiento</h2>
+
+    <p style="color:var(--muted); font-size:13px; margin-bottom:4px;">Contemplar cambios menores en la tarifa por mes.</p>
+
+    <div class="vm-grid">
+      <div class="vm-card recommended">
+        <div class="vm-rec-badge">Recomendado</div>
+        <h3>RTX 4090 — Community Cloud</h3>
+        <div class="vm-sub">24 GB VRAM · RunPod</div>
+        <div class="vm-price">$1.36 USD/hr</div>
+        <div class="vm-spec">✓ 24 GB VRAM — suficiente para SDXL</div>
+        <div class="vm-spec">✓ Pago por milisegundo</div>
+        <div class="vm-spec">✓ Opción más costo-eficiente</div>
+        <div class="vm-spec">⚠ Puede tener interrupciones ocasionales</div>
+        <div class="vm-total">
+          Estimado 40–60 hrs (2 rondas de entrenamiento):<br>
+          <strong>$54 – $82 USD total (con margen ×4)</strong>
+        </div>
+      </div>
+
+      <div class="vm-card">
+        <h3>RTX 4090 — Secure Cloud</h3>
+        <div class="vm-sub">24 GB VRAM · RunPod</div>
+        <div class="vm-price">$2.36 USD/hr</div>
+        <div class="vm-spec">✓ 24 GB VRAM</div>
+        <div class="vm-spec">✓ Sin interrupciones, mayor estabilidad</div>
+        <div class="vm-spec">✓ Ideal si el dataset es sensible</div>
+        <div class="vm-spec">✓ Pago por milisegundo</div>
+        <div class="vm-total">
+          Estimado 40–60 hrs (2 rondas de entrenamiento):<br>
+          <strong>$94 – $142 USD total (con margen ×4)</strong>
+        </div>
+      </div>
+    </div>
+
+    <p class="nota" style="margin-top:20px;">Se recomienda consultar runpod.io antes de iniciar el entrenamiento para confirmar disponibilidad y precio vigente.</p>
+  </section>
+
+  <!-- SECCIÓN 4: INFERENCIA -->
+  <section>
+    <div class="section-label">04 — Inferencia Post Fine-Tune</div>
+    <h2>Costo de Producción del Modelo Propio</h2>
+
+    <div class="q-box">
+      <strong>¿Una vez que el modelo está en RunPod, desde ahí se consulta? ¿Dejamos de usar Render (nuestro servidor principal)?</strong><br>
+      No. RunPod corre el modelo de imagen (la inferencia de generación), pero el backend en Render sigue siendo necesario: es quien recibe las peticiones del usuario, orquesta la llamada a RunPod, maneja autenticación, lógica de negocio y responde al frontend. Render y RunPod trabajan juntos. <strong>El ahorro inicial no es en Render, sino en el costo por imagen al dejar de depender de APIs de LLMs externas</strong> como GPT o NanoBanana 2 vía OpenRouter.
+    </div>
+
+    <div class="cards">
+      <div class="card">
+        <span class="card-icon">⚡</span>
+        <h3>RunPod Serverless</h3>
+        <p>Inferencia bajo demanda. Se paga solo cuando se genera una imagen. Ideal para volúmenes bajos-medios.</p>
+        <span class="price-tag">~$0.005–0.01 USD</span>
+        <span class="price-sub">por imagen · ≈ $0.09–0.18 MXN/imagen</span>
+      </div>
+      <div class="card">
+        <span class="card-icon">🔄</span>
+        <h3>Replicate</h3>
+        <p>Deploy del modelo LoRA con endpoint HTTP. Se integra con el backend en Render. <strong>Render sigue siendo necesario</strong> — el ahorro es en APIs de generación, no en infraestructura.</p>
+        <span class="price-tag">~$0.0023 USD/seg</span>
+        <span class="price-sub">de GPU · ~$0.01 USD/imagen generada</span>
+      </div>
+      <div class="card">
+        <span class="card-icon">💾</span>
+        <h3>Pesos del Modelo (Storage)</h3>
+        <p>Los pesos LoRA son ligeros (~200–500 MB). HuggingFace privado gratis hasta 5 GB, o Supabase Storage incluido en Plan Pro.</p>
+        <span class="price-tag">$0 – $5 USD</span>
+        <span class="price-sub">total · HuggingFace gratis hasta 5 GB</span>
+      </div>
+    </div>
+
+    <div class="info-box" style="border-left-color: var(--green); margin-top:20px;">
+      El Plan Pro de Supabase (<strong>$25 USD/mes</strong>) es necesario para soportar el volumen de media generada (catálogo de imágenes, estilos, pesos auxiliares). El plan gratuito solo incluye 1 GB de storage, insuficiente para producción.
+    </div>
+  </section>
+
+  <!-- SECCIÓN 5: BD MAESTRA -->
+  <section>
+    <div class="section-label">05 — Base de Datos Maestra</div>
+    <h2>BD Multimedia con Catálogos y Estilos</h2>
+
+    <p style="font-size:13.5px; color:var(--muted); max-width:580px; margin-bottom:16px;">Construida sobre Supabase (PostgreSQL + Storage). Centraliza todos los activos visuales, estilos y metadatos del sistema generativo. Incluida en el Plan Pro ya contemplado.</p>
+
+    <div class="bd-features">
+      <div class="bd-feature">
+        <div class="feature-num">01</div>
+        <h4>Catálogos Fijos</h4>
+        <p>Referencias visuales inmutables. Prompts base por categoría. Tags semánticos normalizados.</p>
+      </div>
+      <div class="bd-feature">
+        <div class="feature-num">02</div>
+        <h4>Estilos & Paletas</h4>
+        <p>Mapeo de estilos a pesos LoRA. Paletas de color asociadas. Ejemplos visuales por estilo.</p>
+      </div>
+      <div class="bd-feature">
+        <div class="feature-num">03</div>
+        <h4>Metadatos de Generación</h4>
+        <p>Registro por imagen: usuario, fecha, prompt, modelo, versión de pesos, tiempo de inferencia.</p>
+      </div>
+      <div class="bd-feature">
+        <div class="feature-num">04</div>
+        <h4>Versionado de Modelos</h4>
+        <p>Historial de iteraciones de fine-tuning. Comparativa de resultados entre versiones LoRA.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- SECCIÓN 6: CRONOGRAMA -->
+  <section>
+    <div class="section-label">06 — Cronograma</div>
+    <h2>Plan de 3.5 Meses</h2>
+
+    <div class="timeline">
+      <div class="timeline-item">
+        <div class="timeline-dot"></div>
+        <div class="timeline-content">
+          <div class="timeline-period">Mes 1 — Semanas 1–4</div>
+          <h3>Setup & Fundamentos</h3>
+          <ul class="timeline-tasks">
+            <li>Configuración de Render (backend) + Supabase Pro</li>
+            <li>Integración de APIs: GPT y NanoBanana 2 vía OpenRouter</li>
+            <li>Diseño del esquema de la BD Maestra multimedia</li>
+            <li>Primeros catálogos fijos y definición de estilos</li>
+            <li>Setup de HuggingFace privado para pesos futuros</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="timeline-item">
+        <div class="timeline-dot"></div>
+        <div class="timeline-content">
+          <div class="timeline-period">Mes 2 — Semanas 5–8</div>
+          <h3>Dataset & Preparación del Modelo</h3>
+          <ul class="timeline-tasks">
+            <li>Recolección y limpieza del dataset de imágenes de entrenamiento</li>
+            <li>Etiquetado y limpieza de datos (captions por imagen)</li>
+            <li>Setup del entorno de entrenamiento en RunPod (kohya_ss + diffusers)</li>
+            <li>Configuración de hiperparámetros LoRA para SDXL 1.0</li>
+            <li>Carga de catálogos de estilos en la BD Maestra</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="timeline-item">
+        <div class="timeline-dot"></div>
+        <div class="timeline-content">
+          <div class="timeline-period">Mes 2.5 — Semanas 9–10</div>
+          <h3>Primera Iteración de Fine-Tuning</h3>
+          <ul class="timeline-tasks">
+            <li>Entrenamiento LoRA ronda 1 en RTX 4090 (RunPod)</li>
+            <li>Evaluación de resultados y métricas visuales</li>
+            <li>Almacenamiento de pesos en HuggingFace privado</li>
+            <li>Ajuste de hiperparámetros según resultados</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="timeline-item">
+        <div class="timeline-dot"></div>
+        <div class="timeline-content">
+          <div class="timeline-period">Mes 3 — Semanas 11–12</div>
+          <h3>Segunda Iteración & Deployment</h3>
+          <ul class="timeline-tasks">
+            <li>Entrenamiento LoRA ronda 2 con ajustes de hiperparámetros</li>
+            <li>Deploy del modelo en RunPod Serverless o Replicate</li>
+            <li>Integración con el backend en Render</li>
+            <li>Pruebas de inferencia en producción</li>
+            <li>Registro de versiones en BD Maestra</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="timeline-item">
+        <div class="timeline-dot"></div>
+        <div class="timeline-content">
+          <div class="timeline-period">Mes 3.5 — Semanas 13–14</div>
+          <h3>Optimización & Entrega</h3>
+          <ul class="timeline-tasks">
+            <li>Optimización de costos de inferencia por volumen</li>
+            <li>Cierre y documentación de BD Maestra multimedia</li>
+            <li>Benchmarking: costo por imagen propio vs APIs externas</li>
+            <li>Documentación técnica y entrega final</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SECCIÓN 7: COSTOS MENSUALES -->
+  <section>
+    <div class="section-label">07 — Resumen Financiero</div>
+    <h2>Costos Mensuales en Operación</h2>
+
+    <table class="compare-table">
+      <thead>
+        <tr>
+          <th>Concepto</th>
+          <th>Frecuencia</th>
+          <th>Costo mensual</th>
+          <th>Estado</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Render — Backend API</td>
+          <td>Fijo mensual</td>
+          <td>$25 USD/mes</td>
+          <td><span class="badge badge-green">OPERATIVO</span></td>
+        </tr>
+        <tr>
+          <td>Supabase Pro (BD + Storage + Media)</td>
+          <td>Fijo mensual</td>
+          <td>$25 USD/mes</td>
+          <td><span class="badge badge-green">OPERATIVO</span></td>
+        </tr>
+        <tr>
+          <td>Inferencia propia (RunPod Serverless / Replicate)</td>
+          <td>Variable por imagen</td>
+          <td>~$1–2 USD/mes (300 imgs)</td>
+          <td><span class="badge badge-purple">POST FINE-TUNE</span></td>
+        </tr>
+        <tr>
+          <td>NanoBanana 2 vía OpenRouter (300 imgs/mes)</td>
+          <td>Variable por uso</td>
+          <td>~$60 MXN (~$3 USD)</td>
+          <td><span class="badge badge-amber">ACTUAL</span></td>
+        </tr>
+        <tr>
+          <td>GPT vía API (uso puntual / calidad alta)</td>
+          <td>Variable por uso</td>
+          <td>~$900 MXN (~$45 USD) si 300 imgs</td>
+          <td><span class="badge badge-amber">ACTUAL</span></td>
+        </tr>
+        <tr>
+          <td>Almacenamiento pesos LoRA (HuggingFace)</td>
+          <td>Fijo</td>
+          <td>$0 (gratis hasta 5 GB)</td>
+          <td><span class="badge badge-gray">INCLUIDO</span></td>
+        </tr>
+        <tr>
+          <td>BD Maestra Multimedia</td>
+          <td>Incluida en Supabase Pro</td>
+          <td>$0 adicional</td>
+          <td><span class="badge badge-gray">INCLUIDO</span></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="summary-grid" style="margin-top:28px;">
+      <div class="summary-cell">
+        <span class="s-label">Infraestructura fija</span>
+        <span class="s-amount">$50 USD</span>
+        <span class="s-note">Render + Supabase Pro · cada mes</span>
+      </div>
+      <div class="summary-cell">
+        <span class="s-label">Inferencia post fine-tune</span>
+        <span class="s-amount">~$1–2 USD</span>
+        <span class="s-note">300 imgs/mes con modelo propio</span>
+      </div>
+      <div class="summary-cell">
+        <span class="s-label">Entrenamiento LoRA (una vez)</span>
+        <span class="s-amount">$54–142 USD</span>
+        <span class="s-note">2 rondas · con margen ×4 de seguridad</span>
+      </div>
+    </div>
+
+    <div class="total-row">
+      <div>
+        <div class="t-label">Costo mensual en operación normal (post fine-tune)</div>
+        <div class="t-note">Render + Supabase + inferencia propia · sin APIs externas de imagen</div>
+      </div>
+      <div>
+        <div class="t-amount">~$52 USD/mes</div>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <p class="nota">El primer ahorro tangible es en el costo por imagen al sustituir GPT o NanoBanana 2 (APIs externas) por inferencia propia. Render sigue siendo necesario en todo momento. A partir de ~1,500 generaciones/mes el ahorro en APIs comienza a compensar la inversión del fine-tuning.</p>
+  </section>
+
+  <footer></footer>
+
+</div>
+</body>
+</html>
