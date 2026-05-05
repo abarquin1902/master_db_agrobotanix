@@ -299,6 +299,7 @@
     animation: pulse 2s infinite;
   }
   @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
+  @keyframes spin { to { transform: rotate(360deg); } }
   @keyframes fadeUp {
     from { opacity:0; transform:translateY(16px); }
     to   { opacity:1; transform:translateY(0); }
@@ -346,7 +347,7 @@
 </div>
 
 <!-- CONTENIDO (oculto hasta que carguen los datos) -->
-<div id="contenido" style="display:none">
+<div id="contenido">
 
 <header>
   <div class="header-top">
@@ -414,7 +415,23 @@
 <div class="bottom-grid">
   <div class="panel" style="border-right:1px solid var(--crema-oscura); padding-bottom:1rem;">
     <div class="panel-title">Distribución geográfica — histórico</div>
-    <div id="mapa-leaflet" style="height:420px; border-radius:8px; overflow:hidden;"></div>
+    <div style="position:relative;">
+      <div id="mapa-leaflet" style="height:420px; border-radius:8px; overflow:hidden;"></div>
+      <div id="mapa-spinner" style="
+        position:absolute; inset:0; z-index:999;
+        display:flex; flex-direction:column; align-items:center; justify-content:center;
+        background:rgba(26,61,43,0.75); border-radius:8px; gap:0.75rem;
+        pointer-events:none;
+      ">
+        <div style="
+          width:32px; height:32px; border-radius:50%;
+          border:3px solid rgba(149,213,178,0.3);
+          border-top-color:#95d5b2;
+          animation:spin 0.8s linear infinite;
+        "></div>
+        <span style="font-size:0.75rem;color:#95d5b2;letter-spacing:0.1em;text-transform:uppercase;">Cargando datos</span>
+      </div>
+    </div>
     <div class="mapa-legend" style="margin-top:0.75rem;">
       <span>Menos</span>
       <div class="legend-gradient"></div>
@@ -718,20 +735,26 @@ L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
 }).addTo(mapaLeaflet);
 
 // ─── INIT ─────────────────────────────────────────────────────────────────────
+// Ocultar loading screen de inmediato — el contenido ya es visible
+const _ls = document.getElementById('loading-screen');
+_ls.classList.add('oculto');
+setTimeout(() => _ls.style.display = 'none', 400);
+
 (async () => {
   try {
     const datos = await cargarDatos();
     render(datos);
-
-    // Mostrar contenido, ocultar loading
-    document.getElementById('contenido').style.display = 'block';
-    const ls = document.getElementById('loading-screen');
-    ls.classList.add('oculto');
-    setTimeout(() => ls.style.display = 'none', 600);
-
+    // Quitar spinner del mapa
+    const sp = document.getElementById('mapa-spinner');
+    if (sp) sp.style.display = 'none';
   } catch (err) {
     console.error(err);
-    document.getElementById('loading-screen').style.display = 'none';
+    const sp = document.getElementById('mapa-spinner');
+    if (sp) {
+      sp.querySelector('div').style.display = 'none';
+      sp.querySelector('span').textContent = 'Error al cargar datos';
+      sp.style.background = 'rgba(180,30,30,0.7)';
+    }
     const es = document.getElementById('error-screen');
     es.style.display = 'flex';
     document.getElementById('error-msg').textContent = err.message;
