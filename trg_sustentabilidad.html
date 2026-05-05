@@ -1,0 +1,749 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TRG · Impacto Sustentable</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<style>
+  :root {
+    --verde-bosque: #1a3d2b;
+    --verde-hoja: #2d6a4f;
+    --verde-claro: #52b788;
+    --verde-menta: #95d5b2;
+    --crema: #f8f4ed;
+    --crema-oscura: #ede8df;
+    --texto: #1a1a18;
+    --texto-suave: #5a5a52;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--crema);
+    color: var(--texto);
+    font-family: 'DM Sans', sans-serif;
+    min-height: 100vh;
+  }
+
+  /* ─── LOADING ─── */
+  #loading-screen {
+    position: fixed; inset: 0;
+    background: var(--verde-bosque);
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    z-index: 999;
+    transition: opacity 0.5s ease;
+  }
+  #loading-screen.oculto { opacity: 0; pointer-events: none; }
+
+  .loading-logo {
+    font-family: 'DM Serif Display', serif;
+    font-size: 2rem;
+    color: #fff;
+    margin-bottom: 0.5rem;
+  }
+  .loading-sub {
+    font-size: 0.75rem;
+    color: var(--verde-menta);
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    margin-bottom: 2rem;
+  }
+  .loading-bar-wrap {
+    width: 200px; height: 3px;
+    background: rgba(255,255,255,0.15);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+  .loading-bar {
+    height: 100%;
+    background: var(--verde-claro);
+    border-radius: 2px;
+    animation: loadbar 1.8s ease infinite;
+  }
+  @keyframes loadbar {
+    0%   { width: 0%; margin-left: 0; }
+    50%  { width: 60%; margin-left: 20%; }
+    100% { width: 0%; margin-left: 100%; }
+  }
+
+  /* ─── ERROR ─── */
+  #error-screen {
+    display: none;
+    position: fixed; inset: 0;
+    background: var(--crema);
+    align-items: center; justify-content: center;
+    flex-direction: column; gap: 1rem;
+    z-index: 998;
+  }
+  #error-screen p { color: var(--texto-suave); font-size: 0.9rem; }
+
+  /* ─── HEADER ─── */
+  header {
+    background: var(--verde-bosque);
+    padding: 2.5rem 3rem 2rem;
+    position: relative;
+    overflow: hidden;
+  }
+  header::before {
+    content: ''; position: absolute;
+    top: -60px; right: -60px;
+    width: 300px; height: 300px;
+    border-radius: 50%;
+    background: rgba(82,183,136,0.08);
+  }
+  header::after {
+    content: ''; position: absolute;
+    bottom: -80px; left: 40%;
+    width: 200px; height: 200px;
+    border-radius: 50%;
+    background: rgba(82,183,136,0.05);
+  }
+  .header-top {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    position: relative; z-index: 1;
+  }
+  .logo-area h1 {
+    font-family: 'DM Serif Display', serif;
+    font-size: 2rem; color: #fff;
+    letter-spacing: -0.02em; line-height: 1;
+  }
+  .logo-area .sub {
+    font-size: 0.75rem; color: var(--verde-menta);
+    letter-spacing: 0.15em; text-transform: uppercase;
+    margin-top: 0.35rem;
+  }
+  .header-meta { text-align: right; }
+  .header-meta .actualizado {
+    font-size: 0.72rem; color: var(--verde-menta);
+    letter-spacing: 0.08em;
+  }
+  .header-meta .año {
+    font-family: 'DM Serif Display', serif;
+    font-size: 3.5rem;
+    color: rgba(255,255,255,0.08);
+    line-height: 1; margin-top: -0.5rem;
+  }
+  .header-tagline { margin-top: 1.5rem; position: relative; z-index: 1; }
+  .header-tagline p {
+    font-size: 0.85rem;
+    color: rgba(255,255,255,0.55);
+    max-width: 500px; line-height: 1.6;
+  }
+
+  /* ─── KPI STRIP ─── */
+  .kpi-strip {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    border-bottom: 1px solid var(--crema-oscura);
+  }
+  .kpi {
+    padding: 2rem 2.5rem;
+    border-right: 1px solid var(--crema-oscura);
+    transition: background 0.2s;
+    animation: fadeUp 0.5s ease both;
+  }
+  .kpi:last-child { border-right: none; }
+  .kpi:hover { background: rgba(45,106,79,0.04); }
+  .kpi:nth-child(1) { animation-delay: 0.05s; }
+  .kpi:nth-child(2) { animation-delay: 0.12s; }
+  .kpi:nth-child(3) { animation-delay: 0.19s; }
+  .kpi:nth-child(4) { animation-delay: 0.26s; }
+
+  .kpi-label {
+    font-size: 0.7rem; letter-spacing: 0.12em;
+    text-transform: uppercase; color: var(--texto-suave);
+    margin-bottom: 0.6rem;
+  }
+  .kpi-value {
+    font-family: 'DM Serif Display', serif;
+    font-size: 2.8rem; color: var(--verde-hoja);
+    line-height: 1; letter-spacing: -0.02em;
+  }
+  .kpi-detail { font-size: 0.75rem; color: var(--texto-suave); margin-top: 0.4rem; }
+  .kpi-badge {
+    display: inline-block;
+    background: var(--verde-menta); color: var(--verde-bosque);
+    font-size: 0.65rem; font-weight: 600;
+    letter-spacing: 0.06em;
+    padding: 0.15rem 0.5rem; border-radius: 20px;
+    margin-top: 0.4rem;
+  }
+
+  /* ─── MAIN GRID ─── */
+  .main-grid {
+    display: grid;
+    grid-template-columns: 1.2fr 1fr;
+    border-bottom: 1px solid var(--crema-oscura);
+  }
+  .panel {
+    padding: 2rem 2.5rem;
+    border-right: 1px solid var(--crema-oscura);
+    animation: fadeUp 0.6s ease both;
+    animation-delay: 0.3s;
+  }
+  .panel:last-child { border-right: none; }
+  .panel-title {
+    font-size: 0.68rem; letter-spacing: 0.14em;
+    text-transform: uppercase; color: var(--texto-suave);
+    margin-bottom: 1.5rem;
+    display: flex; align-items: center; gap: 0.5rem;
+  }
+  .panel-title::after {
+    content: ''; flex: 1; height: 1px;
+    background: var(--crema-oscura);
+  }
+
+  .chart-wrap { position: relative; height: 280px; }
+
+  /* ─── BOTTOM GRID ─── */
+  .bottom-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+  }
+
+  /* ─── MAPA ─── */
+  .mapa-wrap svg { width: 100%; height: auto; max-height: 460px; }
+  .estado-path {
+    stroke: var(--crema); stroke-width: 0.8;
+    transition: opacity 0.2s; cursor: pointer;
+  }
+  .estado-path:hover { opacity: 0.75; }
+  .mapa-legend {
+    display: flex; align-items: center; gap: 0.75rem;
+    margin-top: 1rem; font-size: 0.72rem; color: var(--texto-suave);
+  }
+  .legend-gradient {
+    flex: 1; height: 8px; border-radius: 4px;
+    background: linear-gradient(to right, #d8f3dc, #1b4332);
+  }
+
+  /* ─── TABLA MENSUAL ─── */
+  .tabla-mensual { width: 100%; border-collapse: collapse; }
+  .tabla-mensual th {
+    font-size: 0.65rem; letter-spacing: 0.1em;
+    text-transform: uppercase; color: var(--texto-suave);
+    padding: 0.5rem 0.75rem; text-align: left;
+    border-bottom: 1px solid var(--crema-oscura);
+  }
+  .tabla-mensual td {
+    padding: 0.6rem 0.75rem; font-size: 0.85rem;
+    border-bottom: 1px solid rgba(0,0,0,0.04);
+    vertical-align: middle;
+  }
+  .tabla-mensual tr:last-child td { border-bottom: none; }
+  .tabla-mensual tr:hover td { background: rgba(45,106,79,0.03); }
+  .mes-num {
+    font-family: 'DM Serif Display', serif;
+    font-size: 1.1rem; color: var(--verde-hoja);
+  }
+  .bar-inline {
+    height: 6px; border-radius: 3px;
+    background: var(--verde-claro);
+    display: inline-block; vertical-align: middle;
+  }
+
+  /* ─── TOP ESTADOS ─── */
+  .estados-list { list-style: none; }
+  .estados-list li {
+    display: flex; align-items: center; gap: 0.75rem;
+    padding: 0.6rem 0;
+    border-bottom: 1px solid rgba(0,0,0,0.04);
+    font-size: 0.85rem;
+  }
+  .estados-list li:last-child { border-bottom: none; }
+  .estado-rank {
+    font-family: 'DM Serif Display', serif;
+    font-size: 1rem; color: var(--crema-oscura);
+    width: 1.5rem; text-align: center;
+  }
+  .estado-nombre { flex: 1; }
+  .estado-count { font-weight: 600; color: var(--verde-hoja); font-size: 0.9rem; }
+  .estado-pct { font-size: 0.72rem; color: var(--texto-suave); width: 3rem; text-align: right; }
+
+  /* ─── TOOLTIP LEAFLET ─── */
+  .leaflet-tooltip-trg {
+    background: #0d1b2a !important;
+    border: 1px solid #2d6a4f !important;
+    color: #e2e8f0 !important;
+    border-radius: 6px !important;
+    font-family: 'DM Sans', sans-serif !important;
+    font-size: 0.78rem !important;
+    padding: 0.4rem 0.75rem !important;
+    box-shadow: 0 4px 14px rgba(0,0,0,0.6) !important;
+  }
+  .leaflet-tooltip-trg strong {
+    display: block;
+    color: #74c69d;
+    font-size: 0.85rem;
+    margin-bottom: 2px;
+  }
+  .leaflet-tooltip-trg::before { border-top-color: #2d6a4f !important; }
+
+  /* ─── FOOTER ─── */
+  footer {
+    background: var(--verde-bosque);
+    padding: 1.25rem 3rem;
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  footer p { font-size: 0.72rem; color: rgba(255,255,255,0.35); letter-spacing: 0.05em; }
+  footer .dot {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: var(--verde-claro);
+    animation: pulse 2s infinite;
+  }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
+  @keyframes fadeUp {
+    from { opacity:0; transform:translateY(16px); }
+    to   { opacity:1; transform:translateY(0); }
+  }
+
+  /* ─── SELECTOR AÑO ─── */
+  .año-tabs {
+    display: flex; gap: 0.35rem;
+    margin-left: auto;
+  }
+  .año-tab {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.72rem; font-weight: 500;
+    letter-spacing: 0.06em;
+    padding: 0.2rem 0.6rem;
+    border-radius: 20px;
+    border: 1px solid var(--crema-oscura);
+    background: transparent;
+    color: var(--texto-suave);
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .año-tab:hover { border-color: var(--verde-claro); color: var(--verde-hoja); }
+  .año-tab.activo {
+    background: var(--verde-hoja);
+    border-color: var(--verde-hoja);
+    color: #fff;
+  }
+</style>
+</head>
+<body>
+
+<!-- LOADING -->
+<div id="loading-screen">
+  <div class="loading-logo">The Real Green</div>
+  <div class="loading-sub">Cargando datos de impacto...</div>
+  <div class="loading-bar-wrap"><div class="loading-bar"></div></div>
+</div>
+
+<!-- ERROR -->
+<div id="error-screen">
+  <p style="font-size:1.5rem">⚠️</p>
+  <p id="error-msg">No se pudieron cargar los datos.</p>
+  <p style="font-size:0.75rem;margin-top:0.5rem;color:#aaa">Verifica la conexión y recarga la página.</p>
+</div>
+
+<!-- CONTENIDO (oculto hasta que carguen los datos) -->
+<div id="contenido" style="display:none">
+
+<header>
+  <div class="header-top">
+    <div class="logo-area">
+      <h1>The Real Green</h1>
+      <div class="sub">Reporte de Impacto · Área de Sustentabilidad</div>
+    </div>
+    <div class="header-meta">
+      <div class="actualizado">Actualizado: <span id="fecha-actualizacion">—</span></div>
+      <div class="año" id="año-header">—</div>
+    </div>
+  </div>
+  <div class="header-tagline">
+    <p>Clientes únicos impactados con productos de cuidado vegetal sustentable, deduplicados por teléfono, correo electrónico y nombre.</p>
+  </div>
+</header>
+
+<div class="kpi-strip">
+  <div class="kpi">
+    <div class="kpi-label">Clientes únicos histórico</div>
+    <div class="kpi-value" id="kpi-total">—</div>
+    <div class="kpi-detail" id="kpi-total-detalle">Desde el primer pedido registrado</div>
+  </div>
+  <div class="kpi">
+    <div class="kpi-label">Año actual</div>
+    <div class="kpi-value" id="kpi-año">—</div>
+    <div class="kpi-detail" id="kpi-año-detalle">—</div>
+  </div>
+  <div class="kpi">
+    <div class="kpi-label">Mes más activo</div>
+    <div class="kpi-value" id="kpi-mes-pico">—</div>
+    <div class="kpi-detail" id="kpi-mes-pico-nombre">—</div>
+  </div>
+  <div class="kpi">
+    <div class="kpi-label">Estados alcanzados</div>
+    <div class="kpi-value" id="kpi-estados">—</div>
+    <div class="kpi-detail">Cobertura nacional</div>
+    <div class="kpi-badge" id="kpi-estado-top">—</div>
+  </div>
+</div>
+
+<div class="main-grid">
+  <div class="panel">
+    <div class="panel-title">Clientes únicos por mes — histórico</div>
+    <div class="chart-wrap"><canvas id="chartHistorico"></canvas></div>
+  </div>
+  <div class="panel">
+    <div class="panel-title" style="gap:0.5rem;">
+      Detalle mensual
+      <div class="año-tabs" id="año-tabs"></div>
+    </div>
+    <table class="tabla-mensual">
+      <thead>
+        <tr>
+          <th>Mes</th>
+          <th>Clientes</th>
+          <th>Distribución</th>
+        </tr>
+      </thead>
+      <tbody id="tabla-body"></tbody>
+    </table>
+  </div>
+</div>
+
+<div class="bottom-grid">
+  <div class="panel" style="border-right:1px solid var(--crema-oscura); padding-bottom:1rem;">
+    <div class="panel-title">Distribución geográfica — histórico</div>
+    <div id="mapa-leaflet" style="height:420px; border-radius:8px; overflow:hidden;"></div>
+    <div class="mapa-legend" style="margin-top:0.75rem;">
+      <span>Menos</span>
+      <div class="legend-gradient"></div>
+      <span>Más</span>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-title">Top estados por clientes únicos</div>
+    <ul class="estados-list" id="estados-list"></ul>
+  </div>
+</div>
+
+<footer>
+  <p>The Real Green · Área de Sustentabilidad · Datos procesados desde Shopify</p>
+  <div class="dot"></div>
+  <p>Match por teléfono · correo · nombre</p>
+</footer>
+
+</div><!-- /contenido -->
+
+<script>
+// ─── SUPABASE CONFIG ──────────────────────────────────────────────────────────
+const SUPABASE_URL = "https://pjicnaamvuluommctphb.supabase.co";
+const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBqaWNuYWFtdnVsdW9tbWN0cGhiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI0ODUwMjcsImV4cCI6MjA4ODA2MTAyN30.RevJFA0u6Ts4la2vyjgaTgtvqFWeqJTo0zrCg8wOCOY";
+
+// ─── FETCH DATOS ──────────────────────────────────────────────────────────────
+async function cargarDatos() {
+  const resp = await fetch(
+    `${SUPABASE_URL}/rest/v1/trg_sustentabilidad_snapshot?id=eq.1&select=datos,generado_at`,
+    {
+      headers: {
+        "apikey":        SUPABASE_KEY,
+        "Authorization": `Bearer ${SUPABASE_KEY}`,
+      }
+    }
+  );
+
+  if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+  const rows = await resp.json();
+  if (!rows.length) throw new Error("Sin datos en Supabase — corre el script primero.");
+  return rows[0].datos;
+}
+
+// ─── UTILS ────────────────────────────────────────────────────────────────────
+function fmt(n) { return Number(n).toLocaleString('es-MX'); }
+
+// ─── RENDER ───────────────────────────────────────────────────────────────────
+function render(d) {
+  // Header
+  document.getElementById('fecha-actualizacion').textContent = d.actualizado;
+  document.getElementById('año-header').textContent = d.año_actual;
+
+  // KPIs
+  document.getElementById('kpi-total').textContent = fmt(d.total_historico);
+  document.getElementById('kpi-total-detalle').textContent =
+    `Desde ${d.primer_pedido || 'el primer pedido'}`;
+
+  // KPI estados — solo los 32 válidos que quedaron después de normalizar
+  document.getElementById('kpi-estados').textContent = d.por_estado.length;
+
+  const mesesConDatos = d.meses_año_actual.filter(m => m.clientes > 0);
+  const totalAño = mesesConDatos.reduce((s, m) => s + m.clientes, 0);
+  document.getElementById('kpi-año').textContent = fmt(totalAño);
+  document.getElementById('kpi-año-detalle').textContent =
+    mesesConDatos.length
+      ? `Ene–${mesesConDatos.at(-1).mes} ${d.año_actual}`
+      : String(d.año_actual);
+
+  const mesMax = mesesConDatos.reduce(
+    (a, b) => a.clientes >= b.clientes ? a : b,
+    { clientes: 0, mes: '—' }
+  );
+  document.getElementById('kpi-mes-pico').textContent = fmt(mesMax.clientes);
+  document.getElementById('kpi-mes-pico-nombre').textContent =
+    `${mesMax.mes} ${d.año_actual}`;
+  document.getElementById('kpi-estado-top').textContent =
+    d.por_estado[0] ? `↑ ${d.por_estado[0].estado}` : '—';
+
+  // ─ Gráfica histórica — color distinto por año
+  const COLORES_AÑO = [
+    'rgba(149,213,178,0.7)',  // 2019 verde menta
+    'rgba(82,183,136,0.7)',   // 2020
+    'rgba(45,106,79,0.75)',   // 2021
+    'rgba(27,67,50,0.8)',     // 2022
+    'rgba(52,140,100,0.75)',  // 2023
+    'rgba(16,85,60,0.85)',    // 2024
+    'rgba(212,160,23,0.85)',  // 2025 acento dorado
+  ];
+
+  // Mapear cada barra al color de su año
+  const años = [...new Set(d.historico_mensual.map(m => m.fecha.slice(0, 4)))].sort();
+  const colorPorAño = {};
+  años.forEach((a, i) => { colorPorAño[a] = COLORES_AÑO[i % COLORES_AÑO.length]; });
+
+  const bgColors  = d.historico_mensual.map(m => colorPorAño[m.fecha.slice(0, 4)]);
+  const hoverColors = d.historico_mensual.map(m => colorPorAño[m.fecha.slice(0, 4)].replace('0.7','1').replace('0.75','1').replace('0.8','1').replace('0.85','1'));
+
+  const ctx = document.getElementById('chartHistorico').getContext('2d');
+  new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels:   d.historico_mensual.map(m => m.label),
+      datasets: [{
+        data:                 d.historico_mensual.map(m => m.c),
+        backgroundColor:      bgColors,
+        hoverBackgroundColor: hoverColors,
+        borderRadius: 3,
+        borderSkipped: false,
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          callbacks: {
+            label: c => ` ${fmt(c.raw)} clientes`,
+            title: items => {
+              const m = d.historico_mensual[items[0].dataIndex];
+              return `${m.label}  (${m.fecha})`;
+            }
+          }
+        }
+      },
+      scales: {
+        x: {
+          grid: { display: false },
+          ticks: { font: { family:'DM Sans', size:9 }, color:'#9a9a90',
+                   maxRotation: 45, autoSkip: true, maxTicksLimit: 20 }
+        },
+        y: {
+          grid: { color: 'rgba(0,0,0,0.05)' },
+          ticks: { font: { family:'DM Sans', size:10 }, color:'#9a9a90' }
+        }
+      }
+    }
+  });
+
+  // ─ Selector de años + tabla mensual
+  const añosDisponibles = [...new Set(
+    d.historico_mensual.map(m => m.fecha.slice(0, 4))
+  )].sort().slice(-3).reverse();
+
+  const MESES_NOMBRES = ["","Enero","Febrero","Marzo","Abril","Mayo","Junio",
+                         "Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"];
+
+  function renderTabla(año) {
+    const tbody = document.getElementById('tabla-body');
+    tbody.innerHTML = '';
+    const conteoMes = {};
+    d.historico_mensual
+      .filter(m => m.fecha.startsWith(año))
+      .forEach(m => { conteoMes[m.fecha.slice(5, 7)] = m.c; });
+
+    const filas = Array.from({length: 12}, (_, i) => {
+      const num = String(i + 1).padStart(2, '0');
+      return { mes: MESES_NOMBRES[i + 1], num: i + 1, clientes: conteoMes[num] || 0 };
+    });
+
+    const maxCli = Math.max(...filas.map(m => m.clientes), 1);
+    filas.forEach(m => {
+      const tr   = document.createElement('tr');
+      const barW = Math.round((m.clientes / maxCli) * 120);
+      tr.innerHTML = `
+        <td><span style="color:var(--texto-suave);font-size:0.75rem">${m.num}.</span> ${m.mes}</td>
+        <td><span class="mes-num">${m.clientes > 0 ? fmt(m.clientes) : '—'}</span></td>
+        <td>${m.clientes > 0
+          ? `<span class="bar-inline" style="width:${barW}px"></span>`
+          : '<span style="color:var(--crema-oscura);font-size:0.75rem">sin datos</span>'}</td>
+      `;
+      tbody.appendChild(tr);
+    });
+  }
+
+  const tabsWrap = document.getElementById('año-tabs');
+  añosDisponibles.forEach((año, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'año-tab' + (i === 0 ? ' activo' : '');
+    btn.textContent = año;
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.año-tab').forEach(b => b.classList.remove('activo'));
+      btn.classList.add('activo');
+      renderTabla(año);
+    });
+    tabsWrap.appendChild(btn);
+  });
+  renderTabla(añosDisponibles[0]);
+
+  // ─ Mapa Leaflet con GeoJSON de México
+  const porEstadoMap = {};
+  d.por_estado.forEach(e => { porEstadoMap[e.estado] = e.clientes; });
+  const maxVal = d.por_estado[0]?.clientes || 1;
+
+  function interpolateColor(ratio) {
+    const r = Math.round(216 + (27  - 216) * ratio);
+    const g = Math.round(243 + (67  - 243) * ratio);
+    const b = Math.round(220 + (50  - 220) * ratio);
+    return `rgb(${r},${g},${b})`;
+  }
+
+  // Coordenadas de cada estado (centro aproximado)
+  const COORDS_ESTADOS = {
+    "Aguascalientes":    [21.8818, -102.2916],
+    "Baja California":   [30.8406, -115.2838],
+    "Baja California Sur":[25.1234,-110.3005],
+    "Campeche":          [19.8301, -90.5349],
+    "Chiapas":           [16.7569, -93.1292],
+    "Chihuahua":         [28.6353, -106.0889],
+    "Ciudad de México":  [19.4326, -99.1332],
+    "Coahuila":          [27.0587, -101.7068],
+    "Colima":            [19.1223, -103.8678],
+    "Durango":           [24.0277, -104.6532],
+    "Estado de México":  [19.2827, -99.6557],
+    "Guanajuato":        [21.0190, -101.2574],
+    "Guerrero":          [17.5506, -99.5024],
+    "Hidalgo":           [20.0911, -98.7624],
+    "Jalisco":           [20.6597, -103.3496],
+    "Michoacán":         [19.5665, -101.7068],
+    "Morelos":           [18.6813, -99.1013],
+    "Nayarit":           [21.7514, -104.8455],
+    "Nuevo León":        [25.5922, -99.9962],
+    "Oaxaca":            [17.0732, -96.7266],
+    "Puebla":            [19.0414, -98.2063],
+    "Querétaro":         [20.5888, -100.3899],
+    "Quintana Roo":      [19.1817, -88.4791],
+    "San Luis Potosí":   [22.1565, -100.9855],
+    "Sinaloa":           [25.1721, -107.4795],
+    "Sonora":            [29.2972, -110.3309],
+    "Tabasco":           [17.8409, -92.6189],
+    "Tamaulipas":        [24.2669, -98.8363],
+    "Tlaxcala":          [19.3182, -98.2375],
+    "Veracruz":          [19.1738, -96.1342],
+    "Yucatán":           [20.7099, -89.0943],
+    "Zacatecas":         [22.7709, -102.5832],
+  };
+
+  const mapaLeaflet = L.map('mapa-leaflet', {
+    center: [23.6, -102.5],
+    zoom: 5,
+    zoomControl: true,
+    scrollWheelZoom: false,
+    attributionControl: false,
+  });
+
+  L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+    maxZoom: 10,
+  }).addTo(mapaLeaflet);
+
+  // Dibujar un círculo por cada estado con datos
+  d.por_estado.forEach(e => {
+    const coords = COORDS_ESTADOS[e.estado];
+    if (!coords) return;
+
+    const ratio  = e.clientes / maxVal;
+    const radio  = 8 + ratio * 28;              // tamaño proporcional
+    const color  = interpolateColor(ratio);
+
+    const circle = L.circleMarker(coords, {
+      radius:      radio,
+      fillColor:   color,
+      color:       '#0d1b2a',
+      weight:      1.5,
+      opacity:     1,
+      fillOpacity: 0.85,
+    });
+
+    circle.bindTooltip(
+      `<strong>${e.estado}</strong><br>${fmt(e.clientes)} cliente${e.clientes !== 1 ? 's' : ''}`,
+      { direction: 'top', offset: [0, -radio], sticky: false, className: 'leaflet-tooltip-trg' }
+    );
+
+    circle.on('mouseover', function() { this.setStyle({ fillOpacity: 1, weight: 2.5 }); });
+    circle.on('mouseout',  function() { this.setStyle({ fillOpacity: 0.85, weight: 1.5 }); });
+
+    circle.addTo(mapaLeaflet);
+  });
+
+  // ─ Top estados + total al fondo
+  const list = document.getElementById('estados-list');
+  const top10 = d.por_estado.slice(0, 10);
+  const totalTop10 = top10.reduce((s, e) => s + e.clientes, 0);
+
+  top10.forEach((e, i) => {
+    const pct = ((e.clientes / d.total_historico) * 100).toFixed(1);
+    const li  = document.createElement('li');
+    li.innerHTML = `
+      <span class="estado-rank">${i + 1}</span>
+      <span class="estado-nombre">${e.estado}</span>
+      <span class="estado-count">${fmt(e.clientes)}</span>
+      <span class="estado-pct">${pct}%</span>
+    `;
+    list.appendChild(li);
+  });
+
+  // Fila de total
+  const liTotal = document.createElement('li');
+  liTotal.style.cssText = 'border-top:2px solid var(--crema-oscura);margin-top:0.25rem;padding-top:0.75rem;font-weight:600;';
+  const pctTotal = ((totalTop10 / d.total_historico) * 100).toFixed(1);
+  liTotal.innerHTML = `
+    <span class="estado-rank" style="color:var(--verde-hoja)">Σ</span>
+    <span class="estado-nombre" style="color:var(--texto-suave);font-size:0.8rem">Total histórico</span>
+    <span class="estado-count" style="color:var(--verde-bosque)">${fmt(d.total_historico)}</span>
+    <span class="estado-pct" style="color:var(--verde-hoja);font-weight:600">100%</span>
+  `;
+  list.appendChild(liTotal);
+}
+
+// ─── INIT ─────────────────────────────────────────────────────────────────────
+(async () => {
+  try {
+    const datos = await cargarDatos();
+    render(datos);
+
+    // Mostrar contenido, ocultar loading
+    document.getElementById('contenido').style.display = 'block';
+    const ls = document.getElementById('loading-screen');
+    ls.classList.add('oculto');
+    setTimeout(() => ls.style.display = 'none', 600);
+
+  } catch (err) {
+    console.error(err);
+    document.getElementById('loading-screen').style.display = 'none';
+    const es = document.getElementById('error-screen');
+    es.style.display = 'flex';
+    document.getElementById('error-msg').textContent = err.message;
+  }
+})();
+</script>
+</body>
+</html>
