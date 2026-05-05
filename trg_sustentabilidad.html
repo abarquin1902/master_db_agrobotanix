@@ -605,92 +605,28 @@ function render(d) {
   });
   renderTabla(añosDisponibles[0]);
 
-  // ─ Mapa Leaflet con GeoJSON de México
+
+  // ─ Pintar círculos en mapa con datos de Supabase
   const porEstadoMap = {};
   d.por_estado.forEach(e => { porEstadoMap[e.estado] = e.clientes; });
   const maxVal = d.por_estado[0]?.clientes || 1;
 
-  function interpolateColor(ratio) {
-    const r = Math.round(216 + (27  - 216) * ratio);
-    const g = Math.round(243 + (67  - 243) * ratio);
-    const b = Math.round(220 + (50  - 220) * ratio);
-    return `rgb(${r},${g},${b})`;
-  }
-
-  // Coordenadas de cada estado (centro aproximado)
-  const COORDS_ESTADOS = {
-    "Aguascalientes":    [21.8818, -102.2916],
-    "Baja California":   [30.8406, -115.2838],
-    "Baja California Sur":[25.1234,-110.3005],
-    "Campeche":          [19.8301, -90.5349],
-    "Chiapas":           [16.7569, -93.1292],
-    "Chihuahua":         [28.6353, -106.0889],
-    "Ciudad de México":  [19.4326, -99.1332],
-    "Coahuila":          [27.0587, -101.7068],
-    "Colima":            [19.1223, -103.8678],
-    "Durango":           [24.0277, -104.6532],
-    "Estado de México":  [19.2827, -99.6557],
-    "Guanajuato":        [21.0190, -101.2574],
-    "Guerrero":          [17.5506, -99.5024],
-    "Hidalgo":           [20.0911, -98.7624],
-    "Jalisco":           [20.6597, -103.3496],
-    "Michoacán":         [19.5665, -101.7068],
-    "Morelos":           [18.6813, -99.1013],
-    "Nayarit":           [21.7514, -104.8455],
-    "Nuevo León":        [25.5922, -99.9962],
-    "Oaxaca":            [17.0732, -96.7266],
-    "Puebla":            [19.0414, -98.2063],
-    "Querétaro":         [20.5888, -100.3899],
-    "Quintana Roo":      [19.1817, -88.4791],
-    "San Luis Potosí":   [22.1565, -100.9855],
-    "Sinaloa":           [25.1721, -107.4795],
-    "Sonora":            [29.2972, -110.3309],
-    "Tabasco":           [17.8409, -92.6189],
-    "Tamaulipas":        [24.2669, -98.8363],
-    "Tlaxcala":          [19.3182, -98.2375],
-    "Veracruz":          [19.1738, -96.1342],
-    "Yucatán":           [20.7099, -89.0943],
-    "Zacatecas":         [22.7709, -102.5832],
-  };
-
-  const mapaLeaflet = L.map('mapa-leaflet', {
-    center: [23.6, -102.5],
-    zoom: 5,
-    zoomControl: true,
-    scrollWheelZoom: false,
-    attributionControl: false,
-  });
-
-  L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-    maxZoom: 10,
-  }).addTo(mapaLeaflet);
-
-  // Dibujar un círculo por cada estado con datos
   d.por_estado.forEach(e => {
     const coords = COORDS_ESTADOS[e.estado];
     if (!coords) return;
-
-    const ratio  = e.clientes / maxVal;
-    const radio  = 8 + ratio * 28;              // tamaño proporcional
-    const color  = interpolateColor(ratio);
-
+    const ratio = e.clientes / maxVal;
+    const radio = 8 + ratio * 28;
+    const color = interpolateColor(ratio);
     const circle = L.circleMarker(coords, {
-      radius:      radio,
-      fillColor:   color,
-      color:       '#0d1b2a',
-      weight:      1.5,
-      opacity:     1,
-      fillOpacity: 0.85,
+      radius: radio, fillColor: color,
+      color: '#0d1b2a', weight: 1.5, opacity: 1, fillOpacity: 0.85,
     });
-
     circle.bindTooltip(
       `<strong>${e.estado}</strong><br>${fmt(e.clientes)} cliente${e.clientes !== 1 ? 's' : ''}`,
       { direction: 'top', offset: [0, -radio], sticky: false, className: 'leaflet-tooltip-trg' }
     );
-
     circle.on('mouseover', function() { this.setStyle({ fillOpacity: 1, weight: 2.5 }); });
     circle.on('mouseout',  function() { this.setStyle({ fillOpacity: 0.85, weight: 1.5 }); });
-
     circle.addTo(mapaLeaflet);
   });
 
@@ -723,6 +659,63 @@ function render(d) {
   `;
   list.appendChild(liTotal);
 }
+
+
+// ─── MAPA — inicialización inmediata (independiente de Supabase) ──────────────
+function interpolateColor(ratio) {
+  const r = Math.round(216 + (27  - 216) * ratio);
+  const g = Math.round(243 + (67  - 243) * ratio);
+  const b = Math.round(220 + (50  - 220) * ratio);
+  return `rgb(${r},${g},${b})`;
+}
+
+const COORDS_ESTADOS = {
+  "Aguascalientes":    [21.8818, -102.2916],
+  "Baja California":   [30.8406, -115.2838],
+  "Baja California Sur":[25.1234,-110.3005],
+  "Campeche":          [19.8301, -90.5349],
+  "Chiapas":           [16.7569, -93.1292],
+  "Chihuahua":         [28.6353, -106.0889],
+  "Ciudad de México":  [19.4326, -99.1332],
+  "Coahuila":          [27.0587, -101.7068],
+  "Colima":            [19.1223, -103.8678],
+  "Durango":           [24.0277, -104.6532],
+  "Estado de México":  [19.2827, -99.6557],
+  "Guanajuato":        [21.0190, -101.2574],
+  "Guerrero":          [17.5506, -99.5024],
+  "Hidalgo":           [20.0911, -98.7624],
+  "Jalisco":           [20.6597, -103.3496],
+  "Michoacán":         [19.5665, -101.7068],
+  "Morelos":           [18.6813, -99.1013],
+  "Nayarit":           [21.7514, -104.8455],
+  "Nuevo León":        [25.5922, -99.9962],
+  "Oaxaca":            [17.0732, -96.7266],
+  "Puebla":            [19.0414, -98.2063],
+  "Querétaro":         [20.5888, -100.3899],
+  "Quintana Roo":      [19.1817, -88.4791],
+  "San Luis Potosí":   [22.1565, -100.9855],
+  "Sinaloa":           [25.1721, -107.4795],
+  "Sonora":            [29.2972, -110.3309],
+  "Tabasco":           [17.8409, -92.6189],
+  "Tamaulipas":        [24.2669, -98.8363],
+  "Tlaxcala":          [19.3182, -98.2375],
+  "Veracruz":          [19.1738, -96.1342],
+  "Yucatán":           [20.7099, -89.0943],
+  "Zacatecas":         [22.7709, -102.5832],
+};
+
+const mapaLeaflet = L.map('mapa-leaflet', {
+  center: [23.6, -102.5],
+  zoom: 5,
+  zoomControl: true,
+  scrollWheelZoom: false,
+  attributionControl: false,
+});
+
+L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+  subdomains: 'abcd',
+  maxZoom: 10,
+}).addTo(mapaLeaflet);
 
 // ─── INIT ─────────────────────────────────────────────────────────────────────
 (async () => {
