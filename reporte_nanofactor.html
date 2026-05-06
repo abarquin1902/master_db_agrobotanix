@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Nanofactor — Reporte Agentes IA</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --green-50:#f0faf4;--green-100:#d6f2e0;--green-200:#a8e0bc;--green-400:#4caf78;
+    --green-500:#2e9156;--green-600:#1e7040;--green-700:#155230;
+    --ink:#0f1f16;--ink-light:#3a5445;--ink-muted:#6b8c7a;
+    --surface:#f7fbf8;--surface-2:#edf7f1;--border:#cde8d6;--white:#ffffff;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{font-family:'Inter',sans-serif;background:var(--surface);color:var(--ink);min-height:100vh}
+
+  .header{background:var(--white);border-bottom:1.5px solid var(--border);padding:36px 64px 28px;display:flex;justify-content:space-between;align-items:flex-end}
+  .header-left h1{font-size:11px;font-weight:600;letter-spacing:.18em;text-transform:uppercase;color:var(--green-500);margin-bottom:6px}
+  .header-left h2{font-size:28px;font-weight:800;color:var(--ink);line-height:1.15}
+  .header-right .periodo{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--ink-muted);text-align:right;line-height:1.8}
+  .header-right .periodo span{color:var(--green-500);font-weight:500}
+
+  .main{max-width:1160px;margin:0 auto;padding:48px 40px 80px}
+
+  .section-title{font-size:10.5px;font-weight:600;letter-spacing:.18em;text-transform:uppercase;color:var(--ink-muted);margin-bottom:20px;display:flex;align-items:center;gap:10px}
+  .section-title::after{content:'';flex:1;height:1px;background:var(--border)}
+
+  .kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:48px}
+  .kpi-card{background:var(--white);border:1.5px solid var(--border);border-radius:12px;padding:24px 22px 20px;position:relative;overflow:hidden;transition:transform .2s,box-shadow .2s;animation:fadeUp .5s ease both}
+  .kpi-card:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(46,145,86,.08)}
+  .kpi-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--green-400);border-radius:12px 12px 0 0}
+  .kpi-card.highlight{background:var(--green-700);border-color:var(--green-600)}
+  .kpi-card.highlight::before{background:var(--green-200)}
+  .kpi-label{font-size:10.5px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-muted);margin-bottom:10px}
+  .kpi-card.highlight .kpi-label{color:rgba(166,224,188,.8)}
+  .kpi-value{font-size:32px;font-weight:800;color:var(--ink);line-height:1;margin-bottom:5px}
+  .kpi-card.highlight .kpi-value{color:var(--white)}
+  .kpi-sub{font-family:'JetBrains Mono',monospace;font-size:10.5px;color:var(--ink-muted)}
+  .kpi-card.highlight .kpi-sub{color:rgba(166,224,188,.7)}
+  .kpi-card:nth-child(1){animation-delay:.05s}.kpi-card:nth-child(2){animation-delay:.10s}.kpi-card:nth-child(3){animation-delay:.15s}.kpi-card:nth-child(4){animation-delay:.20s}
+
+  .tiempo-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:48px}
+  .tiempo-card{background:var(--white);border:1.5px solid var(--border);border-radius:12px;padding:22px 20px;animation:fadeUp .5s ease both;animation-delay:.25s}
+  .tiempo-card-title{font-size:10.5px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-muted);margin-bottom:14px;padding-bottom:10px;border-bottom:1px solid var(--border)}
+  .tiempo-big{font-size:36px;font-weight:800;color:var(--green-600);line-height:1;margin-bottom:4px}
+  .tiempo-label{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--ink-muted);margin-bottom:14px}
+  .tiempo-desglose{display:flex;flex-direction:column;gap:6px}
+  .tiempo-row{display:flex;justify-content:space-between;font-size:12px;color:var(--ink-light)}
+  .tiempo-row span:last-child{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--green-500);font-weight:500}
+
+  .table-wrap{background:var(--white);border:1.5px solid var(--border);border-radius:14px;overflow:hidden;margin-bottom:40px;animation:fadeUp .5s ease both;animation-delay:.3s}
+  table{width:100%;border-collapse:collapse}
+  thead tr{background:var(--surface-2);border-bottom:1.5px solid var(--border)}
+  thead th{font-size:10px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-muted);padding:13px 20px;text-align:left}
+  thead th.num{text-align:right}
+  tbody tr{border-bottom:1px solid var(--border);transition:background .15s}
+  tbody tr:last-child{border-bottom:none}
+  tbody tr:hover{background:var(--green-50)}
+  tbody tr.total-row{background:var(--surface-2);border-top:1.5px solid var(--border);font-weight:700}
+  tbody tr.total-row:hover{background:var(--green-100)}
+  tbody tr.bu-row{background:var(--surface-2)}
+  tbody tr.mes-row td{padding:8px 20px 8px 32px;font-size:12px;color:var(--ink-muted)}
+  tbody tr.mes-row:hover{background:var(--green-50)}
+  .sub-label{font-size:12px;color:var(--ink-muted)}
+  .sub-val{font-size:11.5px;color:var(--ink-muted)}
+  td{padding:13px 20px;font-size:13.5px;color:var(--ink)}
+  td.num{text-align:right;font-family:'JetBrains Mono',monospace;font-size:12.5px}
+
+  .badge{display:inline-block;padding:3px 10px;border-radius:20px;font-size:10.5px;font-weight:600}
+  .badge-trg{background:#dff2e8;color:#1e7040}
+  .badge-agro{background:#d6edf8;color:#1a5f8a}
+  .badge-drea{background:#f0e8ff;color:#5a2d9a}
+  .badge-total{background:var(--green-700);color:var(--white)}
+
+  .pct-bar-wrap{display:flex;align-items:center;gap:10px;justify-content:flex-end}
+  .pct-bar{width:70px;height:5px;background:var(--border);border-radius:3px;overflow:hidden}
+  .pct-bar-fill{height:100%;background:var(--green-400);border-radius:3px}
+  .pct-text{font-family:'JetBrains Mono',monospace;font-size:12px;min-width:38px;text-align:right}
+
+  .month-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:48px}
+  .month-card{background:var(--white);border:1.5px solid var(--border);border-radius:12px;padding:20px 18px;transition:transform .2s,box-shadow .2s;animation:fadeUp .5s ease both;animation-delay:.35s}
+  .month-card:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(46,145,86,.08)}
+  .month-name{font-size:10.5px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-muted);margin-bottom:10px;padding-bottom:10px;border-bottom:1px solid var(--border)}
+  .month-total-row{display:flex;justify-content:space-between;font-size:11.5px;color:var(--ink);margin-bottom:10px;padding-bottom:8px;border-bottom:1px dashed var(--border)}
+  .month-comp{color:var(--green-500);font-weight:600}
+  .month-bu-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:7px;gap:6px}
+  .month-bu-badge{flex-shrink:0}
+  .month-bu-stats{display:flex;flex-direction:column;align-items:flex-end;gap:1px}
+  .month-bu-stats span{font-family:'JetBrains Mono',monospace;font-size:10.5px;color:var(--ink-muted)}
+  .rev-small{color:var(--green-600)!important;font-weight:500!important}
+  .month-revenue{margin-top:10px;padding-top:10px;border-top:1px solid var(--border);font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:600;color:var(--green-600);text-align:right}
+
+  .note{background:#fffbeb;border:1px solid #f0d060;border-radius:8px;padding:14px 18px;font-size:12px;color:#7a5f10;margin-bottom:40px;line-height:1.7}
+  .note strong{color:#5a4200}
+
+  @keyframes fadeUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-left">
+    <h1>Nanofactor Global</h1>
+    <h2>Reporte de Agentes IA</h2>
+  </div>
+  <div class="header-right">
+    <div class="periodo">Periodo analizado<br><span>Febrero — Mayo 2026</span></div>
+  </div>
+</div>
+
+<div class="main">
+
+  <div class="section-title">Resumen General</div>
+  <div class="kpi-grid">
+    <div class="kpi-card highlight">
+      <div class="kpi-label">Usuarios Atendidos</div>
+      <div class="kpi-value">2,557</div>
+      <div class="kpi-sub">Total Nanofactor Global</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Compradores</div>
+      <div class="kpi-value">37</div>
+      <div class="kpi-sub">usuarios que convirtieron</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Tasa de Conversión</div>
+      <div class="kpi-value">1.4%</div>
+      <div class="kpi-sub">promedio global</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Ventas Generadas</div>
+      <div class="kpi-value">$31.9k</div>
+      <div class="kpi-sub">MXN confirmado</div>
+    </div>
+  </div>
+
+  <div class="section-title">Tiempo Ahorrado — 3 min promedio por conversación</div>
+  <div class="tiempo-grid">
+    <div class="tiempo-card">
+      <div class="tiempo-card-title">Total Horas Ahorradas</div>
+      <div class="tiempo-big">127.8 h</div>
+      <div class="tiempo-label">2,557 usuarios × 3 min</div>
+      <div class="tiempo-desglose">
+        <div class="tiempo-row"><span>Febrero 2026</span><span>34.1 h</span></div><div class="tiempo-row"><span>Marzo 2026</span><span>62.8 h</span></div><div class="tiempo-row"><span>Abril 2026</span><span>26.7 h</span></div><div class="tiempo-row"><span>Mayo 2026</span><span>4.3 h</span></div>
+      </div>
+    </div>
+    <div class="tiempo-card">
+      <div class="tiempo-card-title">Equivalente en Días Laborales</div>
+      <div class="tiempo-big">16.0</div>
+      <div class="tiempo-label">días de 8 horas de trabajo</div>
+      <div class="tiempo-desglose">
+        <div class="tiempo-row"><span>Costo est. agente humano</span><span>$350/día</span></div>
+        <div class="tiempo-row"><span>Ahorro estimado</span><span>$5,600 MXN</span></div>
+        <div class="tiempo-row"><span>Disponibilidad agente IA</span><span>24/7</span></div>
+        <div class="tiempo-row"><span>Resp. promedio humano</span><span>&gt;2 hrs</span></div>
+        <div class="tiempo-row"><span>Resp. agente IA</span><span>&lt;30 seg</span></div>
+      </div>
+    </div>
+    <div class="tiempo-card">
+      <div class="tiempo-card-title">Usuarios por Mes</div>
+      <div class="tiempo-big">639</div>
+      <div class="tiempo-label">promedio mensual atendidos</div>
+      <div class="tiempo-desglose">
+        <div class="tiempo-row"><span>Febrero 2026</span><span>682 usuarios</span></div><div class="tiempo-row"><span>Marzo 2026</span><span>1,255 usuarios</span></div><div class="tiempo-row"><span>Abril 2026</span><span>534 usuarios</span></div><div class="tiempo-row"><span>Mayo 2026</span><span>86 usuarios</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-title">Conversión por Unidad de Negocio</div>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Unidad / Mes</th>
+          <th class="num">Usuarios</th>
+          <th class="num">Compraron</th>
+          <th class="num">% Conversión</th>
+          <th class="num">Tasa</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr class="bu-row">
+          <td><span class="badge badge-trg">TRG</span></td>
+          <td class="num"><strong>502</strong></td>
+          <td class="num"><strong>33</strong></td>
+          <td class="num"><div class="pct-bar-wrap"><div class="pct-bar"><div class="pct-bar-fill" style="width:33.0%"></div></div><span class="pct-text">6.6%</span></div></td>
+          <td class="num" style="color:var(--green-500);font-weight:700;">6.6%</td>
+        </tr>
+        <tr class="mes-row">
+          <td class="sub-label">↳ Febrero 2026</td>
+          <td class="num sub-val">90</td>
+          <td class="num sub-val">8</td>
+          <td class="num sub-val"><div class="pct-bar-wrap"><div class="pct-bar"><div class="pct-bar-fill" style="width:44.5%"></div></div><span class="pct-text">8.9%</span></div></td>
+          <td class="num sub-val">8.9%</td>
+        </tr>
+        <tr class="mes-row">
+          <td class="sub-label">↳ Marzo 2026</td>
+          <td class="num sub-val">64</td>
+          <td class="num sub-val">10</td>
+          <td class="num sub-val"><div class="pct-bar-wrap"><div class="pct-bar"><div class="pct-bar-fill" style="width:78.0%"></div></div><span class="pct-text">15.6%</span></div></td>
+          <td class="num sub-val">15.6%</td>
+        </tr>
+        <tr class="mes-row">
+          <td class="sub-label">↳ Abril 2026</td>
+          <td class="num sub-val">289</td>
+          <td class="num sub-val">15</td>
+          <td class="num sub-val"><div class="pct-bar-wrap"><div class="pct-bar"><div class="pct-bar-fill" style="width:26.0%"></div></div><span class="pct-text">5.2%</span></div></td>
+          <td class="num sub-val">5.2%</td>
+        </tr>
+        <tr class="mes-row">
+          <td class="sub-label">↳ Mayo 2026</td>
+          <td class="num sub-val">59</td>
+          <td class="num sub-val">0</td>
+          <td class="num sub-val"><div class="pct-bar-wrap"><div class="pct-bar"><div class="pct-bar-fill" style="width:0.0%"></div></div><span class="pct-text">0.0%</span></div></td>
+          <td class="num sub-val">—</td>
+        </tr>
+        <tr class="bu-row">
+          <td><span class="badge badge-agro">Agrobotanix</span></td>
+          <td class="num"><strong>1,935</strong></td>
+          <td class="num"><strong>4</strong></td>
+          <td class="num"><div class="pct-bar-wrap"><div class="pct-bar"><div class="pct-bar-fill" style="width:1.0%"></div></div><span class="pct-text">0.2%</span></div></td>
+          <td class="num" style="color:var(--green-500);font-weight:700;">0.2%</td>
+        </tr>
+        <tr class="mes-row">
+          <td class="sub-label">↳ Febrero 2026</td>
+          <td class="num sub-val">592</td>
+          <td class="num sub-val">0</td>
+          <td class="num sub-val"><div class="pct-bar-wrap"><div class="pct-bar"><div class="pct-bar-fill" style="width:0.0%"></div></div><span class="pct-text">0.0%</span></div></td>
+          <td class="num sub-val">—</td>
+        </tr>
+        <tr class="mes-row">
+          <td class="sub-label">↳ Marzo 2026</td>
+          <td class="num sub-val">1,191</td>
+          <td class="num sub-val">1</td>
+          <td class="num sub-val"><div class="pct-bar-wrap"><div class="pct-bar"><div class="pct-bar-fill" style="width:0.5%"></div></div><span class="pct-text">0.1%</span></div></td>
+          <td class="num sub-val">0.1%</td>
+        </tr>
+        <tr class="mes-row">
+          <td class="sub-label">↳ Abril 2026</td>
+          <td class="num sub-val">138</td>
+          <td class="num sub-val">2</td>
+          <td class="num sub-val"><div class="pct-bar-wrap"><div class="pct-bar"><div class="pct-bar-fill" style="width:7.0%"></div></div><span class="pct-text">1.4%</span></div></td>
+          <td class="num sub-val">1.4%</td>
+        </tr>
+        <tr class="mes-row">
+          <td class="sub-label">↳ Mayo 2026</td>
+          <td class="num sub-val">14</td>
+          <td class="num sub-val">1</td>
+          <td class="num sub-val"><div class="pct-bar-wrap"><div class="pct-bar"><div class="pct-bar-fill" style="width:35.5%"></div></div><span class="pct-text">7.1%</span></div></td>
+          <td class="num sub-val">7.1%</td>
+        </tr>
+        <tr class="bu-row">
+          <td><span class="badge badge-drea">DREA</span></td>
+          <td class="num"><strong>120</strong></td>
+          <td class="num"><strong>0</strong></td>
+          <td class="num"><div class="pct-bar-wrap"><div class="pct-bar"><div class="pct-bar-fill" style="width:0.0%"></div></div><span class="pct-text">0.0%</span></div></td>
+          <td class="num">—</td>
+        </tr>
+        <tr class="mes-row">
+          <td class="sub-label">↳ Abril 2026</td>
+          <td class="num sub-val">107</td>
+          <td class="num sub-val">0</td>
+          <td class="num sub-val"><div class="pct-bar-wrap"><div class="pct-bar"><div class="pct-bar-fill" style="width:0.0%"></div></div><span class="pct-text">0.0%</span></div></td>
+          <td class="num sub-val">—</td>
+        </tr>
+        <tr class="mes-row">
+          <td class="sub-label">↳ Mayo 2026</td>
+          <td class="num sub-val">13</td>
+          <td class="num sub-val">0</td>
+          <td class="num sub-val"><div class="pct-bar-wrap"><div class="pct-bar"><div class="pct-bar-fill" style="width:0.0%"></div></div><span class="pct-text">0.0%</span></div></td>
+          <td class="num sub-val">—</td>
+        </tr>
+        <tr class="total-row">
+          <td><span class="badge badge-total">TOTAL</span></td>
+          <td class="num">2,557</td>
+          <td class="num">37</td>
+          <td class="num">—</td>
+          <td class="num" style="color:var(--green-600);font-weight:800;">1.4%</td>
+        </tr></tbody>
+    </table>
+  </div>
+
+  <div class="note">
+    <strong>Nota sobre Agrobotanix (feb–mar):</strong> Las ventas de este periodo se realizaron principalmente vía Mercado Libre, cuyas transacciones se registran en el sistema TRG. El análisis de conversión contra Shopify propio subestima el impacto real del agente en este periodo.
+  </div>
+
+  <div class="section-title">Ventas Generadas por Unidad de Negocio (MXN)</div>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Unidad / Mes</th>
+          <th class="num">Órdenes</th>
+          <th class="num">Ventas Generadas</th>
+          <th class="num">Ticket Promedio</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr class="bu-row">
+          <td><span class="badge badge-trg">TRG</span></td>
+          <td class="num"><strong>33</strong></td>
+          <td class="num" style="color:var(--green-600);font-weight:700;"><strong>$26,615.29</strong></td>
+          <td class="num">$806.52</td>
+        </tr>
+        <tr class="mes-row">
+          <td class="sub-label">↳ Febrero 2026</td>
+          <td class="num sub-val">8</td>
+          <td class="num sub-val">$6,814.57</td>
+          <td class="num sub-val">$851.82</td>
+        </tr>
+        <tr class="mes-row">
+          <td class="sub-label">↳ Marzo 2026</td>
+          <td class="num sub-val">10</td>
+          <td class="num sub-val">$7,630.99</td>
+          <td class="num sub-val">$763.10</td>
+        </tr>
+        <tr class="mes-row">
+          <td class="sub-label">↳ Abril 2026</td>
+          <td class="num sub-val">15</td>
+          <td class="num sub-val">$12,169.73</td>
+          <td class="num sub-val">$811.32</td>
+        </tr>
+        <tr class="mes-row">
+          <td class="sub-label">↳ Mayo 2026</td>
+          <td class="num sub-val">0</td>
+          <td class="num sub-val">$0.00</td>
+          <td class="num sub-val">—</td>
+        </tr>
+        <tr class="bu-row">
+          <td><span class="badge badge-agro">Agrobotanix</span></td>
+          <td class="num"><strong>4</strong></td>
+          <td class="num" style="color:var(--green-600);font-weight:700;"><strong>$5,315.00</strong></td>
+          <td class="num">$1,328.75</td>
+        </tr>
+        <tr class="mes-row">
+          <td class="sub-label">↳ Febrero 2026</td>
+          <td class="num sub-val">0</td>
+          <td class="num sub-val">$0.00</td>
+          <td class="num sub-val">—</td>
+        </tr>
+        <tr class="mes-row">
+          <td class="sub-label">↳ Marzo 2026</td>
+          <td class="num sub-val">1</td>
+          <td class="num sub-val">$979.00</td>
+          <td class="num sub-val">$979.00</td>
+        </tr>
+        <tr class="mes-row">
+          <td class="sub-label">↳ Abril 2026</td>
+          <td class="num sub-val">2</td>
+          <td class="num sub-val">$3,357.00</td>
+          <td class="num sub-val">$1,678.50</td>
+        </tr>
+        <tr class="mes-row">
+          <td class="sub-label">↳ Mayo 2026</td>
+          <td class="num sub-val">1</td>
+          <td class="num sub-val">$979.00</td>
+          <td class="num sub-val">$979.00</td>
+        </tr>
+        <tr class="bu-row">
+          <td><span class="badge badge-drea">DREA</span></td>
+          <td class="num"><strong>0</strong></td>
+          <td class="num" ><strong>$0.00</strong></td>
+          <td class="num">—</td>
+        </tr>
+        <tr class="mes-row">
+          <td class="sub-label">↳ Abril 2026</td>
+          <td class="num sub-val">0</td>
+          <td class="num sub-val">$0.00</td>
+          <td class="num sub-val">—</td>
+        </tr>
+        <tr class="mes-row">
+          <td class="sub-label">↳ Mayo 2026</td>
+          <td class="num sub-val">0</td>
+          <td class="num sub-val">$0.00</td>
+          <td class="num sub-val">—</td>
+        </tr>
+        <tr class="total-row">
+          <td><span class="badge badge-total">TOTAL</span></td>
+          <td class="num">37</td>
+          <td class="num" style="color:var(--green-600);font-weight:800;">$31,930.29</td>
+          <td class="num">$862.98</td>
+        </tr></tbody>
+    </table>
+  </div>
+
+  <div class="section-title">Desglose Mensual por Unidad de Negocio</div>
+  <div class="month-grid">
+    <div class="month-card">
+      <div class="month-name">Febrero 2026</div>
+
+      <div class="month-bu-row">
+        <span class="month-bu-badge"><span class="badge badge-trg">TRG</span></span>
+        <div class="month-bu-stats">
+          <span>90 usu. · <span style="color:var(--green-500);font-weight:600;">8 compraron</span></span>
+          <span class="rev-small">$6,814.57</span>
+        </div>
+      </div>
+      <div class="month-bu-row">
+        <span class="month-bu-badge"><span class="badge badge-agro">Agrobotanix</span></span>
+        <div class="month-bu-stats">
+          <span>592 usu. · <span style="color:var(--ink-muted);">0 compraron</span></span>
+          <span class="rev-small">$0.00</span>
+        </div>
+      </div>
+      <div class="month-revenue">Ventas generadas: $6,814.57</div>
+    </div>
+    <div class="month-card">
+      <div class="month-name">Marzo 2026</div>
+
+      <div class="month-bu-row">
+        <span class="month-bu-badge"><span class="badge badge-trg">TRG</span></span>
+        <div class="month-bu-stats">
+          <span>64 usu. · <span style="color:var(--green-500);font-weight:600;">10 compraron</span></span>
+          <span class="rev-small">$7,630.99</span>
+        </div>
+      </div>
+      <div class="month-bu-row">
+        <span class="month-bu-badge"><span class="badge badge-agro">Agrobotanix</span></span>
+        <div class="month-bu-stats">
+          <span>1,191 usu. · <span style="color:var(--green-500);font-weight:600;">1 compraron</span></span>
+          <span class="rev-small">$979.00</span>
+        </div>
+      </div>
+      <div class="month-revenue">Ventas generadas: $8,609.99</div>
+    </div>
+    <div class="month-card">
+      <div class="month-name">Abril 2026</div>
+
+      <div class="month-bu-row">
+        <span class="month-bu-badge"><span class="badge badge-trg">TRG</span></span>
+        <div class="month-bu-stats">
+          <span>289 usu. · <span style="color:var(--green-500);font-weight:600;">15 compraron</span></span>
+          <span class="rev-small">$12,169.73</span>
+        </div>
+      </div>
+      <div class="month-bu-row">
+        <span class="month-bu-badge"><span class="badge badge-agro">Agrobotanix</span></span>
+        <div class="month-bu-stats">
+          <span>138 usu. · <span style="color:var(--green-500);font-weight:600;">2 compraron</span></span>
+          <span class="rev-small">$3,357.00</span>
+        </div>
+      </div>
+      <div class="month-bu-row">
+        <span class="month-bu-badge"><span class="badge badge-drea">DREA</span></span>
+        <div class="month-bu-stats">
+          <span>107 usu. · <span style="color:var(--ink-muted);">0 compraron</span></span>
+          <span class="rev-small">$0.00</span>
+        </div>
+      </div>
+      <div class="month-revenue">Ventas generadas: $15,526.73</div>
+    </div>
+    <div class="month-card">
+      <div class="month-name">Mayo 2026</div>
+
+      <div class="month-bu-row">
+        <span class="month-bu-badge"><span class="badge badge-trg">TRG</span></span>
+        <div class="month-bu-stats">
+          <span>59 usu. · <span style="color:var(--ink-muted);">0 compraron</span></span>
+          <span class="rev-small">$0.00</span>
+        </div>
+      </div>
+      <div class="month-bu-row">
+        <span class="month-bu-badge"><span class="badge badge-agro">Agrobotanix</span></span>
+        <div class="month-bu-stats">
+          <span>14 usu. · <span style="color:var(--green-500);font-weight:600;">1 compraron</span></span>
+          <span class="rev-small">$979.00</span>
+        </div>
+      </div>
+      <div class="month-bu-row">
+        <span class="month-bu-badge"><span class="badge badge-drea">DREA</span></span>
+        <div class="month-bu-stats">
+          <span>13 usu. · <span style="color:var(--ink-muted);">0 compraron</span></span>
+          <span class="rev-small">$0.00</span>
+        </div>
+      </div>
+      <div class="month-revenue">Ventas generadas: $979.00</div>
+    </div></div>
+
+</div>
+</body>
+</html>
