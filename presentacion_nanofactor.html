@@ -45,7 +45,7 @@
   .kpi-hero-card:nth-child(1){animation-delay:.05s}.kpi-hero-card:nth-child(2){animation-delay:.1s}.kpi-hero-card:nth-child(3){animation-delay:.15s}.kpi-hero-card:nth-child(4){animation-delay:.2s}
 
   /* Impact summary */
-  .impact-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:56px}
+  .impact-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:56px}
   .impact-card{background:var(--white);border:1.5px solid var(--border);border-radius:12px;padding:22px 20px;animation:fadeUp .5s ease both;animation-delay:.25s}
   .impact-card-title{font-size:10.5px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-muted);margin-bottom:14px;padding-bottom:10px;border-bottom:1px solid var(--border)}
   .impact-big{font-size:32px;font-weight:800;color:var(--green-600);line-height:1;margin-bottom:4px}
@@ -120,7 +120,7 @@
     <div class="kpi-hero-card">
       <div class="kpi-label">Ahorro en Licencias</div>
       <div class="kpi-value">$197.6k</div>
-      <div class="kpi-sub">MXN/año · consolidación Zoho (Esto no incluye el tema del ERP (Finanzas (Books) y Logística (Inventory) ))</div>
+      <div class="kpi-sub">MXN/año · consolidación Zoho (No incluye el ERP (Finanzas y Logística))</div>
     </div>
     <div class="kpi-hero-card">
       <div class="kpi-label">Horas Humanas Liberadas</div>
@@ -130,7 +130,6 @@
     <div class="kpi-hero-card">
       <div class="kpi-label">Usuarios Atendidos por IA</div>
       <div class="kpi-value">2,557</div>
-      <div class="kpi-sub">sin intervención humana</div>
     </div>
   </div>
 
@@ -153,10 +152,22 @@
       <div class="impact-big">$35,315.65</div>
       <div class="impact-label">MXN en revenue post-recordatorio</div>
       <div class="impact-rows">
-        <div class="impact-row"><span>Clientes en el programa</span><span>465</span></div>
-        <div class="impact-row"><span>Respondieron positivamente</span><span>90.3%</span></div>
-        <div class="impact-row"><span>Recompraron</span><span>25 (5.4%)</span></div>
-        <div class="impact-row"><span>Productos top</span><span>Enraizantes, Hongos</span></div>
+        <div class="impact-row"><span>Total contactados</span><span>595</span></div>
+        <div class="impact-row"><span>Respondieron sí</span><span>152 (25.5%)</span></div>
+        <div class="impact-row"><span>Rechazaron</span><span>83 (13.9%)</span></div>
+        <div class="impact-row"><span>No respondieron</span><span>360 (60.5%)</span></div>
+        <div class="impact-row"><span>Recompraron</span><span>25 (4.2%)</span></div>
+      </div>
+    </div>
+    <div class="impact-card">
+      <div class="impact-card-title">Generador de Anuncios</div>
+      <div class="impact-big">1.2 días</div>
+      <div class="impact-label">laborales ahorrados al mes</div>
+      <div class="impact-rows">
+        <div class="impact-row"><span>Imágenes generadas/mes</span><span>300</span></div>
+        <div class="impact-row"><span>Sin herramienta</span><span>10.0 hrs/mes</span></div>
+        <div class="impact-row"><span>Con bulk</span><span>~15 min/mes</span></div>
+        <div class="impact-row"><span>Horas ahorradas/mes</span><span>9.8 h</span></div>
       </div>
     </div>
     <div class="impact-card">
@@ -164,10 +175,11 @@
       <div class="impact-big">$16,468</div>
       <div class="impact-label">MXN ahorro neto mensual en licencias</div>
       <div class="impact-rows">
-        <div class="impact-row"><span>Plataformas eliminadas</span><span>8</span></div>
-        <div class="impact-row"><span>Ahorro bruto mensual</span><span>$31,468</span></div>
-        <div class="impact-row"><span>Costo Zoho One (25 usu.)</span><span>$15,000</span></div>
+        <div class="impact-row"><span>Plataformas consolidadas</span><span>8 → 1</span></div>
+        <div class="impact-row"><span>Costo Zoho One (25 usu.)</span><span>$15,000/mes</span></div>
+        <div class="impact-row"><span>Ahorro neto mensual</span><span>$16,468</span></div>
         <div class="impact-row"><span>Ahorro anual</span><span>$197,615</span></div>
+        <div class="impact-row"><span>No incluye ERP</span><span>Books + Inventory</span></div>
       </div>
     </div>
   </div>
@@ -198,20 +210,20 @@
       <p class="proyecto-desc">Sistema automatizado que envía recordatorios personalizados a clientes después de su compra para asegurar el uso correcto del producto y fomentar la recompra.</p>
       <div class="proyecto-impacto">
         <div class="impacto-title">Impacto</div>
-        <ul class="impacto-list"><li>465 clientes en el programa</li><li>90.3% respondieron positivamente</li><li>25 recompraron (5.4% tasa)</li><li>$35,315.65 MXN en revenue post-recordatorio</li><li>Desglose por producto: enraizantes, hongos, bio-fertilizantes</li></ul>
+        <ul class="impacto-list"><li>595 clientes contactados</li><li>152 respondieron positivamente (25.5%)</li><li>83 rechazaron el recordatorio (13.9%)</li><li>360 no respondieron (60.5%)</li><li>25 recompraron (4.2%)</li><li>$35,315.65 MXN en revenue post-recordatorio</li></ul>
       </div>
     </div>
     <div class="proyecto-card">
       <div class="proyecto-header">
         <div>
           <div class="proyecto-bus"><span class="bu-tag">Corporativo</span><span class="estado-badge estado-listo">Implementado</span></div>
-          <h3 class="proyecto-nombre">Consolidación Tecnológica — Zoho One (No incluye el ERP (Finanzas (Books) y Logística (Inventory) ))</h3>
+          <h3 class="proyecto-nombre">Consolidación Tecnológica — Zoho One</h3>
         </div>
       </div>
-      <p class="proyecto-desc">Migración y unificación de 8 plataformas separadas (Slack, Google Suite, Sesame, Monday, Zapier, HotJar, Albato, Prome IA) a un ecosistema integrado en Zoho One.</p>
+      <p class="proyecto-desc">Migración y unificación de 8 plataformas separadas (Slack, Google Suite, Sesame, Monday, Zapier, Albato y otras) a un ecosistema integrado en Zoho One.</p>
       <div class="proyecto-impacto">
         <div class="impacto-title">Impacto</div>
-        <ul class="impacto-list"><li>8 plataformas eliminadas → $31,468 MXN/mes ahorrado</li><li>Zoho One: $15,000 MXN/mes (25 usuarios)</li><li>Ahorro neto: $16,468 MXN/mes</li><li>$197,615 MXN/año en licencias</li><li>CRM + RH + Analytics + Comunicación en una sola plataforma</li></ul>
+        <ul class="impacto-list"><li>8 plataformas consolidadas en Zoho One</li><li>Zoho One: $15,000 MXN/mes (25 usuarios)</li><li>Ahorro neto: $16,468 MXN/mes vs plataformas anteriores</li><li>$197,615 MXN/año en licencias</li><li>No incluye ERP: Finanzas (Books) y Logística (Inventory)</li><li>CRM + RH + Analytics + Comunicación en una sola plataforma</li></ul>
       </div>
     </div>
     <div class="proyecto-card">
@@ -237,7 +249,7 @@
       <p class="proyecto-desc">Base de datos estructurada con cultivos, enfermedades, hongos, bacterias, virus y síntomas. Alimenta al agente de IA con conocimiento experto para diagnóstico en tiempo real.</p>
       <div class="proyecto-impacto">
         <div class="impacto-title">Impacto</div>
-        <ul class="impacto-list"><li>Diagnóstico experto de cultivos vía WhatsApp</li><li>Cubre enfermedades, plagas, hongos, bacterias y virus</li><li>Diferenciador competitivo único en el mercado</li><li>Base para futuras fases de recomendación de productos</li></ul>
+        <ul class="impacto-list"><li>Diagnóstico experto de cultivos vía WhatsApp</li><li>Cubre enfermedades, plagas, hongos, bacterias y virus</li><li>Diferenciador competitivo único en el mercado</li></ul>
       </div>
     </div>
     <div class="proyecto-card">
@@ -250,7 +262,7 @@
       <p class="proyecto-desc">Tablero de impacto para el área de sustentabilidad. Mide el crecimiento mensual de clientes, muestra su distribución geográfica en mapa y consolida el histórico de Shopify.</p>
       <div class="proyecto-impacto">
         <div class="impacto-title">Impacto</div>
-        <ul class="impacto-list"><li>Herramienta nueva — no existía antes</li><li>Visualización geográfica de clientes activos</li><li>Histórico de ventas integrado con Shopify</li><li>Listo para presentaciones a directivos y clientes</li></ul>
+        <ul class="impacto-list"><li>Visualización geográfica de clientes activos</li><li>Histórico de ventas integrado con Shopify</li><li>Listo para presentaciones a directivos y clientes</li></ul>
       </div>
     </div>
     <div class="proyecto-card">
@@ -263,7 +275,7 @@
       <p class="proyecto-desc">Implementación de reglas de directivas, modalidades home/oficina, control de asistencias y tablero de RH en Zoho Analytics para las 24 personas de la empresa.</p>
       <div class="proyecto-impacto">
         <div class="impacto-title">Impacto</div>
-        <ul class="impacto-list"><li>Control de asistencias centralizado para 24 personas</li><li>Tablero RH en tiempo real en Zoho Analytics</li><li>Reglas de directivas y ubicaciones configuradas</li><li>Migración desde Sesame completada</li></ul>
+        <ul class="impacto-list"><li>Control de asistencias centralizado para las personas en la empresa</li><li>Tablero RH en Zoho Analytics · actualizado diariamente a las 8:30 pm</li><li>Reglas de directivas, permisos y ubicaciones configuradas</li><li>Apoyo al área en la configuración de Zoho Recruiter (Linkedin e Indeed)</li><li>Migración desde Sesame completada</li></ul>
       </div>
     </div>
     <div class="proyecto-card">
@@ -285,7 +297,7 @@
   <div class="propuestas-grid">
     <div class="propuesta-card">
       <h3 class="propuesta-nombre">Agente Corporativo Interno</h3>
-      <p class="propuesta-desc">Agente WhatsApp para los 24 empleados de Nanofactor Global. Experto en las 3 unidades de negocio.</p>
+      <p class="propuesta-desc">Agente WhatsApp para los empleados de Nanofactor Global. Experto en las 3 unidades de negocio.</p>
       <div class="propuesta-caps">
         <div class="caps-title">Capacidades</div>
         <ul class="caps-list"><li>Consultar ventas diarias por BU</li><li>Solicitar reportes existentes o previamente solicitados al área</li><li>Organizar y agendar reuniones (Zoho Calendar)</li><li>Check-in y check-out de asistencia (Zoho People API)</li><li>Subir y recibir documentos vía WhatsApp → Zoho WorkDrive</li><li>Evidencias fotográficas del campo (Agrobotanix)</li><li>Capacitación de nuevos empleados sobre las 3 BUs</li><li>Responder dudas sobre productos, procesos y operaciones</li></ul>
@@ -303,7 +315,7 @@
         <ul class="caps-list"><li>Recopilación de síntomas y evolución del paciente</li><li>Registro estructurado de casos clínicos</li><li>Almacenamiento de evidencias fotográficas</li><li>Seguimiento longitudinal del progreso</li><li>Base de datos para investigación clínica</li></ul>
       </div>
       <div class="propuesta-footer">
-        <div class="propuesta-impacto"><strong>Impacto esperado:</strong> Acelera la investigación clínica · Genera datos estructurados de campo · Soporte al área médica de DREA</div>
+        <div class="propuesta-impacto"><strong>Impacto esperado:</strong> Acelera la investigación clínica · Genera datos estructurados de campo · Soporte al área médica de DREA · Se ahorra el sueldo de una persona que tendría que hacer este proceso.</div>
         <div class="propuesta-viab"><strong>Viabilidad:</strong> Alta — mismo stack que agentes actuales</div>
       </div>
     </div>
@@ -325,7 +337,7 @@
     <div>
       <div class="cierre-title">Resumen Ejecutivo</div>
       <div class="cierre-sub">
-        La inversión en tecnología e IA ha generado impacto medible y directo en el estado de resultados de Nanofactor Global.
+        La inversión en tecnología e IA ha generado impacto medible y directo en Nanofactor Global.
         Los agentes y sistemas implementados no solo generan ventas y ahorran costos hoy — construyen la infraestructura
         para escalar sin aumentar proporcionalmente el equipo humano.
       </div>
@@ -352,6 +364,47 @@
         <span class="cierre-stat-value">3 propuestas listas</span>
       </div>
     </div>
+  </div>
+
+  <!-- Valor de mercado -->
+  <div class="section-title section-gap" style="margin-top:48px">¿Qué costaría esto en el mercado?</div>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Proyecto / Entregable</th>
+          <th class="num">Costo estimado de mercado</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>
+            <strong>Migración tecnológica — Zoho One</strong><br>
+            <span style="font-size:12px;color:var(--ink-muted)">Unificación de 8 plataformas. Configuración de CRM, RH, Analytics y comunicación. Sin contemplar ERP.</span>
+          </td>
+          <td class="num" style="color:var(--green-600);font-weight:700;white-space:nowrap">$80,000 — $120,000 MXN</td>
+        </tr>
+        <tr>
+          <td>
+            <strong>Arquitectura de Agentes IA + Infraestructura de Datos</strong><br>
+            <span style="font-size:12px;color:var(--ink-muted)">Diseño completo del esquema de bases de datos para asistencias, ventas brutas, unidades de negocio, conversaciones, notificaciones y bases de memoria. Agentes con memoria, escalación a humano, bases de conocimiento y pipelines de integración con Shopify.</span>
+          </td>
+          <td class="num" style="color:var(--green-600);font-weight:700;white-space:nowrap">$450,000 — $650,000 MXN</td>
+        </tr>
+        <tr>
+          <td>
+            <strong>Sistema de Recordatorios Post-Venta</strong><br>
+            <span style="font-size:12px;color:var(--ink-muted)">Desarrollo a medida con tracking de recompra, segmentación por producto y métricas de engagement.</span>
+          </td>
+          <td class="num" style="color:var(--green-600);font-weight:700;white-space:nowrap">$80,000 — $110,000 MXN</td>
+        </tr>
+        <tr style="background:var(--surface-2);font-weight:700;border-top:1.5px solid var(--border)">
+          <td><strong>Total estimado de mercado</strong><br>
+          <span style="font-size:12px;color:var(--ink-muted);font-weight:400">Equivalente a un equipo de 3 desarrolladores mid-senior durante 6 meses · Desarrollado internamente por una sola persona</span>
+          <td class="num" style="color:var(--green-700);font-size:16px;font-weight:800;white-space:nowrap">$610,000 — $880,000 MXN</td>
+        </tr>
+      </tbody>
+    </table>
   </div>
 
 </div>
