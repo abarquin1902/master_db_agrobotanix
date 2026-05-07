@@ -1,0 +1,2861 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Carritos Abandonados — The Real Green</title>
+<style>
+  :root {
+    --green: #2e7d32;
+    --green-light: #43a047;
+    --green-pale: #e8f5e9;
+    --green-mid: #a5d6a7;
+    --accent: #ff6f00;
+    --bg: #f5f5f5;
+    --card: #ffffff;
+    --text: #212121;
+    --muted: #757575;
+    --border: #e0e0e0;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); color: var(--text); }
+
+  header {
+    background: linear-gradient(135deg, var(--green) 0%, var(--green-light) 100%);
+    color: #fff;
+    padding: 28px 40px 24px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+  header .logo { font-size: 2rem; }
+  header h1 { font-size: 1.6rem; font-weight: 700; }
+  header .subtitle { font-size: 0.85rem; opacity: 0.85; margin-top: 2px; }
+  header .updated { margin-left: auto; font-size: 0.8rem; opacity: 0.8; text-align: right; }
+
+  .kpis {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 16px;
+    padding: 28px 40px 0;
+  }
+  .kpi {
+    background: var(--card);
+    border-radius: 12px;
+    padding: 20px 24px;
+    box-shadow: 0 1px 4px rgba(0,0,0,.08);
+    border-left: 4px solid var(--green-light);
+  }
+  .kpi .label { font-size: 0.78rem; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); }
+  .kpi .value { font-size: 2rem; font-weight: 700; color: var(--green); margin-top: 4px; }
+  .kpi.accent { border-left-color: var(--accent); }
+  .kpi.accent .value { color: var(--accent); }
+
+  .section { padding: 28px 40px; }
+  .section h2 { font-size: 1.1rem; font-weight: 600; margin-bottom: 16px; color: var(--green); }
+
+  /* Top productos */
+  .prod-card {
+    background: var(--card);
+    border-radius: 12px;
+    padding: 24px;
+    box-shadow: 0 1px 4px rgba(0,0,0,.08);
+  }
+  .prod-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 12px;
+    font-size: 0.88rem;
+  }
+  .prod-rank { width: 26px; color: var(--muted); font-size: 0.75rem; }
+  .prod-name { width: 240px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .prod-bar-wrap { flex: 1; background: var(--green-pale); border-radius: 4px; height: 10px; overflow: hidden; }
+  .prod-bar { height: 100%; background: var(--green-light); border-radius: 4px; transition: width .3s; }
+  .prod-qty { width: 32px; text-align: right; font-weight: 600; color: var(--green); }
+
+  /* Tabla */
+  .table-wrap {
+    background: var(--card);
+    border-radius: 12px;
+    box-shadow: 0 1px 4px rgba(0,0,0,.08);
+    overflow: hidden;
+  }
+  .table-controls {
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    gap: 12px;
+    align-items: center;
+  }
+  .table-controls input {
+    flex: 1;
+    max-width: 320px;
+    padding: 8px 12px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    font-size: 0.9rem;
+    outline: none;
+  }
+  .table-controls input:focus { border-color: var(--green-light); }
+  .count-badge {
+    font-size: 0.8rem;
+    background: var(--green-pale);
+    color: var(--green);
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-weight: 600;
+  }
+
+  table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+  thead tr { background: var(--green-pale); }
+  th { padding: 12px 14px; text-align: left; font-weight: 600; color: var(--green); font-size: 0.78rem; text-transform: uppercase; letter-spacing: .04em; white-space: nowrap; }
+  td { padding: 11px 14px; border-bottom: 1px solid var(--border); vertical-align: middle; }
+  tbody tr:last-child td { border-bottom: none; }
+  tbody tr:hover { background: #fafafa; }
+
+  .money { font-weight: 700; color: var(--green); }
+  .email-chip {
+    background: var(--green-pale);
+    color: var(--green);
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-size: 0.78rem;
+    font-family: monospace;
+  }
+  .products-cell { max-width: 220px; color: var(--muted); }
+  .btn-recover {
+    background: var(--accent);
+    color: #fff;
+    padding: 4px 12px;
+    border-radius: 6px;
+    text-decoration: none;
+    font-size: 0.78rem;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+  .btn-recover:hover { background: #e65100; }
+
+  .empty { padding: 48px; text-align: center; color: var(--muted); font-size: 1rem; }
+
+  footer { text-align: center; padding: 24px 40px; color: var(--muted); font-size: 0.78rem; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">🌿</div>
+  <div>
+    <h1>Carritos Abandonados — The Real Green</h1>
+    <div class="subtitle">Shopify • the-real-greenn.myshopify.com</div>
+  </div>
+  <div class="updated">Actualizado<br>07/05/2026 16:30 (CDMX)</div>
+</header>
+
+<div class="kpis">
+  <div class="kpi accent">
+    <div class="label">Carritos abandonados</div>
+    <div class="value">257</div>
+  </div>
+  <div class="kpi">
+    <div class="label">Valor potencial total</div>
+    <div class="value">$144,641.12</div>
+  </div>
+  <div class="kpi">
+    <div class="label">Total de productos</div>
+    <div class="value">449</div>
+  </div>
+  <div class="kpi">
+    <div class="label">Clientes recurrentes</div>
+    <div class="value">12</div>
+  </div>
+  <div class="kpi">
+    <div class="label">Ticket promedio</div>
+    <div class="value">$562.81</div>
+  </div>
+</div>
+
+<div class="section">
+  <h2>Top productos abandonados</h2>
+  <div class="prod-card">
+    
+        <div class="prod-row">
+          <span class="prod-rank">#1</span>
+          <span class="prod-name">Auxiliar para el control de plagas</span>
+          <div class="prod-bar-wrap"><div class="prod-bar" style="width:100%"></div></div>
+          <span class="prod-qty">106</span>
+        </div>
+        <div class="prod-row">
+          <span class="prod-rank">#2</span>
+          <span class="prod-name">Enraizante para orquídeas</span>
+          <div class="prod-bar-wrap"><div class="prod-bar" style="width:74%"></div></div>
+          <span class="prod-qty">79</span>
+        </div>
+        <div class="prod-row">
+          <span class="prod-rank">#3</span>
+          <span class="prod-name">Bio-fertilizante nutritivo</span>
+          <div class="prod-bar-wrap"><div class="prod-bar" style="width:71%"></div></div>
+          <span class="prod-qty">76</span>
+        </div>
+        <div class="prod-row">
+          <span class="prod-rank">#4</span>
+          <span class="prod-name">Auxiliar para el control de hongos, virus y bacterias</span>
+          <div class="prod-bar-wrap"><div class="prod-bar" style="width:46%"></div></div>
+          <span class="prod-qty">49</span>
+        </div>
+        <div class="prod-row">
+          <span class="prod-rank">#5</span>
+          <span class="prod-name">Enraizante y mejorador de suelos</span>
+          <div class="prod-bar-wrap"><div class="prod-bar" style="width:32%"></div></div>
+          <span class="prod-qty">34</span>
+        </div>
+        <div class="prod-row">
+          <span class="prod-rank">#6</span>
+          <span class="prod-name">Enraizante para orquídeas Concentrado</span>
+          <div class="prod-bar-wrap"><div class="prod-bar" style="width:22%"></div></div>
+          <span class="prod-qty">24</span>
+        </div>
+        <div class="prod-row">
+          <span class="prod-rank">#7</span>
+          <span class="prod-name">Sustrato para plantas de interior 3L</span>
+          <div class="prod-bar-wrap"><div class="prod-bar" style="width:21%"></div></div>
+          <span class="prod-qty">23</span>
+        </div>
+        <div class="prod-row">
+          <span class="prod-rank">#8</span>
+          <span class="prod-name">Bio-fertilizante nutritivo Concentrado</span>
+          <div class="prod-bar-wrap"><div class="prod-bar" style="width:21%"></div></div>
+          <span class="prod-qty">23</span>
+        </div>
+        <div class="prod-row">
+          <span class="prod-rank">#9</span>
+          <span class="prod-name">Sustrato para orquídeas 3L</span>
+          <div class="prod-bar-wrap"><div class="prod-bar" style="width:18%"></div></div>
+          <span class="prod-qty">20</span>
+        </div>
+        <div class="prod-row">
+          <span class="prod-rank">#10</span>
+          <span class="prod-name">Bolsa "Quien tiene plantas... su mal espanta"</span>
+          <div class="prod-bar-wrap"><div class="prod-bar" style="width:10%"></div></div>
+          <span class="prod-qty">11</span>
+        </div>
+  </div>
+</div>
+
+<div class="section">
+  <h2>Detalle de carritos</h2>
+  <div class="table-wrap">
+    <div class="table-controls">
+      <input type="text" id="searchInput" placeholder="Buscar por nombre, email o producto…" onkeyup="filterTable()">
+      <span class="count-badge" id="rowCount">257 carritos</span>
+    </div>
+    
+    <table id="mainTable">
+      <thead>
+        <tr>
+          <th>Cliente</th>
+          <th>Email</th>
+          <th>Total</th>
+          <th>Productos</th>
+          <th>Descripción</th>
+          <th>Creado</th>
+          <th>Último cambio</th>
+          <th>Acción</th>
+        </tr>
+      </thead>
+      <tbody id="tableBody">
+        
+        <tr>
+          <td>Cynthia Yolanda Vazquez Montoya</td>
+          <td><span class="email-chip">yolandavazquezjv@gmail.com</span></td>
+          <td class="money">$730.00</td>
+          <td>2</td>
+          <td class="products-cell" title="Biofertilizante concentrado 125 mililitros, Kit plantas felices (chico)">Biofertilizante concentrado 125 mililitros, Kit plantas feli…</td>
+          <td>02/03/2023 00:09</td>
+          <td>04/03/2023 22:15</td>
+          <td><a href="https://therealgreenn.com/67162145044/checkouts/ac/ece4c53432bdde1d2624687dc6e9a4e0/recover?key=0bf5f25cdf54a1f0e1fb87e4260d5ed8&locale=es-MX" target="_blank" class="btn-recover">Recuperar</a></td>
+        </tr>
+        <tr>
+          <td>Graciela Stivalet</td>
+          <td><span class="email-chip">stivaletgraciela@gmail.com</span></td>
+          <td class="money">$275.00</td>
+          <td>1</td>
+          <td class="products-cell" title="Enraizante para orquídeas 60ml">Enraizante para orquídeas 60ml</td>
+          <td>24/05/2023 18:58</td>
+          <td>25/05/2023 11:06</td>
+          <td><a href="https://therealgreenn.com/67162145044/checkouts/ac/e08abf5f3325b8dc8bfd29a0e4b311ce/recover?key=ff4b412d507a6f591df39c5650b2e937&locale=es-MX" target="_blank" class="btn-recover">Recuperar</a></td>
+        </tr>
+        <tr>
+          <td>Tonatiuh Aguilera García</td>
+          <td><span class="email-chip">tona.aguilera@gmail.com</span></td>
+          <td class="money">$600.00</td>
+          <td>1</td>
+          <td class="products-cell" title="Kit plantas felices (chico)">Kit plantas felices (chico)</td>
+          <td>17/07/2023 22:19</td>
+          <td>19/07/2023 23:08</td>
+          <td><a href="https://therealgreenn.com/67162145044/checkouts/ac/4ef0e222fc8be54f18ffff031717fcf6/recover?key=009af380e88c9644fcea3479acd1e8ed&locale=es-MX" target="_blank" class="btn-recover">Recuperar</a></td>
+        </tr>
+        <tr>
+          <td>Paola Vazquez</td>
+          <td><span class="email-chip">paola.vazquezg@gmail.com</span></td>
+          <td class="money">$1,385.50</td>
+          <td>3</td>
+          <td class="products-cell" title="Kit césped verde, Enraizante para orquídeas 60ml, Kit plantas felices (chico)">Kit césped verde, Enraizante para orquídeas 60ml, Kit planta…</td>
+          <td>14/08/2023 11:47</td>
+          <td>14/08/2023 22:41</td>
+          <td><a href="https://therealgreenn.com/67162145044/checkouts/ac/c1-da54cda3e9b6bc846508bdb4fb1d6437/recover?key=32baee1c919e2b1e2db8c62450eef8d6&locale=es" target="_blank" class="btn-recover">Recuperar</a></td>
+        </tr>
+        <tr>
+          <td>Kaby Vallejo</td>
+          <td><span class="email-chip">kaby@proyectopixel.com</span></td>
+          <td class="money">$260.86</td>
+          <td>1</td>
+          <td class="products-cell" title="Auxiliar para el control de hongos, virus y bacterias - 480 mililitros">Auxiliar para el control de hongos, virus y bacterias - 480 …</td>
+          <td>17/09/2023 09:46</td>
+          <td>19/09/2023 06:24</td>
+          <td><a href="https://therealgreenn.com/67162145044/checkouts/ac/c1-eff923ab04bd7eec21f540c76e5f0cb5/recover?key=5d8b5cc3ee7dbfcc198cdc7651fcd3bf&locale=es" target="_blank" class="btn-recover">Recuperar</a></td>
+        </tr>
+        <tr>
+          <td>Mariana Sánchez</td>
+          <td><span class="email-chip">m.sanchezl1924@gmail.com</span></td>
+          <td class="money">$265.00</td>
+          <td>1</td>
+          <td class="products-cell" title="Auxiliar para el control de insectos 960 mililitros">Auxiliar para el control de insectos 960 mililitros</td>
+          <td>09/10/2023 19:13</td>
+          <td>23/10/2023 09:57</td>
+          <td><a href="https://therealgreenn.com/67162145044/checkouts/ac/c1-587c4227fc3afe5923a31e1cc4b10504/recover?key=66ea291514da5745c0cbc7ec9104cdb0&locale=es-MX" target="_blank" class="btn-recover">Recuperar</a></td>
+        </tr>
+        <tr>
+          <td>Amy Mason</td>
+          <td><span class="email-chip">amymason1912@gmail.com</span></td>
+          <td class="money">$820.00</td>
+          <td>2</td>
+          <td class="products-cell" title="Enraizante para orquídeas 60ml, Kit plantas felices (chico)">Enraizante para orquídeas 60ml, Kit plantas felices (chico)</td>
+          <td>13/10/2023 16:25</td>
+          <td>14/10/2023 12:17</td>
+          <td><a href="https://therealgreenn.com/67162145044/checkouts/ac/c1-664065edb1add27d9e1f588127159eab/recover?key=3738784081eb1fefe5ae272d420c6571&locale=es-MX" target="_blank" class="btn-recover">Recuperar</a></td>
+        </tr>
+        <tr>
+          <td>Luis Manuel López Pérez</td>
+          <td><span class="email-chip">luismanuellopez.perez@gmail.com</span></td>
+          <td class="money">$610.86</td>
+          <td>2</td>
+          <td class="products-cell" title="Bio-fertilizante nutritivo, Auxiliar para el control de hongos, virus y bacterias">Bio-fertilizante nutritivo, Auxiliar para el control de hong…</td>
+          <td>08/01/2024 20:14</td>
+          <td>13/01/2024 13:30</td>
+          <td><a href="https://www.therealgreen.com.mx/67162145044/checkouts/ac/Z2NwLXVzLWNlbnRyYWwxOjAxSEtOWE1ORlM3WjEyME5YWlo5MzlSQjY2/recover?key=ef2a738583676650dafcfacf782bb167&locale=es-MX" target="_blank" class="btn-recover">Recuperar</a></td>
+        </tr>
+        <tr>
+          <td>Mirna del carmen Contreras Damian</td>
+          <td><span class="email-chip">mirnacontreras9@hotmail.com</span></td>
+          <td class="money">$255.00</td>
+          <td>1</td>
+          <td class="products-cell" title="Enraizante para orquídeas">Enraizante para orquídeas</td>
+          <td>12/02/2024 18:11</td>
+          <td>17/02/2024 16:24</td>
+          <td><a href="https://www.therealgreen.com.mx/67162145044/checkouts/ac/Z2NwLXVzLWNlbnRyYWwxOjAxSFBGVzFSMDZFTlhOUzE0MlhaSzM0TVJF/recover?key=e63c0b863e67861094ea1cf4282b381e&locale=es-MX" target="_blank" class="btn-recover">Recuperar</a></td>
+        </tr>
+        <tr>
+          <td>Margarita Vasquez Montano</td>
+          <td><span class="email-chip">mgl.vasquez@gmail.com</span></td>
+          <td class="money">$675.00</td>
+          <td>3</td>
+          <td class="products-cell" title="Bolsa Edición Especial. 8 de Marzo, Auxiliar para el control de plagas, Bio-fertilizante nutritivo">Bolsa Edición Especial. 8 de Marzo, Auxiliar para el control…</td>
+          <td>29/03/2024 08:31</td>
+          <td>29/03/2024 20:46</td>
+          <td><a href="https://www.therealgreen.com.mx/67162145044/checkouts/ac/Z2NwLXVzLWNlbnRyYWwxOjAxSFQ1OFRUUUpXVFFXNERHM0RRRUtZS0NO/recover?key=874873a0275a4a954626e7fc5dd5b4a4&locale=es-MX" target="_blank" class="btn-recover">Recuperar</a></td>
+        </tr>
+        <tr>
+          <td>Anabel Caballero Marín</td>
+          <td><span class="email-chip">anabelcaballero_@hotmail.com</span></td>
+          <td class="money">$325.00</td>
+          <td>2</td>
+          <td class="products-cell" title="Auxiliar para el control de plagas, Bolsa "Quien tiene plantas... su mal espanta"">Auxiliar para el control de plagas, Bolsa "Quien tiene plant…</td>
+          <td>01/04/2024 11:50</td>
+          <td>02/04/2024 21:57</td>
+          <td><a href="https://www.therealgreen.com.mx/67162145044/checkouts/ac/Z2NwLXVzLWNlbnRyYWwxOjAxSFREQjhCMFdUWkgwVjlQV0JSQVBNSlA4/recover?key=7f0ecd8fb8392070ea95e7c70ca3a27a&locale=es-MX" target="_blank" class="btn-recover">Recuperar</a></td>
+        </tr>
+        <tr>
+          <td>Jesús Enrique Porras Hernández</td>
+          <td><span class="email-chip">enriqueporrashdz@gmail.com</span></td>
+          <td class="money">$715.86</td>
+          <td>3</td>
+          <td class="products-cell" title="Auxiliar para el control de hongos, virus y bacterias, Auxiliar para el control de plagas, Bio-fertilizante nutritivo">Auxiliar para el control de hongos, virus y bacterias, Auxil…</td>
+          <td>24/04/2024 15:32</td>
+          <td>25/04/2024 17:07</td>
+          <td><a href="https://www.therealgreen.com.mx/67162145044/checkouts/ac/Z2NwLXVzLWNlbnRyYWwxOjAxSFczVEtKQllNNlNHUDNTUFNGNFJKNldE/recover?key=6094e73c6c790b29798b3da7e25dc59c&locale=es-MX" target="_blank" class="btn-recover">Recuperar</a></td>
+        </tr>
+        <tr>
+          <td>Rafael Espinosa contreras</td>
+          <td><span class="email-chip">rafaelanest@outlook.es</span></td>
+          <td class="money">$725.00</td>
+          <td>2</td>
+          <td class="products-cell" title="Enraizante y mejorador de suelos, Bio-fertilizante nutritivo">Enraizante y mejorador de suelos, Bio-fertilizante nutritivo</td>
+          <td>19/05/2024 09:54</td>
+          <td>20/05/2024 07:53</td>
+          <td><a href="https://www.therealgreen.com.mx/67162145044/checkouts/ac/Z2NwLXVzLWNlbnRyYWwxOjAxSFk4UU5CSlNIODQzNEpCV0ZNWFozUEFH/recover?key=b0538273290fd028b84f7ca8b4199f9e&locale=es-MX" target="_blank" class="btn-recover">Recuperar</a></td>
+        </tr>
+        <tr>
+          <td>Luis Carlos Sohle Sanchez</td>
+          <td><span class="email-chip">lsohles@gmail.com</span></td>
+          <td class="money">$800.00</td>
+          <td>1</td>
+          <td class="products-cell" title="Auxiliar para el control de plagas">Auxiliar para el control de plagas</td>
+          <td>10/06/2024 16:17</td>
+          <td>11/06/2024 08:17</td>
+          <td><a href="https://www.therealgreen.com.mx/67162145044/checkouts/ac/Z2NwLXVzLWNlbnRyYWwxOjAxSjAyMldaNFlIUjM3REJBM1NDRlpSMUNX/recover?key=b410794e45fc5666fe9a09f191e82718&locale=es-MX" target="_blank" class="btn-recover">Recuperar</a></td>
+        </tr>
+        <tr>
+          <td>Erika Deutsch Polak</td>
+          <td><span class="email-chip">erikaleo2@gmail.com</span></td>
+          <td class="money">$375.00</td>
+          <td>1</td>
+          <td class="products-cell" title="Enraizante y mejorador de suelos">Enraizante y mejorador de suelos</td>
+          <td>15/06/2024 13:30</td>
+          <td>16/06/2024 08:16</td>
+          <td><a href="https://www.therealgreen.com.mx/67162145044/checkouts/ac/Z2NwLXVzLXdlc3QxOjAxSjBFTkM5RTBLOEQwVEZTS1pSQ1E5UzdK/recover?key=31c74c7489d3671527cecc979a753d34&locale=es-MX" target="_blank" class="btn-recover">Recuperar</a></td>
+        </tr>
+        <tr>
+          <td>María Del Pilar Martínez Sánchez</td>
+          <td><span class="email-chip">madelpima6@gmail.com</span></td>
+          <td class="money">$275.00</td>
+          <td>1</td>
+          <td class="products-cell" title="Enraizante para orquídeas">Enraizante para orquídeas</td>
+          <td>08/07/2024 16:53</td>
+          <td>09/07/2024 16:28</td>
+          <td><a href="https://therealgreen.com.mx/67162145044/checkouts/ac/Z2NwLXVzLWNlbnRyYWwxOjAxSjJBODJUOUQ5WjJSRU4yWFZHVzZLRlNG/recover?key=5e778ac2db684e08d0189128c1deff62&locale=es-MX" target="_blank" class="btn-recover">Recuperar</a></td>
+        </tr>
+        <tr>
+          <td>Anabell Martel</td>
+          <td><span class="email-chip">anabellmartel@gmail.com</span></td>
+          <td class="money">$275.00</td>
+          <td>1</td>
+          <td class="products-cell" title="Bio-fertilizante nutritivo">Bio-fertilizante nutritivo</td>
+          <td>10/07/2024 09:05</td>
+          <td>11/07/2024 14:31</td>
+          <td><a href="https://therealgreen.com.mx/67162145044/checkouts/ac/Z2NwLXVzLWNlbnRyYWwxOjAxSjJFSjZBRTNXVkJURlRUOUZOUThUVzk3/recover?key=59977821509af86b8dd765948fdff5b5&locale=es-MX" target="_blank" class="btn-recover">Recuperar</a></td>
+        </tr>
+        <tr>
+          <td>María Del Pilar Martínez Sánchez</td>
+          <td><span class="email-chip">madelpima6@gmail.com</span></td>
+          <td class="money">$455.00</td>
+          <td>1</td>
+          <td class="products-cell" title="Enraizante para orquídeas">Enraizante para orquídeas</td>
+          <td>21/07/2024 14:25</td>
+          <td>22/07/2024 13:34</td>
+          <td><a href="https://therealgreen.com.mx/67162145044/checkouts/ac/Z2NwLXVzLWNlbnRyYWwxOjAxSjNCRVI3SzhZRzI4NFZHN0FBS1A4UjhD/recover?key=0612c2d1908322ce6e890115203b157e&locale=es-MX" target="_blank" class="btn-recover">Recuperar</a></td>
+        </tr>
+        <tr>
+          <td>Alma Ríos</td>
+          <td><span class="email-chip">marurios_mx@yahoo.com</span></td>
+          <td class="money">$1,080.00</td>
+          <td>2</td>
+          <td class="products-cell" title="Enraizante para orquídeas, Enraizante para orquídeas">Enraizante para orquídeas, Enraizante para orquídeas</td>
+          <td>01/08/2024 15:17</td>
+          <td>12/08/2024 16:16</td>
+          <td><a href="https://therealgreen.com.mx/67162145044/checkouts/ac/Z2NwLXVzLXdlc3QxOjAxSjQwSEZEMzRQU0dKR1laODdQMTVCRTRL/recover?key=1514d3ab2957b706c3cc9bf25bc3ea48&locale=es-MX" target="_blank" class="btn-recover">Recuperar</a></td>
+        </tr>
+        <tr>
+          <td>Montserrat Viridiana Terrones</td>
+          <td><span class="email-chip">viridiana.nunezt@gmail.com</span></td>
+          <td class="money">$715.00</td>
+          <td>1</td>
+          <td class="products-cell" title="Kit Plantas Felices">Kit Plantas Felices</td>
+          <td>17/09/2024 02:17</td>
+          <td>17/09/2024 19:53</td>
+          <td><a href="https://therealgreen.com.mx/67162145044/checkouts/ac/Z2NwLXVzLWNlbnRyYWwxOjAxSjdaRzlLMDhYQ1pIQkpOWkpaM1BaRDZK/recover?key=1be1f04d99d4888a422d4d214bf56b63&locale=es-MX" target="_blank" class="btn-recover">Recuperar</a></td>
+        </tr>
+        <tr>
+          <td>Anke Kleinert</td>
+          <td><span class="email-chip">apika38@hotmail.com</span></td>
+          <td class="money">$480.00</td>
+          <td>2</td>
+          <td class="products-cell" title="Bio-fertilizante nutritivo, Enraizante para orquídeas">Bio-fertilizante nutritivo, Enraizante para orquídeas</td>
+          <td>21/09/2024 07:51</td>
+          <td>22/09/2024 20:06</td>
+          <td><a href="https://therealgreen.com.mx/67162145044/checkouts/ac/Z2NwLXVzLWNlbnRyYWwxOjAxSjhBQ1dSMjU4Uks4MlpZQ0VZNTdFNFNX/recover?key=6dcbd7945e5b911c39541fe832002d46&locale=es-MX" target="_blank" class="btn-recover">Recuperar</a></td>
+        </tr>
+        <tr>
+          <td>Claudia Alemán</td>
+          <td><span class="email-chip">clausalem@hotmail.com</span></td>
+          <td class="money">$400.00</td>
+          <td>1</td>
+          <td class="products-cell" title="Auxiliar para el control de hongos, virus y bacterias">Auxiliar para el control de hongos, virus y bacterias</td>
+          <td>17/08/2025 09:23</td>
+          <td>07/09/2025 10:50</td>
+          <td><a href="https://therealgreen.com.mx/67162145044/checkouts/ac/hWN1uMo4PQanvrh9mRp0KuUT/recover?key=74818821fb0e3c394d03ff155b6513c9&locale=es-MX" target="_blank" class="btn-recover">Recuperar</a></td>
+        </tr>
+        <tr>
+          <td>Susana Castil</td>
+          <td><span class="email-chip">susanacastilrosell@hotmail.com</span></td>
+          <td class="money">$490.00</td>
+          <td>2</td>
+          <td class="products-cell" title="Bio-fertilizante nutritivo, Auxiliar para el control de plagas">Bio-fertilizante nutritivo, Auxiliar para el control de plag…</td>
+          <td>21/08/2025 22:10</td>
+          <td>22/08/2025 11:13</td>
+          <td><a href="https://therealgreen.com.mx/67162145044/checkouts/ac/hWN251gSlr9qzaE9Cg8mNmlN/recover?key=ac2da1f506fdf272cf735b67ca163591&locale=es-MX" target="_blank" class="btn-recover">Recuperar</a></td>
+        </tr>
+        <tr>
+          <td>Perla Herrera</td>
+          <td><span class="email-chip">perlaharuko@gmail.com</span></td>
+          <td class="money">$451.00</td>
+          <td>2</td>
+          <td class="products-cell" title="Auxiliar para el control de plagas, Bio-fertilizante nutritivo">Auxiliar para el control de plagas, Bio-fertilizante nutriti…</td>
+          <td>22/08/2025 18:22</td>
+          <td>28/08/2025 12:02</td>
+          <td><a href="https://therealgreen.com.mx/67162145044/checkouts/ac/hWN26pG4ZfddDkrti9ho1JBJ/recover?key=b3460c2bfc1ca206684d5d2357e2f3ac&locale=es-MX" target="_blank" class="btn-recover">Recuperar</a></td>
+        </tr>
+        <tr>
+          <td>Claudia guadarrama fernandez</td>
+          <td><span class="email-chip">cuallis05@gmail.com</span></td>
+          <td class="money">$570.50</td>
+          <td>2</td>
+          <td class="products-cell" title="Enraizante y mejorador de suelos, Bio-fertilizante nutritivo">Enraizante y mejorador de suelos, Bio-fertilizante nutritivo</td>
+          <td>24/08/2025 16:42</td>
+          <td>27/08/2025 18:05</td>
+          <td><a href="https://therealgreen.com.mx/67162145044/checkouts/ac/hWN2BWj0rHIvzzTM38avCaY5/recover?key=6d16d20f7fb486d575e83e734c33a49c&locale=es-MX" target="_blank" class="btn-recover">Recuperar</a></td>
+        </tr>
+        <tr>
+          <td>Martha Araceli Alcántara</td>
+          <td><span class="email-chip">amarta_araceli10@yahoo.com</span></td>
+          <td class="money">$194.00</td>
+          <td>1</td>
+          <td class="products-cell" title="Auxiliar para el control de plagas">Auxiliar para el control de plagas</td>
+          <td>25/08/2025 17:47</td>
+          <td>04/09/2025 22:34</td>
+          <td><a href="https://therealgreen.com.mx/67162145044/checkouts/ac/hWN2E0rdZ3sgUc4hgzDBtMbR/recover?key=83c3cbc9eabf482f0975016c9793a1ac&locale=es-MX" target="_blank" class="btn-recover">Recuperar</a></td>
+        </tr>
+        <tr>
+          <td>Felisa Reséndiz</td>
+          <td><span class="email-chip">prchio@yahoo.com.mx</span></td>
+          <td class="money">$780.00</td>
+          <td>1</td>
+          <td class="products-cell" title="Kit Plantas Felices">Kit Plantas Felices</td>
+          <td>26/08/2025 16:41</td>
+          <td>26/08/2025 18:30</td>
+          <td><a href="https://therealgreen.com.mx/67162145044/checkouts/ac/hWN2GFVYDXatTJXdpmyfLqgT/recover?key=90fcd5cb01b9b213016efb2b215604c2&locale=es-MX" target="_blank" class="btn-recover">Recuperar</a></td>
+        </tr>
+        <tr>
+          <td>Julia Hezinova</td>
+          <td><span class="email-chip">julia.hezinova@gmail.com</span></td>
+          <td class="money">$410.00</td>
+          <td>2</td>
+          <td class="products-cell" title="Bio-fertilizante nutritivo, Auxiliar para el control de plagas">Bio-fertilizante nutritivo, Auxiliar para el control de plag…</td>
+          <td>27/08/2025 10:22</td>
+          <td>27/08/2025 15:09</td>
+          <td><a href="https://therealgreen.com.mx/67162145044/checkouts/ac/hWN2FktNU1mlybc242f80K7V/recover?key=d421d4c5d030656018513b2f868f558b&locale=es-MX" target="_blank" class="btn-recover">Recuperar</a></td>
+        </tr>
+        <tr>
+          <td>Andrea Gomez</td>
+          <td><span class="email-chip">andreagimezc740@gmail.com</span></td>
+          <td class="money">$280.00</td>
+          <td>1</td>
+          <td class="products-cell" title="Auxiliar para el control de hongos, virus y bacterias">Auxiliar para el control de hongos, virus y bacterias</td>
+          <td>28/08/2025 10:22</td>
+          <td>10/09/2025 11:21</td>
+          <td><a href="https://therealgreen.com.mx/67162145044/checkouts/ac/hWN2KLYgriaMYxOm5bWXGtO6/recover?key=949c049fcaaa0d3a1cd4c32c41ece21a&locale=es-MX" target="_blank" class="btn-recover">Recuperar</a></td>
+        </tr>
+        <tr>
+          <td>Armando Javier Escalante Alfaro</td>
+          <td><span class="email-chip">javz90@outlook.com</span></td>
+          <td class="money">$1,290.00</td>
+          <td>4</td>
+          <td class="products-cell" title="Auxiliar para el control de hongos, virus y bacterias, Enraizante y mejorador de suelos, Auxiliar para el control de gallina ciega, Auxiliar para el control de plagas">Auxiliar para el control de hongos, virus y bacterias, Enrai…</td>
+          <td>30/08/2025 10:27</td>
+          <td>30/08/2025 12:46</td>
+          <td><a href="https://therealgreen.com.mx/67162145044/checkouts/ac/hWN2P3uGfs9k59jkfB22p0AD/recover?key=c1e1fcfc37f71f7816cb02c9127446bf&locale=es-MX" target="_blank" class="btn-recover">Recuperar</a></td>
+        </tr>
+        <tr>
+          <td>Martha Galindo Zatarain</td>
+          <td><span class="email-chip">martha.galindo@hotmail.com</span></td>
+          <td class="money">$340.00</td>
+          <td>2</td>
+          <td class="products-cell" title="Enraizante para orquídeas, Enraizante y mejorador de suelos">Enraizante para orquídeas, Enraizante y mejorador de suelos</td>
+          <td>31/08/2025 08:02</td>
+          <td>13/09/2025 10:49</td>
+          <td><a href="https://therealgreen.com.mx/67162145044/checkouts/ac/hWN2RBGCXM3Gff6x0Lnsh8Vt/recover?key=344f0d9199576c9f5bae462739cd99c2&locale=es-MX" target="_blank" class="btn-recover">Recuperar</a></td>
+        </tr>
+        <tr>
+          <td>Ana Karen Armenta</td>
+          <td><span class="email-chip">anarmenta.a@gmail.com</span></td>
+          <td class="money">$318.00</td>
+          <td>1</td>
+          <td class="products-cell" title="Auxiliar para el control de plagas">Auxiliar para el control de plagas</td>
+          <td>04/09/2025 15:38</td>
+          <td>07/09/2025 19:26</td>
+          <td><a href="https://therealgreen.com.mx/67162145044/checkouts/ac/hWN2WRGARL8xUAmaXw8OINBB/recover?key=b924870d25dab8c6aaf979cba222729f&locale=es-MX" target="_blank" class="btn-recover">Recuperar</a></td>
+        </tr>
+        <tr>
+          <td>Lorena Murua</td>
+          <td><span class="email-chip">lorenachavarriamurua@gmail.com</span></td>
+          <td class="money">$310.00</td>
+          <td>1</td>
+          <td class="products-cell" title="Bio-fertilizante nutritivo">Bio-fertilizante nutritivo</td>
+          <td>07/09/2025 12:26</td>
+          <td>07/09/2025 13:17</td>
+          <td><a href="https://therealgreen.com.mx/67162145044/checkouts/ac/hWN2fRxo9Sii9mUzbQzFCpY9/recover?key=ced39beed758094cf58ba7c12b77c79f&locale=es-MX" target="_blank" class="btn-recover">Recuperar</a></td>
+        </tr>
+        <tr>
+          <td>Xchel Aurora Perez Palafox</td>
+          <td><span class="email-chip">xapp39@gmail.com</span></td>
+          <td class="money">$652.40</td>
+          <td>3</td>
+          <td class="products-cell" title="Sustrato para plantas de interior 3L, Sustrato para orquídeas 3L, Auxiliar para el control de hongos, virus y bacterias">Sustrato para plantas de interior 3L, Sustrato para orquídea…</td>
+          <td>09/09/2025 14:14</td>
+          <td>09/09/2025 17:18</td>
+          <td><a href="https://therealgreen.com.mx/67162145044/checkouts/ac/hWN1psqFrmRBen8ZMINqk2Mr/recover?key=5734c8fe52b52464a692cb87c0da22c9&locale=es-MX" target="_blank" class="btn-recover">Recuperar</a></td>
+        </tr>
+        <tr>
+          <td>Hermila Rendon  Pineda</td>
+          <td><span class="email-chip">elena_01_02@hotmail.com</span></td>
+          <td class="money">$840.00</td>
+          <td>2</td>
+          <td class="products-cell" title="Auxiliar para el control de plagas, Auxiliar para el control de plagas">Auxiliar para el control de plagas, Auxiliar para el control…</td>
+          <td>11/09/2025 11:21</td>
+          <td>11/09/2025 14:56</td>
+          <td><a href="https://therealgreen.com.mx/67162145044/checkouts/ac/hWN2rOO43N6wqibTyU7VT90r/recover?key=71d97a8705e0f2d844b17a216a1c5ee4&locale=es-MX" target="_blank" class="btn-recover">Recuperar</a></td>
+        </tr>
+        <tr>
+          <td>Kareen Santillan</td>
+          <td><span class="email-chip">kareengiselle6@gmail.com</span></td>
+          <td class="money">$690.00</td>
+          <td>1</td>
+          <td class="products-cell" title="Kit Plantas Felices">Kit Plantas Felices</td>
+          <td>13/09/2025 17:51</td>
+          <td>13/09/2025 21:24</td>
+          <td><a href="https://therealgreen.com.mx/67162145044/checkouts/ac/hWN2wk4hdT5iN9Q6N732PrSj/recover?key=a7e4329ca7f7051916e65640ef9b8fad&locale=es-MX" target="_blank" class="btn-recover">Recuperar</a></td>
+        </tr>
+        <tr>
+          <td>Alejandro Quintero Cano</td>
+          <td><span class="email-chip">alexcanoejercita@gmail.com</span></td>
+          <td class="money">$375.40</td>
+          <td>1</td>
+          <td class="products-cell" title="Auxiliar para el control de hongos, virus y bacterias">Auxiliar para el control de hongos, virus y bacterias</td>
+          <td>15/09/2025 07:04</td>
+          <td>20/09/2025 20:17</td>
+          <td><a href="https://therealgreen.com.mx/67162145044/checkouts/ac/hWN30O1hvsks5dJHzYMeb55c/recover?key=76467a0300e48796901b69fc81334252&locale=es-MX" target="_blank" class="btn-recover">Recuperar</a></td>
+        </tr>
+        <tr>
+          <td>Pablo Vazquez Alvarado</td>
+          <td><span class="email-chip">09pablova@gmail.com</span></td>
+          <td class="money">$270.00</td>
+          <td>1</td>
+          <td class="products-cell" title="Bio-fertilizante nutritivo">Bio-fertilizante nutritivo</td>
+          <td>15/09/2025 15:07</td>
+          <td>18/09/2025 16:00</td>
+          <td><a href="https://therealgreen.com.mx/67162145044/checkouts/ac/hWN31B6qx5hTN8X40o2MRadt/recover?key=88edea4d06ba7c732f4d303275ec7e86&locale=es-MX" target="_blank" class="btn-recover">Recuperar</a></td>
+        </tr>
+        <tr>
+          <td>Patricia Ontiveros</td>
+          <td><span class="email-chip">patricia.ontiveros@gmail.com</span></td>
+          <td class="money">$320.00</td>
+          <td>1</td>
+          <td class="products-cell" title="Auxiliar para el control de plagas">Auxiliar para el control de plagas</td>
+          <td>16/09/2025 17:53</td>
+          <td>16/09/2025 19:35</td>
+          <td><a href="https://therealgreen.com.mx/67162145044/checkouts/ac/hWN33o1osBIKL4HBT2AFmDZg/recover?key=bfec196ba70a7fb4f4306ffa31b243e9&locale=es-MX" target="_blank" class="btn-recover">Recuperar</a></td>
+        </tr>
+        <tr>
+          <td>Martha Patricia Moreno Galindo</td>
+          <td><span class="email-chip">paty.mor76@hotmail.com</span></td>
+          <td class="money">$631.00</td>
+          <td>1</td>
+          <td class="products-cell" title="Kit Plantas Felices">Kit Plantas Felices</td>
+          <td>18/09/2025 20:00</td>
+          <td>22/09/2025 09:49</td>
+          <td><a href="https://therealgreen.com.mx/67162145044/checkouts/ac/hWN38hnMAz3ZtyycVfmhPfqT/recover?key=7d12f18e7a9844e57889a23d0f9c1d36&locale=es-MX" target="_blank" class="btn-recover">Recuperar</a></td>
+        </tr>
+        <tr>
+          <td>Mateo Medrano</td>
+          <td><span class="email-chip">medrano_gonzalez@hotmail.com</span></td>
+          <td class="money">$379.00</td>
+          <td>2</td>
+          <td class="products-cell" title="Enraizante y mejorador de suelos, Bio-fertilizante nutritivo">Enraizante y mejorador de suelos, Bio-fertilizante nutritivo</td>
+          <td>19/09/2025 15:27</td>
+          <td>22/09/2025 16:53</td>
+          <td><a href="https://therealgreen.com.mx/67162145044/checkouts/ac/hWN3AbsYZuZz4VqUxrSfTfUn/recover?key=5bee4c0637046c49770d26c4cfdc1241&locale=es-MX" target="_blank" class="btn-recover">Recuperar</a></td>
+        </tr>
+        <tr>
+          <td>Olimpia Pesina</td>
+          <td><span class="email-chip">olypessina13@outlook.com</span></td>
+          <td class="money">$458.25</td>
+          <td>2</td>
+          <td class="products-cell" title="Auxiliar para el control de hongos, virus y bacterias, Auxiliar para el control de plagas">Auxiliar para el control de hongos, virus y bacterias, Auxil…</td>
+          <td>14/10/2025 08:37</td>
+          <td>12/11/2025 17:11</td>
+          <td><a href="https://therealgreen.com.mx/67162145044/checkouts/ac/hWN3CuHog0rZpzLminbzMzkf/recover?key=d1310cbae5e978275337745ffc61ddba&locale=es-MX" target="_blank" class="btn-recover">Recuperar</a></td>
+        </tr>
+        <tr>
+          <td>Anabel López Mejía</td>
+          <td><span class="email-chip">anamofe80@gmail.com</span></td>
+          <td class="money">$616.50</td>
+          <td>3</td>
+          <td class="products-cell" title="Enraizante para orquídeas, Sustrato para plantas de interior 3L, Bio-fertilizante nutritivo">Enraizante para orquídeas, Sustrato para plantas de interior…</td>
+          <td>21/09/2025 08:07</td>
+          <td>24/09/2025 09:30</td>
+          <td><a href="https://therealgreen.com.mx/67162145044/checkouts/ac/hWN38TECAsc7e2W90amu5pSL/recover?key=e66179cec30ed4f265c37ec938f00ddd&locale=es-MX" target="_blank" class="btn-recover">Recuperar</a></td>
+        </tr>
+        <tr>
+          <td>Karla Blanco</td>
+          <td><span class="email-chip">kblancotorres@gmail.com</span></td>
+          <td class="money">$480.00</td>
+          <td>2</td>
+          <td class="products-cell" title="Auxiliar para el control de plagas, Auxiliar para el control de hongos, virus y bacterias">Auxiliar para el control de plagas, Auxiliar para el control…</td>
+          <td>22/09/2025 18:56</td>
+          <td>29/09/2025 13:30</td>
+          <td><a href="https://therealgreen.com.mx/67162145044/checkouts/ac/hWN3ALPaKfrao3hBPubilYYL/recover?key=04ef1eb7b1a647dc4e2e74de811ff932&locale=es-MX" target="_blank" class="btn-recover">Recuperar</a></td>
+        </tr>
+        <tr>
+          <td>Blanca Magdalena Gutiérrez Valdez</td>
+          <td><span class="email-chip">blanca0672@outlook.com</span></td>
+          <td class="money">$372.20</td>
+          <td>2</td>
+          <td class="products-cell" title="Bio-fertilizante nutritivo, Enraizante para orquídeas">Bio-fertilizante nutritivo, Enraizante para orquídeas</td>
+          <td>25/09/2025 21:38</td>
+          <td>09/10/2025 07:24</td>
+          <td><a href="https://therealgreen.com.mx/67162145044/checkouts/ac/hWN3PArGVGxyPIML4lDdgUDZ/recover?key=4670ffcefa87e53f43504fdce672fc73&locale=es-MX" target="_blank" class="btn-recover">Recuperar</a></td>
+        </tr>
+        <tr>
+          <td>Laura Revelo Ruiz</td>
+          <td><span class="email-chip">tibiritabara@hotmail.com</span></td>
+          <td class="money">$500.00</td>
+          <td>1</td>
+          <td class="products-cell" title="Auxiliar para el control de plagas">Auxiliar para el control de plagas</td>
+          <td>26/09/2025 09:17</td>
+          <td>09/10/2025 16:36</td>
+          <td><a href="https://therealgreen.com.mx/67162145044/checkouts/ac/hWN3QUTE2wiuufiVGvP1wEl7/recover?key=dece2d4ed9087b214c6727ad33d28cf7&locale=es-MX" target="_blank" class="btn-recover">Recuperar</a></td>
+        </tr>
+        <tr>
+          <td>Lucia Carvajal Jiménez</td>
+          <td><span class="email-chip">rene_0003@outlook.com</span></td>
+          <td class="money">$750.00</td>
+          <td>3</td>
+          <td class="products-cell" title="Gorra “Pregúntame por mis plantas”, Enraizante y mejorador de suelos, Enraizante y mejorador de suelos">Gorra “Pregúntame por mis plantas”, Enraizante y mejorador d…</td>
+          <td>29/09/2025 12:09</td>
+          <td>29/09/2025 16:18</td>
+          <td><a href="https://therealgreen.com.mx/67162145044/checkouts/ac/hWN3XpXIx8N7eIT8RDYdXZVB/recover?key=c3782a0cd9194ccbbb8828290e0cd631&locale=es-MX" target="_blank" class="btn-recover">Recuperar</a></td>
+        </tr>
+        <tr>
+          <td>Angelica Rocio Miramontes Hernandez</td>
+          <td><span class="email-chip">chiomhz@hotmail.com</span></td>
+          <td class="money">$795.00</td>
+          <td>4</td>
+          <td class="products-cell" title="Sustrato para plantas de interior 3L, Bio-fertilizante nutritivo, Enraizante y mejorador de suelos, Auxiliar para el control de plagas">Sustrato para plantas de interior 3L, Bio-fertilizante nutri…</td>
+          <td>30/09/2025 08:57</td>
+          <td>30/09/2025 23:58</td>
+          <td><a href="https://therealgreen.com.mx/67162145044/checkouts/ac/hWN3Zs0RAuBqZtmAe0Bch0oz/recover?key=b7951e494dd7728db5134d429c035174&locale=es-MX" target="_blank" class="btn-recover">Recuperar</a></td>
+        </tr>
+        <tr>
+          <td>mancini ojeda</td>
+          <td><span class="email-chip">andyojeda9397@hotmail.com</span></td>
+          <td class="money">$1,080.00</td>
+          <td>2</td>
+          <td class="products-cell" title="Bio-fertilizante nutritivo, Bio-fertilizante nutritivo">Bio-fertilizante nutritivo, Bio-fertilizante nutritivo</td>
+          <td>30/09/2025 15:55</td>
+          <td>01/10/2025 10:28</td>
+          <td><a href="https://therealgreen.com.mx/67162145044/checkouts/ac/hWN3aYLtM7WzwxexGyrsdf3R/recover?key=91e21501ddb2f827b0d6be0bbba5a409&locale=es-MX" target="_blank" class="btn-recover">Recuperar</a></td>
+        </tr>
+        <tr>
+          <td>Perla Herrera</td>
+          <td><span class="email-chip">perlaharuko@gmail.com</span></td>
+          <td class="money">$330.00</td>
+          <td>1</td>
+          <td class="products-cell" title="Bio-fertilizante nutritivo">Bio-fertilizante nutritivo</td>
+          <td>05/10/2025 16:06</td>
+          <td>07/10/2025 16:08</td>
+          <td><a href="https://therealgreen.com.mx/67162145044/checkouts/ac/hWN3mL4T3LhMxmdVJQYEhkrh/recover?key=4b46c3499b4deb81c7375988dc867ac5&locale=es-MX" target="_blank" class="btn-recover">Recuperar</a></td>
+        </tr>
+        <tr>
+          <td>Diana Monserrat Reyes Martínez</td>
+          <td><span class="email-chip">diana.m.reyes.martinez@gmail.com</span></td>
+          <td class="money">$250.00</td>
+          <td>1</td>
+          <td class="products-cell" title="Auxiliar para el control de plagas">Auxiliar para el control de plagas</td>
+          <td>10/10/2025 12:47</td>
+          <td>10/10/2025 14:33</td>
+          <td><a href="https://therealgreen.com.mx/67162145044/checkouts/ac/hWN3xmpimcqpkIGj26h2rP05/recover?key=69d6040c9b88b772277ae45267fe0998&locale=es-MX" target="_blank" class="btn-recover">Recuperar</a></td>
+        </tr>
+        <tr>
+          <td>Daniela Soberanis</td>
+          <td><span class="email-chip">danielasoberanis72@gmail.com</span></td>
+          <td class="money">$760.00</td>
+          <td>1</td>
+          <td class="products-cell" title="Auxiliar para el control de gallina ciega">Auxiliar para el control de gallina ciega</td>
+          <td>15/10/2025 12:36</td>
+          <td>15/10/2025 13:32</td>
+          <td><a href="https://therealgreen.com.mx/67162145044/checkouts/ac/hWN49XNw7Ou96Kg3F0MNIZK4/recover?key=417697062821ea36eb9358a22d6b371e&locale=es-MX" target="_blank" class="btn-recover">Recuperar</a></td>
+        </tr>
+        <tr>
+          <td>Oliva GARCIA</td>
+          <td><span class="email-chip">olivaga@hotmail.com</span></td>
+          <td class="money">$370.00</td>
+          <td>1</td>
+          <td class="products-cell" title="Auxiliar para el control de plagas">Auxiliar para el control de plagas</td>
+          <td>16/10/2025 14:36</td>
+          <td>16/10/2025 20:39</td>
+          <td><a href="https://therealgreen.com.mx/67162145044/checkouts/ac/hWN4C5RGRhAyxLBqu2YnhiM5/recover?key=8ba0f6b6d96074816bcaf2ed7f848120&locale=es-MX" target="_blank" class="btn-recover">Recuperar</a></td>
+        </tr>
+        <tr>
+          <td>Edgar Garibay</td>
+          <td><span class="email-chip">egaribay@gmail.com</span></td>
+          <td class="money">$492.00</td>
+          <td>3</td>
+          <td class="products-cell" title="Auxiliar para el control de hongos, virus y bacterias, Bio-fertilizante nutritivo, Auxiliar para el control de plagas">Auxiliar para el control de hongos, virus y bacterias, Bio-f…</td>
+          <td>17/10/2025 23:30</td>
+          <td>18/10/2025 09:55</td>
+          <td><a href="https://therealgreen.com.mx/67162145044/checkouts/ac/hWN4FHL6NyD0baSWhybRecwD/recover?key=3d9342f298a24f87110cdf562397e528&locale=es-MX" target="_blank" class="btn-recover">Recuperar</a></td>
+        </tr>
+        <tr>
+          <td>Claudia Herman</td>
+          <td><span class="email-chip">claudiaivettehm@gmail.com</span></td>
+          <td class="money">$1,323.00</td>
+          <td>1</td>
+          <td class="products-cell" title="Kit Plantas Felices">Kit Plantas Felices</td>
+          <td>20/10/2025 15:04</td>
+          <td>20/10/2025 16:45</td>
+          <td><a href="https://therealgreen.com.mx/67162145044/checkouts/ac/hWN3vx4CdoyVJJ92M6g0HL85/recover?key=f49c142884300cdb56969663515de29b&locale=es-MX" target="_blank" class="btn-recover">Recuperar</a></td>
+        </tr>
+        <tr>
+          <td>SILVIA ILEANA MORENO RAMIREZ</td>
+          <td><span class="email-chip">ileanamr@hotmail.com</span></td>
+          <td class="money">$690.00</td>
+          <td>2</td>
+          <td class="products-cell" title="Enraizante para orquídeas, Auxiliar para el control de plagas">Enraizante para orquídeas, Auxiliar para el control de plaga…</td>
+          <td>25/10/2025 19:35</td>
+          <td>25/10/2025 20:24</td>
+          <td><a href="https://therealgreen.com.mx/67162145044/checkouts/ac/hWN4XjKHM6ONsqFeoXIETvsH/recover?key=3366c424e2b6c3d9029f3d2f057286f0&locale=es-MX" target="_blank" class="btn-recover">Recuperar</a></td>
+        </tr>
+        <tr>
+          <td>Raquel Conchas</td>
+          <td><span class="email-chip">rachelito22@icloud.com</span></td>
+          <td class="money">$1,776.60</td>
+          <td>4</td>
+          <td class="products-cell" title="Bolsa "Quien tiene plantas... su mal espanta", Sustrato para orquídeas 3L, Kit orquídeas, Kit Plantas Felices">Bolsa "Quien tiene plantas... su mal espanta", Sustrato para…</td>
+          <td>28/10/2025 18:44</td>
+          <td>03/11/2025 09:33</td>
+          <td><a href="https://therealgreen.com.mx/67162145044/checkouts/ac/hWN4ehEhuW9KfTXLNLQ6Txjt/recover?key=4da2ce1269c74f9cdb41755247b13655&locale=es-MX" target="_blank" class="btn-recover">Recuperar</a></td>
+        </tr>
+        <tr>
+          <td>Adriana Nieto</td>
+          <td><span class="email-chip">anietod@gmail.com</span></td>
+          <td class="money">$917.10</td>
+          <td>2</td>
+          <td class="products-cell" title="Kit Plantas Felices, Auxiliar para el control de gallina ciega">Kit Plantas Felices, Auxiliar para el control de gallina cie…</td>
+          <td>29/10/2025 13:16</td>
+          <td>29/10/2025 18:39</td>
+          <td><a href="https://therealgreen.com.mx/67162145044/checkouts/ac/hWN4gY0vIbrwg9dJUlQ6h9xB/recover?key=48e65aa8d05e08709455d79531445946&locale=es-MX" target="_blank" class="btn-recover">Recuperar</a></td>
+        </tr>
+        <tr>
+          <td>Fr. Juan Carlos Magaña Ortiz</td>
+          <td><span class="email-chip">fraykarlmag@gmail.com</span></td>
+          <td class="money">$439.00</td>
+          <td>2</td>
+          <td class="products-cell" title="Enraizante y mejorador de suelos, Bio-fertilizante nutritivo">Enraizante y mejorador de suelos, Bio-fertilizante nutritivo</td>
+          <td>29/10/2025 15:54</td>
+          <td>09/11/2025 12:45</td>
+          <td><a href="https://therealgreen.com.mx/67162145044/checkouts/ac/hWN4gns3cbFMvXj7rwnbEci1/recover?key=faad527ef1cfa978c991a06ee728bffb&locale=es-MX" target="_blank" class="btn-recover">Recuperar</a></td>
+        </tr>
+        <tr>
+          <td>Maria Gudiño</td>
+          <td><span class="email-chip">salmarpa@hotmail.com</span></td>
+          <td class="money">$966.60</td>
+          <td>3</td>
+          <td class="products-cell" title="Enraizante y mejorador de suelos, Bio-fertilizante nutritivo, Enraizante para orquídeas">Enraizante y mejorador de suelos, Bio-fertilizante nutritivo…</td>
+          <td>04/11/2025 07:48</td>
+          <td>04/11/2025 11:00</td>
+          <td><a href="https://therealgreen.com.mx/67162145044/checkouts/ac/hWN4u7wKGOd4dE0wEOXnjlNh/recover?key=a0153654b0921bb33cab7c6c72c49584&locale=es-MX" target="_blank" class="btn-recover">Recuperar</a></td>
+        </tr>
+        <tr>
+          <td>Rocío Torrontegui ibarra</td>
+          <td><span class="email-chip">rocio.torrontegui@gmail.com</span></td>
+          <td class="money">$1,153.70</td>
+          <td>5</td>
+          <td class="products-cell" title="Auxiliar para el control de plagas, Auxiliar para el control de hongos, virus y bacterias, Enraizante para orquídeas, Bio-fertilizante nutritivo, Auxiliar para el control de plagas">Auxiliar para el control de plagas, Auxiliar para el control…</td>
+          <td>05/11/2025 13:59</td>
+          <td>05/11/2025 18:57</td>
+          <td><a href="https://therealgreen.com.mx/67162145044/checkouts/ac/hWN4x29seNuIBPMDGI2MHmTZ/recover?key=6bbaf8b613440f26e7b1f6350b0a2024&locale=es-MX" target="_blank" class="btn-recover">Recuperar</a></td>
+        </tr>
+        <tr>
+          <td>Beatriz Orozco</td>
+          <td><span class="email-chip">eugeniaor@yahoo.com</span></td>
+          <td class="money">$577.92</td>
+          <td>1</td>
+          <td class="products-cell" title="Kit Plantas Felices">Kit Plantas Felices</td>
+          <td>13/11/2025 23:23</td>
+          <td>17/11/2025 07:48</td>
+          <td><a href="https://therealgreen.com.mx/67162145044/checkouts/ac/hWN4y1TAuEstTakpiVZzwsW9/recover?key=0cdeedceff8df423ebced92dbec276a0&locale=es-MX" target="_blank" class="btn-recover">Recuperar</a></td>
+        </tr>
+        <tr>
+          <td>NAYELI VELAZQUEZ REGALADO</td>
+          <td><span class="email-chip">naye.vr@hotmail.com</span></td>
+          <td class="money">$303.30</td>
+          <td>1</td>
+          <td class="products-cell" title="Bio-fertilizante nutritivo">Bio-fertilizante nutritivo</td>
+          <td>14/11/2025 17:56</td>
+          <td>15/11/2025 11:29</td>
+          <td><a href="https://therealgreen.com.mx/67162145044/checkouts/ac/hWN5IevLtmKEQakHX1rq6Itt/recover?key=89fabc779b209c1039f4f8f7e6f2b3ef&locale=es-MX" target="_blank" class="btn-recover">Recuperar</a></td>
+        </tr>
+        <tr>
+          <td>Lola RUIZ BRACAMONTES</td>
+          <td><span class="email-chip">d.ruiz@kermapartners.com</span></td>
+          <td class="money">$972.40</td>
+          <td>4</td>
+          <td class="products-cell" title="Auxiliar para el control de plagas, Auxiliar para el control de plagas, Auxiliar para el control de plagas, Bio-fertilizante nutritivo">Auxiliar para el control de plagas, Auxiliar para el control…</td>
+          <td>18/11/2025 10:54</td>
+          <td>18/11/2025 15:07</td>
+          <td><a href="https://therealgreen.com.mx/67162145044/checkouts/ac/hWN5RMA15v8GNw99JKkx37pp/recover?key=0b6d6c34fe88245142919957cc8108ad&locale=es-MX" target="_blank" class="btn-recover">Recuperar</a></td>
+        </tr>
+        <tr>
+          <td>German Limon Limon</td>
+          <td><span class="email-chip">germanlimon@yaho.com</span></td>
+          <td class="money">$510.20</td>
+          <td>2</td>
+          <td class="products-cell" title="Bio-fertilizante nutritivo, Auxiliar para el control de plagas">Bio-fertilizante nutritivo, Auxiliar para el control de plag…</td>
+          <td>04/12/2025 15:49</td>
+          <td>09/12/2025 11:55</td>
+          <td><a href="https://therealgreen.com.mx/67162145044/checkouts/ac/hWN63WLGpc0cwt93wWHv0sBF/recover?key=2f895183fd3004cf8574a2b5a16d5f94&locale=es-MX" target="_blank" class="btn-recover">Recuperar</a></td>
+        </tr>
+        <tr>
+          <td>Karina Polanco</td>
+          <td><span class="email-chip">pskarina07@gmail.com</span></td>
+          <td class="money">$300.00</td>
+          <td>1</td>
+          <td class="products-cell" title="Auxiliar para el control de plagas">Auxiliar para el control de plagas</td>
+          <td>05/12/2025 21:43</td>
+          <td>06/12/2025 01:02</td>
+          <td><a href="https://therealgreen.com.mx/67162145044/checkouts/ac/hWN66Rgdtxteg4rG7EwpHMcD/recover?key=03dc3ceb89d4e2339789c05abbaff337&locale=es-MX" target="_blank" class="btn-recover">Recuperar</a></td>
+        </tr>
+        <tr>
+          <td>Isabel Suarez</td>
+          <td><span class="email-chip">isabelsualoz@gmail.com</span></td>
+          <td class="money">$1,720.80</td>
+          <td>4</td>
+          <td class="products-cell" title="Bolsa "Quien tiene plantas... su mal espanta", Enraizante para orquídeas, Sustrato para orquídeas 3L, Sustrato para orquídeas 3L">Bolsa "Quien tiene plantas... su mal espanta", Enraizante pa…</td>
+          <td>07/12/2025 19:57</td>
+          <td>07/12/2025 23:05</td>
+          <td><a href="https://therealgreen.com.mx/67162145044/checkouts/ac/hWN6Ayalgcx8MaM02aGRD3NR/recover?key=162838bb13e8acb81f3186ae6e984371&locale=es-MX" target="_blank" class="btn-recover">Recuperar</a></td>
+        </tr>
+        <tr>
+          <td>Yasira Laurel Rodríguez</td>
+          <td><span class="email-chip">yasiralaurel@hotmail.com</span></td>
+          <td class="money">$240.00</td>
+          <td>1</td>
+          <td class="products-cell" title="Enraizante y mejorador de suelos">Enraizante y mejorador de suelos</td>
+          <td>09/12/2025 08:43</td>
+          <td>11/12/2025 10:03</td>
+          <td><a href="https://therealgreen.com.mx/67162145044/checkouts/ac/hWN6EalAR0nKeN4QY60AWOIb/recover?key=643b8079c874ae0238cc6354236139c4&locale=es-MX" target="_blank" class="btn-recover">Recuperar</a></td>
+        </tr>
+        <tr>
+          <td>Sara Melina Mata Ríos</td>
+          <td><span class="email-chip">saramelimata@gmail.com</span></td>
+          <td class="money">$480.00</td>
+          <td>1</td>
+          <td class="products-cell" title="Auxiliar para el control de plagas">Auxiliar para el control de plagas</td>
+          <td>22/12/2025 16:40</td>
+          <td>22/12/2025 20:56</td>
+          <td><a href="https://therealgreen.com.mx/67162145044/checkouts/ac/hWN6jyOwpGe3HNOdPi2jiv5t/recover?key=222849119b05d3aae0c9da35728ae966&locale=es-MX" target="_blank" class="btn-recover">Recuperar</a></td>
+        </tr>
+        <tr>
+          <td>TANNIA JIMENEZ VEGA</td>
+          <td><span class="email-chip">tannia.mentaarquitectura@gmail.com</span></td>
+          <td class="money">$737.10</td>
+          <td>2</td>
+          <td class="products-cell" title="Enraizante para orquídeas, Kit Plantas Felices">Enraizante para orquídeas, Kit Plantas Felices</td>
+          <td>28/12/2025 12:48</td>
+          <td>02/01/2026 18:58</td>
+          <td><a href="https://therealgreen.com.mx/67162145044/checkouts/ac/hWN67l36dqdJq6RGdmCOrr9d/recover?key=1dcd0b088daa591368235b158e84646d&locale=es-MX" target="_blank" class="btn-recover">Recuperar</a></td>
+        </tr>
+        <tr>
+          <td>Enrique Rodrigurz</td>
+          <td><span class="email-chip">erodriguez@nanobotanix.com</span></td>
+          <td class="money">$142.40</td>
+          <td>1</td>
+          <td class="products-cell" title="Bio-fertilizante nutritivo">Bio-fertilizante nutritivo</td>
+          <td>02/03/2026 09:38</td>
+          <td>05/03/2026 11:42</td>
+          <td><a href="https://therealgreen.com.mx/67162145044/checkouts/ac/hWN7nW4jf3952hyg2Pc0Tga9/recover?key=a4dd8c7ba1effc56f4d794d8ca4b29ff&locale=es-MX" target="_blank" class="btn-recover">Recuperar</a></td>
+        </tr>
+        <tr>
+          <td>IMELDA Fonseca</td>
+          <td><span class="email-chip">fonseca.imelda67@gmail.com</span></td>
+          <td class="money">$525.00</td>
+          <td>2</td>
+          <td class="products-cell" title="Auxiliar para el control de plagas, Auxiliar para el control de hongos, virus y bacterias">Auxiliar para el control de plagas, Auxiliar para el control…</td>
+          <td>12/02/2026 18:25</td>
+          <td>12/02/2026 18:25</td>
+          <td><a href="https://therealgreen.com.mx/67162145044/checkouts/ac/hWN7ZNFAcPTUGMIy1WpdRXW5/recover?key=927918cf50b49fe059a051bbd599e0e7&locale=es-MX" target="_blank" class="btn-recover">Recuperar</a></td>
+        </tr>
+        <tr>
+          <td>—</td>
+          <td><span class="email-chip">sarai_ts@hotmail.com</span></td>
+          <td class="money">$180.00</td>
+          <td>1</td>
+          <td class="products-cell" title="Enraizante para orquídeas">Enraizante para orquídeas</td>
+          <td>07/02/2026 07:05</td>
+          <td>07/02/2026 07:05</td>
+          <td><a href="https://therealgreen.com.mx/67162145044/checkouts/ac/hWN8Ve2HAqFysoF87NFMC0yP/recover?key=96a4df11fc032713d854ef4bfa618832&locale=es-MX" target="_blank" class="btn-recover">Recuperar</a></td>
+        </tr>
+        <tr>
+          <td>Claudia Mondragon</td>
+          <td><span class="email-chip">claumondra@hotmail.com</span></td>
+          <td class="money">$887.00</td>
+          <td>4</td>
+          <td class="products-cell" title="Enraizante para orquídeas, Bio-fertilizante nutritivo, Sustrato para orquídeas 3L, Auxiliar para el control de plagas">Enraizante para orquídeas, Bio-fertilizante nutritivo, Sustr…</td>
+          <td>07/02/2026 09:00</td>
+          <td>07/02/2026 09:00</td>
+          <td><a href="https://therealgreen.com.mx/67162145044/checkouts/ac/hWN8SMsFYMfGJtXIRIGlOvrN/recover?key=b92ece85fddf7276940f84b577eb0831&locale=es-MX" target="_blank" class="btn-recover">Recuperar</a></td>
+        </tr>
+        <tr>
+          <td>Regina Hernández</td>
+          <td><span class="email-chip">regina@capicua.mx</span></td>
+          <td class="money">$728.00</td>
+          <td>4</td>
+          <td class="products-cell" title="Auxiliar para el control de plagas, Sustrato para orquídeas 3L, Bio-fertilizante nutritivo, Enraizante para orquídeas">Auxiliar para el control de plagas, Sustrato para orquídeas …</td>
+          <td>07/02/2026 09:09</td>
+          <td>07/02/2026 09:09</td>
+          <td><a href="https://therealgreen.com.mx/67162145044/checkouts/ac/hWN7wVUX60CXXo8TknAVNc4v/recover?key=0be331a1c2914df470bbee6f6686fe16&locale=es-MX" target="_blank" class="btn-recover">Recuperar</a></td>
+        </tr>
+        <tr>
+          <td>—</td>
+          <td><span class="email-chip">olivaresalondra64@gmail.com</span></td>
+          <td class="money">$360.00</td>
+          <td>1</td>
+          <td class="products-cell" title="Enraizante para orquídeas">Enraizante para orquídeas</td>
+          <td>07/02/2026 16:47</td>
+          <td>07/02/2026 16:47</td>
+          <td><a href="https://therealgreen.com.mx/67162145044/checkouts/ac/hWN8WbD0MGSZGKTOUdfKIRsu/recover?key=a452d646d31e87f5da05dc612c6562f2&locale=es-MX" target="_blank" class="btn-recover">Recuperar</a></td>
+        </tr>
+        <tr>
+          <td>Yazmin Aguilar</td>
+          <td><span class="email-chip">juanacarrac877@hotmail.com</span></td>
+          <td class="money">$1,705.00</td>
+          <td>4</td>
+          <td class="products-cell" title="Bolsa "Quien tiene plantas... su mal espanta", Sustrato para orquídeas 3L, Sustrato para orquídeas 3L, Kit Orquideas">Bolsa "Quien tiene plantas... su mal espanta", Sustrato para…</td>
+          <td>08/02/2026 15:34</td>
+          <td>08/02/2026 15:34</td>
+          <td><a href="https://therealgreen.com.mx/67162145044/checkouts/ac/hWN8YpF6ZeOeDTXYFC7Vqr9G/recover?key=d5ef90840a9dd9d19196c6e9a0680876&locale=es-MX" target="_blank" class="btn-recover">Recuperar</a></td>
+        </tr>
+        <tr>
+          <td>Cinthya Mariana Ramírez</td>
+          <td><span class="email-chip">mariiana_ramirez@hotmail.com</span></td>
+          <td class="money">$980.10</td>
+          <td>2</td>
+          <td class="products-cell" title="Enraizante y mejorador de suelos, Kit Orquideas">Enraizante y mejorador de suelos, Kit Orquideas</td>
+          <td>08/02/2026 18:44</td>
+          <td>14/02/2026 08:02</td>
+          <td><a href="https://therealgreen.com.mx/67162145044/checkouts/ac/hWN8Z8TelSpegAxo7maJFldR/recover?key=76cc8789c41fd6af449a572e4f8daaed&locale=es-MX" target="_blank" class="btn-recover">Recuperar</a></td>
+        </tr>
+        <tr>
+          <td>Arlette Torres Eyssautier</td>
+          <td><span class="email-chip">arlettees@gmail.com</span></td>
+          <td class="money">$330.00</td>
+          <td>1</td>
+          <td class="products-cell" title="Auxiliar para el control de plagas">Auxiliar para el control de plagas</td>
+          <td>09/02/2026 13:51</td>
+          <td>09/02/2026 13:51</td>
+          <td><a href="https://therealgreen.com.mx/67162145044/checkouts/ac/hWN8b0kMp0eYNSlCuCmZ94bQ/recover?key=4148ccd28d6e893967e959212cbdaa2e&locale=es-MX" target="_blank" class="btn-recover">Recuperar</a></td>
+        </tr>
+        <tr>
+          <td>Angelina Fuentes Ordaz</td>
+          <td><span class="email-chip">angelalter@hotmail.com</span></td>
+          <td class="money">$425.00</td>
+          <td>2</td>
+          <td class="products-cell" title="Enraizante para orquídeas, Auxiliar para el control de hongos, virus y bacterias">Enraizante para orquídeas, Auxiliar para el control de hongo…</td>
+          <td>09/02/2026 15:49</td>
+          <td>09/02/2026 15:49</td>
+          <td><a href="https://therealgreen.com.mx/67162145044/checkouts/ac/hWN7xcc3VXA6OlAbM3J7YpQf/recover?key=05178eb4a6367fe7f8e220189cc2866a&locale=es-MX" target="_blank" class="btn-recover">Recuperar</a></td>
+        </tr>
+        <tr>
+          <td>Fatima Sanchez</td>
+          <td><span class="email-chip">fapsl@hotmail.com</span></td>
+          <td class="money">$505.00</td>
+          <td>2</td>
+          <td class="products-cell" title="Auxiliar para el control de plagas, Auxiliar para el control de hongos, virus y bacterias">Auxiliar para el control de plagas, Auxiliar para el control…</td>
+          <td>09/02/2026 23:30</td>
+          <td>09/02/2026 23:30</td>
+          <td><a href="https://therealgreen.com.mx/67162145044/checkouts/ac/hWN8bxKleP76EbF9OIoMjChl/recover?key=9a9f895886d165d8a3b6a13740640a03&locale=es-MX" target="_blank" class="btn-recover">Recuperar</a></td>
+        </tr>
+        <tr>
+          <td>NORA Ramírez</td>
+          <td><span class="email-chip">norahildaramirezrobles@gmail.com</span></td>
+          <td class="money">$628.00</td>
+          <td>3</td>
+          <td class="products-cell" title="Enraizante para orquídeas, Sustrato para orquídeas 3L, Auxiliar para el control de plagas">Enraizante para orquídeas, Sustrato para orquídeas 3L, Auxil…</td>
+          <td>10/02/2026 10:10</td>
+          <td>10/02/2026 10:10</td>
+          <td><a href="https://therealgreen.com.mx/67162145044/checkouts/ac/hWN8d0T89VaPvNnoSjWnYymn/recover?key=f3b4a1b82a2a961f14c2adc249750c5c&locale=es-MX" target="_blank" class="btn-recover">Recuperar</a></td>
+        </tr>
+        <tr>
+          <td>Ma. Carmen garcia</td>
+          <td><span class="email-chip">tatahaddad@yahoo.com.mx</span></td>
+          <td class="money">$720.00</td>
+          <td>1</td>
+          <td class="products-cell" title="Enraizante para orquídeas">Enraizante para orquídeas</td>
+          <td>10/02/2026 17:08</td>
+          <td>10/02/2026 17:08</td>
+          <td><a href="https://therealgreen.com.mx/67162145044/checkouts/ac/hWN8dgoDJrfZ1GcPOlX2H7FC/recover?key=7453186d0cf935651ba9f75fb510d900&locale=es-MX" target="_blank" class="btn-recover">Recuperar</a></td>
+        </tr>
+        <tr>
+          <td>Ma. Carmen garcia</td>
+          <td><span class="email-chip">tatahaddad@yahoo.com.mx</span></td>
+          <td class="money">$720.00</td>
+          <td>1</td>
+          <td class="products-cell" title="Enraizante para orquídeas">Enraizante para orquídeas</td>
+          <td>10/02/2026 21:28</td>
+          <td>10/02/2026 21:28</td>
+          <td><a href="https://therealgreen.com.mx/67162145044/checkouts/ac/hWN8e6oy7cLJOc0PB4jVAMg4/recover?key=81f7d3fb8932833b7006551d06f282a4&locale=es-MX" target="_blank" class="btn-recover">Recuperar</a></td>
+        </tr>
+        <tr>
+          <td>Diego Antonio Moreno</td>
+          <td><span class="email-chip">diegoantoniomoreno@hotmail.com</span></td>
+          <td class="money">$253.30</td>
+          <td>1</td>
+          <td class="products-cell" title="Bio-fertilizante nutritivo">Bio-fertilizante nutritivo</td>
+          <td>10/02/2026 21:36</td>
+          <td>10/02/2026 22:29</td>
+          <td><a href="https://therealgreen.com.mx/67162145044/checkouts/ac/hWN8539Kj8yod8r0lo45e49p/recover?key=8c79283e2db5d3b0ecf363278218ef40&locale=es-MX" target="_blank" class="btn-recover">Recuperar</a></td>
+        </tr>
+        <tr>
+          <td>claudia solis sosa</td>
+          <td><span class="email-chip">solissosaclaudia52@gmail.com</span></td>
+          <td class="money">$805.00</td>
+          <td>4</td>
+          <td class="products-cell" title="Sustrato para orquídeas 3L, Enraizante para cactáceas y suculentas, Bio-fertilizante nutritivo, Bio-fertilizante nutritivo">Sustrato para orquídeas 3L, Enraizante para cactáceas y sucu…</td>
+          <td>11/02/2026 07:32</td>
+          <td>11/02/2026 07:32</td>
+          <td><a href="https://therealgreen.com.mx/67162145044/checkouts/ac/hWN8f6P08TA79UI3j4Wng1BJ/recover?key=1b13aa42b5b2693d5924443d8382761d&locale=es-MX" target="_blank" class="btn-recover">Recuperar</a></td>
+        </tr>
+        <tr>
+          <td>Guadalupe Isabel Carrillo Bueno</td>
+          <td><span class="email-chip">guadalupe1744carrillo@gmail.com</span></td>
+          <td class="money">$440.00</td>
+          <td>1</td>
+          <td class="products-cell" title="Enraizante para orquídeas">Enraizante para orquídeas</td>
+          <td>11/02/2026 16:08</td>
+          <td>11/02/2026 16:08</td>
+          <td><a href="https://therealgreen.com.mx/67162145044/checkouts/ac/hWN8fwYwQKmQtrTDZFaUNhxZ/recover?key=037dc4eaaa54f7df5f23b6ab17201447&locale=es-MX" target="_blank" class="btn-recover">Recuperar</a></td>
+        </tr>
+        <tr>
+          <td>Rigoberto Garcia</td>
+          <td><span class="email-chip">rigobertogarciav@hotmail.com</span></td>
+          <td class="money">$260.00</td>
+          <td>1</td>
+          <td class="products-cell" title="Enraizante para orquídeas">Enraizante para orquídeas</td>
+          <td>12/02/2026 01:16</td>
+          <td>12/02/2026 01:16</td>
+          <td><a href="https://therealgreen.com.mx/67162145044/checkouts/ac/hWN8gqQcjRVEv614siePgR5V/recover?key=1994f4779b8caaa6e43d7c57b3cdfa3f&locale=es-MX" target="_blank" class="btn-recover">Recuperar</a></td>
+        </tr>
+        <tr>
+          <td>Erika Deutsch Polak</td>
+          <td><span class="email-chip">erikaleo2@gmail.com</span></td>
+          <td class="money">$669.00</td>
+          <td>3</td>
+          <td class="products-cell" title="Bio-fertilizante nutritivo, Auxiliar para el control de hongos, virus y bacterias, Auxiliar para el control de hongos, virus y bacterias">Bio-fertilizante nutritivo, Auxiliar para el control de hong…</td>
+          <td>12/02/2026 13:28</td>
+          <td>12/02/2026 13:57</td>
+          <td><a href="https://therealgreen.com.mx/67162145044/checkouts/ac/hWN8i2DsmwKH8arOwjHROOu1/recover?key=96a55beb1083aaf6babf54bda2aa01e2&locale=es-MX" target="_blank" class="btn-recover">Recuperar</a></td>
+        </tr>
+        <tr>
+          <td>Rubén Fernández Álvarez</td>
+          <td><span class="email-chip">psico.ruben88@gmail.com</span></td>
+          <td class="money">$230.00</td>
+          <td>1</td>
+          <td class="products-cell" title="Auxiliar para el control de plagas">Auxiliar para el control de plagas</td>
+          <td>13/02/2026 15:43</td>
+          <td>13/02/2026 15:43</td>
+          <td><a href="https://therealgreen.com.mx/67162145044/checkouts/ac/hWN8kZxVA9UfjKv7cVojkchV/recover?key=8e9e90dd0de27ac7987dd32aa13dffbe&locale=es-MX" target="_blank" class="btn-recover">Recuperar</a></td>
+        </tr>
+        <tr>
+          <td>Maria Catalina</td>
+          <td><span class="email-chip">catalinajimenezf@gmail.com</span></td>
+          <td class="money">$330.00</td>
+          <td>1</td>
+          <td class="products-cell" title="Auxiliar para el control de plagas">Auxiliar para el control de plagas</td>
+          <td>14/02/2026 06:12</td>
+          <td>14/02/2026 06:12</td>
+          <td><a href="https://therealgreen.com.mx/67162145044/checkouts/ac/hWN8K0CZMdrc4yIZYslHGOh7/recover?key=f0c23d462a5ebea9ff3abab180878622&locale=es-MX" target="_blank" class="btn-recover">Recuperar</a></td>
+        </tr>
+        <tr>
+          <td>Alan Pacheco Rodríguez</td>
+          <td><span class="email-chip">pachelli66@gmail.com</span></td>
+          <td class="money">$416.00</td>
+          <td>1</td>
+          <td class="products-cell" title="Bio-fertilizante nutritivo">Bio-fertilizante nutritivo</td>
+          <td>14/02/2026 14:35</td>
+          <td>14/02/2026 14:35</td>
+          <td><a href="https://therealgreen.com.mx/67162145044/checkouts/ac/hWN8mNQjC3FEQmG1GOVB6o2T/recover?key=8e3d171b08605d67b740ec9018f5b2a3&locale=es-MX" target="_blank" class="btn-recover">Recuperar</a></td>
+        </tr>
+        <tr>
+          <td>Mirna Del Carmen Deloya Navarrete</td>
+          <td><span class="email-chip">mircar8312@gmail.com</span></td>
+          <td class="money">$980.10</td>
+          <td>2</td>
+          <td class="products-cell" title="Enraizante y mejorador de suelos, Kit Orquideas">Enraizante y mejorador de suelos, Kit Orquideas</td>
+          <td>14/02/2026 20:31</td>
+          <td>15/02/2026 09:14</td>
+          <td><a href="https://therealgreen.com.mx/67162145044/checkouts/ac/hWN8dv1dkX7ItV8MTLubprmM/recover?key=c544c65d516e693221de6777c5c54c9e&locale=es-MX" target="_blank" class="btn-recover">Recuperar</a></td>
+        </tr>
+        <tr>
+          <td>Lucia Porras Rangel</td>
+          <td><span class="email-chip">luciacapri@hotmail.com</span></td>
+          <td class="money">$275.00</td>
+          <td>1</td>
+          <td class="products-cell" title="Auxiliar para el control de hongos, virus y bacterias">Auxiliar para el control de hongos, virus y bacterias</td>
+          <td>15/02/2026 09:09</td>
+          <td>15/02/2026 09:09</td>
+          <td><a href="https://therealgreen.com.mx/67162145044/checkouts/ac/hWN8ofMy0rYKlwdxF97MNAgb/recover?key=5d11b9c497b64657355eb0f0b88adebf&locale=es-MX" target="_blank" class="btn-recover">Recuperar</a></td>
+        </tr>
+        <tr>
+          <td>Yazmin Bárcenas orozco</td>
+          <td><span class="email-chip">franciab.302@gmail.com</span></td>
+          <td class="money">$660.00</td>
+          <td>2</td>
+          <td class="products-cell" title="Enraizante para orquídeas, Auxiliar para el control de plagas">Enraizante para orquídeas, Auxiliar para el control de plaga…</td>
+          <td>15/02/2026 09:13</td>
+          <td>15/02/2026 09:13</td>
+          <td><a href="https://therealgreen.com.mx/67162145044/checkouts/ac/hWN8ofjmsBOp2YAlQrFQBfub/recover?key=b9d6eac012b55f887a0caf53153e65a1&locale=es-MX" target="_blank" class="btn-recover">Recuperar</a></td>
+        </tr>
+        <tr>
+          <td>Ricardo Rios</td>
+          <td><span class="email-chip">rriosg_26@hotmail.com</span></td>
+          <td class="money">$420.00</td>
+          <td>1</td>
+          <td class="products-cell" title="Auxiliar para el control de plagas">Auxiliar para el control de plagas</td>
+          <td>15/02/2026 14:42</td>
+          <td>15/02/2026 14:42</td>
+          <td><a href="https://therealgreen.com.mx/67162145044/checkouts/ac/hWN8pDjmvipVpekRoRUkACgL/recover?key=cc9d567df10aa046345fff2072811b04&locale=es-MX" target="_blank" class="btn-recover">Recuperar</a></td>
+        </tr>
+        <tr>
+          <td>—</td>
+          <td><span class="email-chip">evazquez2611@gmail.com</span></td>
+          <td class="money">$250.00</td>
+          <td>1</td>
+          <td class="products-cell" title="Auxiliar para el control de plagas">Auxiliar para el control de plagas</td>
+          <td>15/02/2026 18:33</td>
+          <td>15/02/2026 19:06</td>
+          <td><a href="https://therealgreen.com.mx/67162145044/checkouts/ac/hWN8pbEU01mpL89tpmzcRc8H/recover?key=4896815272a2a0f8f7bd909ec5be9573&locale=es-MX" target="_blank" class="btn-recover">Recuperar</a></td>
+        </tr>
+        <tr>
+          <td>Estela Caldera</td>
+          <td><span class="email-chip">estelacaldera@yahoo.com</span></td>
+          <td class="money">$258.00</td>
+          <td>1</td>
+          <td class="products-cell" title="Bio-fertilizante nutritivo">Bio-fertilizante nutritivo</td>
+          <td>15/02/2026 23:09</td>
+          <td>15/02/2026 23:09</td>
+          <td><a href="https://therealgreen.com.mx/67162145044/checkouts/ac/hWN8q2x9pzTfIT5YSxIlFDFp/recover?key=417dfba708538d2a1e662ddcbcaaec8f&locale=es-MX" target="_blank" class="btn-recover">Recuperar</a></td>
+        </tr>
+        <tr>
+          <td>iliana sanchez</td>
+          <td><span class="email-chip">sanchez.iliana@gmail.com</span></td>
+          <td class="money">$408.00</td>
+          <td>2</td>
+          <td class="products-cell" title="Bio-fertilizante nutritivo, Auxiliar para el control de plagas">Bio-fertilizante nutritivo, Auxiliar para el control de plag…</td>
+          <td>16/02/2026 14:42</td>
+          <td>16/02/2026 14:42</td>
+          <td><a href="https://therealgreen.com.mx/67162145044/checkouts/ac/hWN8rX1ONL0ZXci23B0lQqv3/recover?key=59fa39290adb173893b0c844910069f5&locale=es-MX" target="_blank" class="btn-recover">Recuperar</a></td>
+        </tr>
+        <tr>
+          <td>Iliana Sanchez</td>
+          <td><span class="email-chip">sanchez.iliana@gmail.com</span></td>
+          <td class="money">$408.00</td>
+          <td>2</td>
+          <td class="products-cell" title="Bio-fertilizante nutritivo, Auxiliar para el control de plagas">Bio-fertilizante nutritivo, Auxiliar para el control de plag…</td>
+          <td>16/02/2026 14:55</td>
+          <td>17/02/2026 23:48</td>
+          <td><a href="https://therealgreen.com.mx/67162145044/checkouts/ac/hWN8rb04JqaiaPp4xxRdFOaH/recover?key=e6f9b073fc2992a12340bcee2f4066a6&locale=es-MX" target="_blank" class="btn-recover">Recuperar</a></td>
+        </tr>
+        <tr>
+          <td>Lourdes Jimenez</td>
+          <td><span class="email-chip">jprado.lulu@hotmail.com</span></td>
+          <td class="money">$245.00</td>
+          <td>1</td>
+          <td class="products-cell" title="Auxiliar para el control de hongos, virus y bacterias">Auxiliar para el control de hongos, virus y bacterias</td>
+          <td>17/02/2026 13:20</td>
+          <td>17/02/2026 13:20</td>
+          <td><a href="https://therealgreen.com.mx/67162145044/checkouts/ac/hWN8tVvGAzMxiSy6mLvpCR2f/recover?key=0c35b8e672cd69d911f837498ced3d24&locale=es-MX" target="_blank" class="btn-recover">Recuperar</a></td>
+        </tr>
+        <tr>
+          <td>Jose Alberto Rodriguez Camacho</td>
+          <td><span class="email-chip">tooalbert@icoud.com</span></td>
+          <td class="money">$808.00</td>
+          <td>3</td>
+          <td class="products-cell" title="Enraizante para cactáceas y suculentas, Auxiliar para el control de plagas, Bio-fertilizante nutritivo">Enraizante para cactáceas y suculentas, Auxiliar para el con…</td>
+          <td>17/02/2026 23:18</td>
+          <td>17/02/2026 23:18</td>
+          <td><a href="https://therealgreen.com.mx/67162145044/checkouts/ac/hWN8hdKvpF5v9hCJegpOx20n/recover?key=ae1d46edeb99c8b35f1044631c8e137f&locale=es-MX" target="_blank" class="btn-recover">Recuperar</a></td>
+        </tr>
+        <tr>
+          <td>—</td>
+          <td><span class="email-chip">nadjieli@hotmail.com</span></td>
+          <td class="money">$378.00</td>
+          <td>1</td>
+          <td class="products-cell" title="Enraizante y mejorador de suelos">Enraizante y mejorador de suelos</td>
+          <td>18/02/2026 09:07</td>
+          <td>18/02/2026 09:07</td>
+          <td><a href="https://therealgreen.com.mx/67162145044/checkouts/ac/hWN8vikPyWAFJFNOOQsKVc5h/recover?key=ab57ca4a8b64cdffe0ca736b8ae3d1d2&locale=es-MX" target="_blank" class="btn-recover">Recuperar</a></td>
+        </tr>
+        <tr>
+          <td>Adela Castrejon</td>
+          <td><span class="email-chip">adelanivad2@gmail.com</span></td>
+          <td class="money">$558.00</td>
+          <td>2</td>
+          <td class="products-cell" title="Sustrato para orquídeas 3L, Enraizante para orquídeas">Sustrato para orquídeas 3L, Enraizante para orquídeas</td>
+          <td>18/02/2026 10:29</td>
+          <td>18/02/2026 10:29</td>
+          <td><a href="https://therealgreen.com.mx/67162145044/checkouts/ac/hWN8tQEyLcJatHVVBimJ2M8P/recover?key=d821d584c82f136e764477f6d2235c48&locale=es-MX" target="_blank" class="btn-recover">Recuperar</a></td>
+        </tr>
+        <tr>
+          <td>—</td>
+          <td><span class="email-chip">cony_rojo@yahoo.com.mx</span></td>
+          <td class="money">$1,502.10</td>
+          <td>3</td>
+          <td class="products-cell" title="Bolsa "Quien tiene plantas... su mal espanta", Enraizante para orquídeas, Bio-fertilizante nutritivo">Bolsa "Quien tiene plantas... su mal espanta", Enraizante pa…</td>
+          <td>18/02/2026 11:30</td>
+          <td>18/02/2026 11:30</td>
+          <td><a href="https://therealgreen.com.mx/67162145044/checkouts/ac/hWN8vy3qbqll9XJqv0rqAC49/recover?key=c3721b59dd3e1a33365d4da8cf070cf5&locale=es-MX" target="_blank" class="btn-recover">Recuperar</a></td>
+        </tr>
+        <tr>
+          <td>—</td>
+          <td><span class="email-chip">35mm@hotmail.es</span></td>
+          <td class="money">$1,278.90</td>
+          <td>4</td>
+          <td class="products-cell" title="Enraizante y mejorador de suelos, Auxiliar para el control de gallina ciega, Auxiliar para el control de hongos, virus y bacterias, Auxiliar para el control de plagas">Enraizante y mejorador de suelos, Auxiliar para el control d…</td>
+          <td>18/02/2026 14:02</td>
+          <td>18/02/2026 14:02</td>
+          <td><a href="https://therealgreen.com.mx/67162145044/checkouts/ac/hWN8wC1ymMKj9aK973ScHR8D/recover?key=4caf742a05a6bb90564b2bf4fdf9734e&locale=es-MX" target="_blank" class="btn-recover">Recuperar</a></td>
+        </tr>
+        <tr>
+          <td>Thalia Marquez</td>
+          <td><span class="email-chip">thaliamrqz@gmail.com</span></td>
+          <td class="money">$230.00</td>
+          <td>1</td>
+          <td class="products-cell" title="Enraizante para orquídeas">Enraizante para orquídeas</td>
+          <td>18/02/2026 16:13</td>
+          <td>18/02/2026 16:13</td>
+          <td><a href="https://therealgreen.com.mx/67162145044/checkouts/ac/hWN8vldsRV4le1YvRSI9eslt/recover?key=3683ea4db0620e7583e8b9b87aaaf4e8&locale=es-MX" target="_blank" class="btn-recover">Recuperar</a></td>
+        </tr>
+        <tr>
+          <td>Abigahil Hernandez Garcia</td>
+          <td><span class="email-chip">hgabigahil@gmail.com</span></td>
+          <td class="money">$980.10</td>
+          <td>2</td>
+          <td class="products-cell" title="Enraizante y mejorador de suelos, Kit Orquideas">Enraizante y mejorador de suelos, Kit Orquideas</td>
+          <td>19/02/2026 08:23</td>
+          <td>19/02/2026 08:23</td>
+          <td><a href="https://therealgreen.com.mx/67162145044/checkouts/ac/hWN8y0qfAU5ltTHlrFtcGrzd/recover?key=21348ba0900471a931eafeb2e4bbeda3&locale=es-MX" target="_blank" class="btn-recover">Recuperar</a></td>
+        </tr>
+        <tr>
+          <td>—</td>
+          <td><span class="email-chip">patygomez6@yahoo.com</span></td>
+          <td class="money">$178.00</td>
+          <td>1</td>
+          <td class="products-cell" title="Bio-fertilizante nutritivo">Bio-fertilizante nutritivo</td>
+          <td>19/02/2026 08:31</td>
+          <td>19/02/2026 08:31</td>
+          <td><a href="https://therealgreen.com.mx/67162145044/checkouts/ac/hWN7f26HDImiAM8rOr5erSGw/recover?key=80aa09f768ecab27924347859288aa67&locale=es-MX" target="_blank" class="btn-recover">Recuperar</a></td>
+        </tr>
+        <tr>
+          <td>Mané Inés Pacheco Méndez</td>
+          <td><span class="email-chip">mane.2109@hotmail.com</span></td>
+          <td class="money">$929.00</td>
+          <td>1</td>
+          <td class="products-cell" title="Kit Orquideas">Kit Orquideas</td>
+          <td>20/02/2026 17:09</td>
+          <td>20/02/2026 17:09</td>
+          <td><a href="https://therealgreen.com.mx/67162145044/checkouts/ac/hWN8z7UZUyb3xLWCqo3yHoWX/recover?key=e9338ca6e8423dd7d2d01ca4b9ef6c19&locale=es-MX" target="_blank" class="btn-recover">Recuperar</a></td>
+        </tr>
+        <tr>
+          <td>—</td>
+          <td><span class="email-chip">mary-gonzalez@hotmail.com</span></td>
+          <td class="money">$936.00</td>
+          <td>3</td>
+          <td class="products-cell" title="Enraizante para orquídeas, Sustrato para plantas de interior 3L, Auxiliar para el control de plagas">Enraizante para orquídeas, Sustrato para plantas de interior…</td>
+          <td>19/02/2026 22:12</td>
+          <td>19/02/2026 22:12</td>
+          <td><a href="https://therealgreen.com.mx/67162145044/checkouts/ac/hWN67spN2HQoA8hRVJhOl3s0/recover?key=14f2b93fe16e573a2eab4cde21e5b369&locale=es-MX" target="_blank" class="btn-recover">Recuperar</a></td>
+        </tr>
+        <tr>
+          <td>Mejia America</td>
+          <td><span class="email-chip">america.mejiar@gmail.com</span></td>
+          <td class="money">$275.00</td>
+          <td>1</td>
+          <td class="products-cell" title="Auxiliar para el control de hongos, virus y bacterias">Auxiliar para el control de hongos, virus y bacterias</td>
+          <td>20/02/2026 13:00</td>
+          <td>20/02/2026 13:00</td>
+          <td><a href="https://therealgreen.com.mx/67162145044/checkouts/ac/hWN90owgqJ744Os8jOGSqC0n/recover?key=15ee9d850cf3b7d8b6ae77df1c7e4b5d&locale=es-MX" target="_blank" class="btn-recover">Recuperar</a></td>
+        </tr>
+        <tr>
+          <td>Nohemi De la Rosa</td>
+          <td><span class="email-chip">nohemirs@live.com.mx</span></td>
+          <td class="money">$758.00</td>
+          <td>2</td>
+          <td class="products-cell" title="Bio-fertilizante nutritivo, Auxiliar para el control de plagas">Bio-fertilizante nutritivo, Auxiliar para el control de plag…</td>
+          <td>20/02/2026 13:35</td>
+          <td>20/02/2026 13:35</td>
+          <td><a href="https://therealgreen.com.mx/67162145044/checkouts/ac/hWN4n5dyEA9tnRmikHeBatkn/recover?key=d919116a91f1f66dc425e34f1e6825c8&locale=es-MX" target="_blank" class="btn-recover">Recuperar</a></td>
+        </tr>
+        <tr>
+          <td>Laura Kaire Herrera</td>
+          <td><span class="email-chip">laurakaireherrera52@gmail.com</span></td>
+          <td class="money">$420.00</td>
+          <td>1</td>
+          <td class="products-cell" title="Enraizante para orquídeas">Enraizante para orquídeas</td>
+          <td>21/02/2026 16:11</td>
+          <td>21/02/2026 16:11</td>
+          <td><a href="https://therealgreen.com.mx/67162145044/checkouts/ac/hWN7SdQVrApKtD2BdauK91EX/recover?key=eb55f2617f917fcd1ff08f5c1f82bb1f&locale=es-MX" target="_blank" class="btn-recover">Recuperar</a></td>
+        </tr>
+        <tr>
+          <td>—</td>
+          <td><span class="email-chip">betyaguilar60@hotmail.com</span></td>
+          <td class="money">$180.00</td>
+          <td>1</td>
+          <td class="products-cell" title="Enraizante para orquídeas">Enraizante para orquídeas</td>
+          <td>22/02/2026 07:16</td>
+          <td>18/03/2026 07:06</td>
+          <td><a href="https://therealgreen.com.mx/67162145044/checkouts/ac/hWN94y0Ojvz9fjnF6Ub5CWyf/recover?key=82fa08ffb48dd03fe12ba2e978a5e82f&locale=es-MX" target="_blank" class="btn-recover">Recuperar</a></td>
+        </tr>
+        <tr>
+          <td>Marlen Ruiz</td>
+          <td><span class="email-chip">marlen_1234_22@hotmail.com</span></td>
+          <td class="money">$725.00</td>
+          <td>4</td>
+          <td class="products-cell" title="Gorra “Pregúntame por mis plantas”, Auxiliar para el control de hongos, virus y bacterias, Auxiliar para el control de plagas, Enraizante para orquídeas">Gorra “Pregúntame por mis plantas”, Auxiliar para el control…</td>
+          <td>22/02/2026 14:41</td>
+          <td>22/02/2026 14:41</td>
+          <td><a href="https://therealgreen.com.mx/67162145044/checkouts/ac/hWN95gZN0YeBbOceFrRzxe4I/recover?key=cc7010d6b75d9c7dd88dddae3bbd8851&locale=es-MX" target="_blank" class="btn-recover">Recuperar</a></td>
+        </tr>
+        <tr>
+          <td>Leticia García Torres Garcia Torres</td>
+          <td><span class="email-chip">letygart@hotmail.com</span></td>
+          <td class="money">$440.00</td>
+          <td>1</td>
+          <td class="products-cell" title="Enraizante para orquídeas">Enraizante para orquídeas</td>
+          <td>23/02/2026 12:42</td>
+          <td>23/02/2026 12:42</td>
+          <td><a href="https://therealgreen.com.mx/67162145044/checkouts/ac/hWN97qxc2CJz25lcNzA99iIk/recover?key=4ba6b2c3b99d7dbb5f212ac843a915a0&locale=es-MX" target="_blank" class="btn-recover">Recuperar</a></td>
+        </tr>
+        <tr>
+          <td>Olivia Santillán</td>
+          <td><span class="email-chip">oliviasb@prodigy.net.mx</span></td>
+          <td class="money">$410.00</td>
+          <td>1</td>
+          <td class="products-cell" title="Enraizante para orquídeas">Enraizante para orquídeas</td>
+          <td>23/02/2026 19:09</td>
+          <td>23/02/2026 19:09</td>
+          <td><a href="https://therealgreen.com.mx/67162145044/checkouts/ac/hWN98U0srg2JKZlk52Jo2F0S/recover?key=c1bcafd695a6d9a6233afd2825dfc9f8&locale=es-MX" target="_blank" class="btn-recover">Recuperar</a></td>
+        </tr>
+        <tr>
+          <td>Mariana Cravioto Aguillon</td>
+          <td><span class="email-chip">mariana_cravioto@hotmail.com</span></td>
+          <td class="money">$435.00</td>
+          <td>2</td>
+          <td class="products-cell" title="Auxiliar para el control de hongos, virus y bacterias, Enraizante para orquídeas">Auxiliar para el control de hongos, virus y bacterias, Enrai…</td>
+          <td>23/02/2026 22:45</td>
+          <td>23/02/2026 22:45</td>
+          <td><a href="https://therealgreen.com.mx/67162145044/checkouts/ac/hWN80RzM48nYp7KISfcAswuP/recover?key=3297934082542e524f5d98e6c72079d3&locale=es-MX" target="_blank" class="btn-recover">Recuperar</a></td>
+        </tr>
+        <tr>
+          <td>—</td>
+          <td><span class="email-chip">estefaniabelenfaggionatto327@gmail.com</span></td>
+          <td class="money">$747.00</td>
+          <td>1</td>
+          <td class="products-cell" title="Kit Plantas Felices Mediano">Kit Plantas Felices Mediano</td>
+          <td>24/02/2026 10:56</td>
+          <td>24/02/2026 10:56</td>
+          <td><a href="https://therealgreen.com.mx/67162145044/checkouts/ac/hWN9A20UfXd3I5EoU9wPiDly/recover?key=0f985b7da02ac2efc71f65343943b1fb&locale=es-MX" target="_blank" class="btn-recover">Recuperar</a></td>
+        </tr>
+        <tr>
+          <td>Angelina Arriola</td>
+          <td><span class="email-chip">marriola42@gmail.com</span></td>
+          <td class="money">$1,145.70</td>
+          <td>1</td>
+          <td class="products-cell" title="Kit Plantas Felices Grande">Kit Plantas Felices Grande</td>
+          <td>24/02/2026 14:52</td>
+          <td>24/02/2026 14:52</td>
+          <td><a href="https://therealgreen.com.mx/67162145044/checkouts/ac/hWN8I88nCuh5yDdEbtbUvPaq/recover?key=996b707691ad4f25790d5000f6b01aa1&locale=es-MX" target="_blank" class="btn-recover">Recuperar</a></td>
+        </tr>
+        <tr>
+          <td>Veronica Maya</td>
+          <td><span class="email-chip">danyhas0306@gmail.com</span></td>
+          <td class="money">$348.00</td>
+          <td>1</td>
+          <td class="products-cell" title="Bio-fertilizante nutritivo">Bio-fertilizante nutritivo</td>
+          <td>24/02/2026 20:45</td>
+          <td>24/02/2026 20:45</td>
+          <td><a href="https://therealgreen.com.mx/67162145044/checkouts/ac/hWN7mzBGc1dRWDDE3UbWJ0LZ/recover?key=ae2ed37b746414ff3ada1b7b5811f504&locale=es-MX" target="_blank" class="btn-recover">Recuperar</a></td>
+        </tr>
+        <tr>
+          <td>Alejandra Jimena Zavala Garcia</td>
+          <td><span class="email-chip">alejzg@yahoo.com.mx</span></td>
+          <td class="money">$1,652.40</td>
+          <td>5</td>
+          <td class="products-cell" title="Bolsa "Quien tiene plantas... su mal espanta", Bio-fertilizante nutritivo, Enraizante para cactáceas y suculentas, Sustrato para plantas carnívoras 3L, Kit Orquideas">Bolsa "Quien tiene plantas... su mal espanta", Bio-fertiliza…</td>
+          <td>25/02/2026 12:13</td>
+          <td>25/02/2026 12:35</td>
+          <td><a href="https://therealgreen.com.mx/67162145044/checkouts/ac/hWN9Aqpvkk6lQevLwCA7sTnl/recover?key=0f6a6d6d7ec546170736112298412f2c&locale=es-MX" target="_blank" class="btn-recover">Recuperar</a></td>
+        </tr>
+        <tr>
+          <td>Hannia Rios</td>
+          <td><span class="email-chip">rioshanniadaniela@gmail.com</span></td>
+          <td class="money">$560.00</td>
+          <td>1</td>
+          <td class="products-cell" title="Auxiliar para el control de plagas">Auxiliar para el control de plagas</td>
+          <td>26/02/2026 13:03</td>
+          <td>26/02/2026 13:03</td>
+          <td><a href="https://therealgreen.com.mx/67162145044/checkouts/ac/hWN9EwEPkQTcynUqCZRxL1u5/recover?key=8b85d9b5f4081b8a5df482b5c273595f&locale=es-MX" target="_blank" class="btn-recover">Recuperar</a></td>
+        </tr>
+        <tr>
+          <td>—</td>
+          <td><span class="email-chip">michelle.peters@tresmondia.com</span></td>
+          <td class="money">$180.00</td>
+          <td>1</td>
+          <td class="products-cell" title="Enraizante para orquídeas">Enraizante para orquídeas</td>
+          <td>26/02/2026 18:29</td>
+          <td>26/02/2026 18:29</td>
+          <td><a href="https://therealgreen.com.mx/67162145044/checkouts/ac/hWN9FTybonqwlSyS3FecC6dv/recover?key=a84adccd780bc4f273abd970dea09213&locale=es-MX" target="_blank" class="btn-recover">Recuperar</a></td>
+        </tr>
+        <tr>
+          <td>Yael Pineda</td>
+          <td><span class="email-chip">yaelpinedarosales55@gmail.com</span></td>
+          <td class="money">$203.00</td>
+          <td>1</td>
+          <td class="products-cell" title="Auxiliar para el control de plagas">Auxiliar para el control de plagas</td>
+          <td>27/02/2026 00:34</td>
+          <td>27/02/2026 00:53</td>
+          <td><a href="https://therealgreen.com.mx/67162145044/checkouts/ac/hWN9G2iEWaQYemv9cfvWqPGz/recover?key=fb8e873f34b58a385c79b6fa048d71f4&locale=es-MX" target="_blank" class="btn-recover">Recuperar</a></td>
+        </tr>
+        <tr>
+          <td>Lorena Cruz</td>
+          <td><span class="email-chip">lorena070321@gmail.com</span></td>
+          <td class="money">$929.00</td>
+          <td>1</td>
+          <td class="products-cell" title="Kit Orquideas">Kit Orquideas</td>
+          <td>27/02/2026 10:38</td>
+          <td>27/02/2026 10:38</td>
+          <td><a href="https://therealgreen.com.mx/67162145044/checkouts/ac/hWN9H44RpmGFKOnATaM2Tg5h/recover?key=b5851d0ce40bb0c6b867f7fac8b59841&locale=es-MX" target="_blank" class="btn-recover">Recuperar</a></td>
+        </tr>
+        <tr>
+          <td>Fernanda Zepeda</td>
+          <td><span class="email-chip">marifer.nutrifam@gmail.com</span></td>
+          <td class="money">$260.00</td>
+          <td>1</td>
+          <td class="products-cell" title="Enraizante para orquídeas">Enraizante para orquídeas</td>
+          <td>27/02/2026 22:30</td>
+          <td>27/02/2026 22:30</td>
+          <td><a href="https://therealgreen.com.mx/67162145044/checkouts/ac/hWN9IDwyt67FBt9v0EvlV36f/recover?key=95a3195e5d400767c8ff44f05c89f0ba&locale=es-MX" target="_blank" class="btn-recover">Recuperar</a></td>
+        </tr>
+        <tr>
+          <td>—</td>
+          <td><span class="email-chip">pfgaytanc@hotmail.com</span></td>
+          <td class="money">$360.00</td>
+          <td>1</td>
+          <td class="products-cell" title="Enraizante para orquídeas">Enraizante para orquídeas</td>
+          <td>27/02/2026 22:44</td>
+          <td>27/02/2026 22:44</td>
+          <td><a href="https://therealgreen.com.mx/67162145044/checkouts/ac/hWN9I5jmYNMVpVi4QGKedbAv/recover?key=79aa61ba2faddfa516bae5de792e6871&locale=es-MX" target="_blank" class="btn-recover">Recuperar</a></td>
+        </tr>
+        <tr>
+          <td>Vargas Ayala</td>
+          <td><span class="email-chip">dan.va.76@hotmail.com</span></td>
+          <td class="money">$2,182.50</td>
+          <td>4</td>
+          <td class="products-cell" title="Bolsa "Quien tiene plantas... su mal espanta", Sustrato para orquídeas 3L, Enraizante para orquídeas, Kit Orquideas">Bolsa "Quien tiene plantas... su mal espanta", Sustrato para…</td>
+          <td>28/02/2026 14:12</td>
+          <td>28/02/2026 14:12</td>
+          <td><a href="https://therealgreen.com.mx/67162145044/checkouts/ac/hWN9JhTOPNDnWtPHxiBEgSWX/recover?key=edc36dcd2baf356f90cb6f79f92a607e&locale=es-MX" target="_blank" class="btn-recover">Recuperar</a></td>
+        </tr>
+        <tr>
+          <td>—</td>
+          <td><span class="email-chip">gonzalopihuave@gmail.com</span></td>
+          <td class="money">$929.00</td>
+          <td>1</td>
+          <td class="products-cell" title="Kit Orquideas">Kit Orquideas</td>
+          <td>28/02/2026 17:18</td>
+          <td>28/02/2026 17:18</td>
+          <td><a href="https://therealgreen.com.mx/67162145044/checkouts/ac/hWN9K4JOQFgSkohiu7bJ0zmV/recover?key=3dd1ec2bc2d78a4a5be0cf381141ddb7&locale=es-MX" target="_blank" class="btn-recover">Recuperar</a></td>
+        </tr>
+        <tr>
+          <td>Manuel Hernand</td>
+          <td><span class="email-chip">manuel_6.5@icloud.com</span></td>
+          <td class="money">$486.30</td>
+          <td>2</td>
+          <td class="products-cell" title="Enraizante para orquídeas Concentrado, Bio-fertilizante nutritivo Concentrado">Enraizante para orquídeas Concentrado, Bio-fertilizante nutr…</td>
+          <td>28/02/2026 17:25</td>
+          <td>26/04/2026 13:58</td>
+          <td><a href="https://therealgreen.com.mx/67162145044/checkouts/ac/hWN9K4krzUUM8iYRbFffCPQ1/recover?key=9bc44aa2a69dae8e759cb47716e052c7&locale=es-MX" target="_blank" class="btn-recover">Recuperar</a></td>
+        </tr>
+        <tr>
+          <td>Margarita Valadez</td>
+          <td><span class="email-chip">mago_valadez@yahoo.com</span></td>
+          <td class="money">$230.00</td>
+          <td>1</td>
+          <td class="products-cell" title="Enraizante para orquídeas">Enraizante para orquídeas</td>
+          <td>01/03/2026 03:19</td>
+          <td>01/03/2026 03:19</td>
+          <td><a href="https://therealgreen.com.mx/67162145044/checkouts/ac/hWN9JpcMwXwHZNqXGc5T1hJQ/recover?key=c77858f5ec8eed18a8bad5eec021bd64&locale=es-MX" target="_blank" class="btn-recover">Recuperar</a></td>
+        </tr>
+        <tr>
+          <td>Beatriz Martinez</td>
+          <td><span class="email-chip">betyaguilar60@hotmail.com</span></td>
+          <td class="money">$260.00</td>
+          <td>1</td>
+          <td class="products-cell" title="Enraizante para orquídeas">Enraizante para orquídeas</td>
+          <td>01/03/2026 07:15</td>
+          <td>01/03/2026 07:15</td>
+          <td><a href="https://therealgreen.com.mx/67162145044/checkouts/ac/hWN9LRMVBbQo2ePCjUcEoK0X/recover?key=e6e9b9acc20f86e63856364cd6e7691f&locale=es-MX" target="_blank" class="btn-recover">Recuperar</a></td>
+        </tr>
+        <tr>
+          <td>Jimena Patino</td>
+          <td><span class="email-chip">jimenap80@gmail.com</span></td>
+          <td class="money">$300.00</td>
+          <td>1</td>
+          <td class="products-cell" title="Auxiliar para el control de plagas">Auxiliar para el control de plagas</td>
+          <td>01/03/2026 11:08</td>
+          <td>01/03/2026 11:08</td>
+          <td><a href="https://therealgreen.com.mx/67162145044/checkouts/ac/hWN9LoxYkw9A45ntl3C4B8oT/recover?key=cb7cedc152110027d0a8630aca65247d&locale=es-MX" target="_blank" class="btn-recover">Recuperar</a></td>
+        </tr>
+        <tr>
+          <td>ANA ELIZABETH CASTRO BAUTISTA</td>
+          <td><span class="email-chip">elizabethcastro000777@gmail.com</span></td>
+          <td class="money">$719.00</td>
+          <td>1</td>
+          <td class="products-cell" title="Kit Plantas Felices Chico">Kit Plantas Felices Chico</td>
+          <td>04/03/2026 21:59</td>
+          <td>04/03/2026 21:59</td>
+          <td><a href="https://therealgreen.com.mx/67162145044/checkouts/ac/hWN9O0E58AtgbPqpbmOiefM9/recover?key=3229ceb5570db03a3c182c3762dd3c16&locale=es-MX" target="_blank" class="btn-recover">Recuperar</a></td>
+        </tr>
+        <tr>
+          <td>Lidia Gomez Montes de Oca</td>
+          <td><span class="email-chip">lidia.montes63@yahoo.com.mx</span></td>
+          <td class="money">$2,144.70</td>
+          <td>3</td>
+          <td class="products-cell" title="Sustrato para plantas de interior 3L, Sustrato para cactáceas y suculentas 3L, Kit Plantas Felices Grande">Sustrato para plantas de interior 3L, Sustrato para cactácea…</td>
+          <td>03/03/2026 09:22</td>
+          <td>03/03/2026 09:22</td>
+          <td><a href="https://therealgreen.com.mx/67162145044/checkouts/ac/hWN7uc9YtLx2Movni58eSp1U/recover?key=4d726c654200a59f9c0c120e57fb6303&locale=es-MX" target="_blank" class="btn-recover">Recuperar</a></td>
+        </tr>
+        <tr>
+          <td>Maricela Valenzuela</td>
+          <td><span class="email-chip">farvenval@hotmail.com</span></td>
+          <td class="money">$260.00</td>
+          <td>1</td>
+          <td class="products-cell" title="Enraizante para orquídeas">Enraizante para orquídeas</td>
+          <td>03/03/2026 11:38</td>
+          <td>03/03/2026 11:38</td>
+          <td><a href="https://therealgreen.com.mx/67162145044/checkouts/ac/hWN9QYWSiSmlG52kKbD6NWXx/recover?key=f1ecb6c3c522fa29a97dbad0f65af2fb&locale=es-MX" target="_blank" class="btn-recover">Recuperar</a></td>
+        </tr>
+        <tr>
+          <td>Aida Araceli Castillo Martínez</td>
+          <td><span class="email-chip">aacastillo@valeant.com</span></td>
+          <td class="money">$440.00</td>
+          <td>1</td>
+          <td class="products-cell" title="Enraizante para orquídeas">Enraizante para orquídeas</td>
+          <td>03/03/2026 12:38</td>
+          <td>03/03/2026 12:38</td>
+          <td><a href="https://therealgreen.com.mx/67162145044/checkouts/ac/hWN9Qftw9l6c1LiJD3322hUX/recover?key=7c2b3d26add719b67712c79b16cbb565&locale=es-MX" target="_blank" class="btn-recover">Recuperar</a></td>
+        </tr>
+        <tr>
+          <td>Sandy Valeria Perez cru</td>
+          <td><span class="email-chip">sandyvaleriapec@icloud.com</span></td>
+          <td class="money">$260.00</td>
+          <td>1</td>
+          <td class="products-cell" title="Enraizante para orquídeas">Enraizante para orquídeas</td>
+          <td>03/03/2026 13:15</td>
+          <td>03/03/2026 13:15</td>
+          <td><a href="https://therealgreen.com.mx/67162145044/checkouts/ac/hWN9QjG6wjGumXQqAGut4dbV/recover?key=7515c74d2da2c2632d1f62861c9e81fc&locale=es-MX" target="_blank" class="btn-recover">Recuperar</a></td>
+        </tr>
+        <tr>
+          <td>Gabriela Gutierrez</td>
+          <td><span class="email-chip">gaby-170213@hormail.com</span></td>
+          <td class="money">$245.75</td>
+          <td>1</td>
+          <td class="products-cell" title="Auxiliar para el control de hongos, virus y bacterias">Auxiliar para el control de hongos, virus y bacterias</td>
+          <td>04/03/2026 11:50</td>
+          <td>18/03/2026 13:56</td>
+          <td><a href="https://therealgreen.com.mx/67162145044/checkouts/ac/hWN9Sw398073QE81Ad9gfbxh/recover?key=51182b981dd98bd433df3398bfb88376&locale=es-MX" target="_blank" class="btn-recover">Recuperar</a></td>
+        </tr>
+        <tr>
+          <td>Monserrat Cabrera Santiago</td>
+          <td><span class="email-chip">monserratcabrerasantiago@gmail.com.com</span></td>
+          <td class="money">$420.00</td>
+          <td>2</td>
+          <td class="products-cell" title="Enraizante y mejorador de suelos, Enraizante para orquídeas">Enraizante y mejorador de suelos, Enraizante para orquídeas</td>
+          <td>06/03/2026 09:11</td>
+          <td>06/03/2026 09:11</td>
+          <td><a href="https://therealgreen.com.mx/67162145044/checkouts/ac/hWN9WBLwuFJi9oR1VmZ7JIeH/recover?key=17ad1a19c16bbaf8294cac35faf135d6&locale=es-MX" target="_blank" class="btn-recover">Recuperar</a></td>
+        </tr>
+        <tr>
+          <td>America Álvarez</td>
+          <td><span class="email-chip">alvarezcruzamerica@gmail.com</span></td>
+          <td class="money">$1,463.40</td>
+          <td>6</td>
+          <td class="products-cell" title="Bolsa "Quien tiene plantas... su mal espanta", Auxiliar para el control de hongos, virus y bacterias, Enraizante para orquídeas, Enraizante y mejorador de suelos, Auxiliar para el control de plagas, Bio-fertilizante nutritivo">Bolsa "Quien tiene plantas... su mal espanta", Auxiliar para…</td>
+          <td>06/03/2026 09:46</td>
+          <td>06/03/2026 09:46</td>
+          <td><a href="https://therealgreen.com.mx/67162145044/checkouts/ac/hWN9XRSYhzysokNj81C0RDnE/recover?key=298255952613109c8246e45ff1bfe13a&locale=es-MX" target="_blank" class="btn-recover">Recuperar</a></td>
+        </tr>
+        <tr>
+          <td>sofia ramos</td>
+          <td><span class="email-chip">sofiaramoscham@hotmail.com</span></td>
+          <td class="money">$378.00</td>
+          <td>1</td>
+          <td class="products-cell" title="Bio-fertilizante nutritivo">Bio-fertilizante nutritivo</td>
+          <td>06/03/2026 15:27</td>
+          <td>06/03/2026 15:27</td>
+          <td><a href="https://therealgreen.com.mx/67162145044/checkouts/ac/hWN9Y0fWcIiKfkEMbe04OVZC/recover?key=2ec6bb5f4abccdf23265c4c8431c3c42&locale=es-MX" target="_blank" class="btn-recover">Recuperar</a></td>
+        </tr>
+        <tr>
+          <td>Rocio De la rosa cordova</td>
+          <td><span class="email-chip">rochilin1509@gmail.com</span></td>
+          <td class="money">$844.00</td>
+          <td>3</td>
+          <td class="products-cell" title="Auxiliar para el control de hongos, virus y bacterias, Enraizante y mejorador de suelos, Enraizante para cactáceas y suculentas">Auxiliar para el control de hongos, virus y bacterias, Enrai…</td>
+          <td>06/03/2026 17:03</td>
+          <td>06/03/2026 17:03</td>
+          <td><a href="https://therealgreen.com.mx/67162145044/checkouts/ac/hWN9Y9S7rm5YMOwwEAetf5wv/recover?key=e9272e447e81391c90ac874fdb4088e9&locale=es-MX" target="_blank" class="btn-recover">Recuperar</a></td>
+        </tr>
+        <tr>
+          <td>Maribel Torres</td>
+          <td><span class="email-chip">mtorresg28@outlook.com</span></td>
+          <td class="money">$240.00</td>
+          <td>1</td>
+          <td class="products-cell" title="Enraizante para orquídeas">Enraizante para orquídeas</td>
+          <td>06/03/2026 18:34</td>
+          <td>12/03/2026 13:35</td>
+          <td><a href="https://therealgreen.com.mx/67162145044/checkouts/ac/hWN9HOzJlampUEtwEVT8NeUr/recover?key=3b189a2704d2e32f6e12e56e8a6badde&locale=es-MX" target="_blank" class="btn-recover">Recuperar</a></td>
+        </tr>
+        <tr>
+          <td>David Cortinas</td>
+          <td><span class="email-chip">dcortiz@outlook.com</span></td>
+          <td class="money">$378.00</td>
+          <td>1</td>
+          <td class="products-cell" title="Sustrato para orquídeas 3L">Sustrato para orquídeas 3L</td>
+          <td>07/03/2026 10:40</td>
+          <td>07/03/2026 10:40</td>
+          <td><a href="https://therealgreen.com.mx/67162145044/checkouts/ac/hWN9ZtQnFQ1rHcQrJ8nCCbB3/recover?key=e4f76e1fd062968239ad467df3ed3440&locale=es-MX" target="_blank" class="btn-recover">Recuperar</a></td>
+        </tr>
+        <tr>
+          <td>Palmy Martin</td>
+          <td><span class="email-chip">palmiramav@gmail.com</span></td>
+          <td class="money">$260.00</td>
+          <td>1</td>
+          <td class="products-cell" title="Enraizante para orquídeas">Enraizante para orquídeas</td>
+          <td>08/03/2026 21:28</td>
+          <td>08/03/2026 21:28</td>
+          <td><a href="https://therealgreen.com.mx/67162145044/checkouts/ac/hWN9a2HnBRDE3FqdqrPFJ2Z7/recover?key=966eeeb01fb52314b0bc3acde96c48d2&locale=es-MX" target="_blank" class="btn-recover">Recuperar</a></td>
+        </tr>
+        <tr>
+          <td>Shamira Chavez</td>
+          <td><span class="email-chip">chavez.shamira@gmail.com</span></td>
+          <td class="money">$455.00</td>
+          <td>2</td>
+          <td class="products-cell" title="Auxiliar para el control de plagas, Auxiliar para el control de hongos, virus y bacterias">Auxiliar para el control de plagas, Auxiliar para el control…</td>
+          <td>09/03/2026 12:42</td>
+          <td>09/03/2026 12:42</td>
+          <td><a href="https://therealgreen.com.mx/67162145044/checkouts/ac/hWN9elJd17JNzF3lI8FIiPBJ/recover?key=3fd379c340311afa4fec4561de500b48&locale=es-MX" target="_blank" class="btn-recover">Recuperar</a></td>
+        </tr>
+        <tr>
+          <td>Katya Garcia</td>
+          <td><span class="email-chip">galo.katherine@gmail.com</span></td>
+          <td class="money">$230.00</td>
+          <td>1</td>
+          <td class="products-cell" title="Enraizante para orquídeas">Enraizante para orquídeas</td>
+          <td>10/03/2026 00:08</td>
+          <td>10/03/2026 09:16</td>
+          <td><a href="https://therealgreen.com.mx/67162145044/checkouts/ac/hWN9fvIWdVS8W1hYvLAQVfHN/recover?key=bf3e811009fa18d8f92461be7259fda4&locale=es-MX" target="_blank" class="btn-recover">Recuperar</a></td>
+        </tr>
+        <tr>
+          <td>Luz Zagal</td>
+          <td><span class="email-chip">luzma.zagal@yahoo.com.mx</span></td>
+          <td class="money">$260.00</td>
+          <td>1</td>
+          <td class="products-cell" title="Enraizante para orquídeas">Enraizante para orquídeas</td>
+          <td>10/03/2026 18:47</td>
+          <td>10/03/2026 18:47</td>
+          <td><a href="https://therealgreen.com.mx/67162145044/checkouts/ac/hWN8dKg6spZbZOL5JuvOLSQF/recover?key=c48482a5f2137374669dc72606c63b87&locale=es-MX" target="_blank" class="btn-recover">Recuperar</a></td>
+        </tr>
+        <tr>
+          <td>Angel Rico</td>
+          <td><span class="email-chip">gaborico028@gmail.com</span></td>
+          <td class="money">$322.24</td>
+          <td>1</td>
+          <td class="products-cell" title="Bio-fertilizante nutritivo">Bio-fertilizante nutritivo</td>
+          <td>10/03/2026 19:37</td>
+          <td>10/03/2026 19:37</td>
+          <td><a href="https://therealgreen.com.mx/67162145044/checkouts/ac/hWN9hpKHahE4YlCqc6qHAD4L/recover?key=47823d77c55a56a5f60ae4c59060f109&locale=es-MX" target="_blank" class="btn-recover">Recuperar</a></td>
+        </tr>
+        <tr>
+          <td>marcela Sánchez lino</td>
+          <td><span class="email-chip">marcela_sali@hotmail.com</span></td>
+          <td class="money">$728.00</td>
+          <td>3</td>
+          <td class="products-cell" title="Auxiliar para el control de hongos, virus y bacterias, Bio-fertilizante nutritivo, Enraizante y mejorador de suelos">Auxiliar para el control de hongos, virus y bacterias, Bio-f…</td>
+          <td>11/03/2026 13:01</td>
+          <td>11/03/2026 13:01</td>
+          <td><a href="https://therealgreen.com.mx/67162145044/checkouts/ac/hWN9jUdy9Zy9jNI4IvWuDKp6/recover?key=d598588fcbc383e021ec0bdc4759a047&locale=es-MX" target="_blank" class="btn-recover">Recuperar</a></td>
+        </tr>
+        <tr>
+          <td>Norma Deyden</td>
+          <td><span class="email-chip">nordey66@gmail.com</span></td>
+          <td class="money">$836.00</td>
+          <td>3</td>
+          <td class="products-cell" title="Bio-fertilizante nutritivo, Enraizante para orquídeas, Sustrato para orquídeas 3L">Bio-fertilizante nutritivo, Enraizante para orquídeas, Sustr…</td>
+          <td>11/03/2026 17:55</td>
+          <td>11/03/2026 17:55</td>
+          <td><a href="https://therealgreen.com.mx/67162145044/checkouts/ac/hWN9jF8bZsBK0tqtOUEJ1yLQ/recover?key=f97cb3ea8a25560119f618ed09236561&locale=es-MX" target="_blank" class="btn-recover">Recuperar</a></td>
+        </tr>
+        <tr>
+          <td>Marlene Mora Meneses</td>
+          <td><span class="email-chip">marlene-meneses.odonto@hotmail.com</span></td>
+          <td class="money">$204.00</td>
+          <td>1</td>
+          <td class="products-cell" title="Enraizante para orquídeas">Enraizante para orquídeas</td>
+          <td>12/03/2026 14:21</td>
+          <td>12/03/2026 14:21</td>
+          <td><a href="https://therealgreen.com.mx/67162145044/checkouts/ac/hWN9m0t3uyIzurjeJnj0Rwif/recover?key=0e7d98b3fa092d6b72b0e294634404a9&locale=es-MX" target="_blank" class="btn-recover">Recuperar</a></td>
+        </tr>
+        <tr>
+          <td>Jacqueline Soto</td>
+          <td><span class="email-chip">jaliz1528@gmail.com</span></td>
+          <td class="money">$628.00</td>
+          <td>2</td>
+          <td class="products-cell" title="Auxiliar para el control de plagas, Bio-fertilizante nutritivo">Auxiliar para el control de plagas, Bio-fertilizante nutriti…</td>
+          <td>14/03/2026 07:49</td>
+          <td>14/03/2026 07:49</td>
+          <td><a href="https://therealgreen.com.mx/67162145044/checkouts/ac/hWN9q3byf88rt6PX0PcFxWWm/recover?key=f53555a1993524101793fa309ca1f7b6&locale=es-MX" target="_blank" class="btn-recover">Recuperar</a></td>
+        </tr>
+        <tr>
+          <td>Zara Ortiz Landa</td>
+          <td><span class="email-chip">zaraortiz.l@gmail.com</span></td>
+          <td class="money">$300.00</td>
+          <td>1</td>
+          <td class="products-cell" title="Auxiliar para el control de plagas">Auxiliar para el control de plagas</td>
+          <td>14/03/2026 18:51</td>
+          <td>14/03/2026 18:51</td>
+          <td><a href="https://therealgreen.com.mx/67162145044/checkouts/ac/hWN9rAHCAqi9FpOFjRnqwIHB/recover?key=dbd59975ee19adcd5e34f6ee8c4e178f&locale=es-MX" target="_blank" class="btn-recover">Recuperar</a></td>
+        </tr>
+        <tr>
+          <td>—</td>
+          <td><span class="email-chip">dianalpzmtz@gmail.com</span></td>
+          <td class="money">$720.00</td>
+          <td>1</td>
+          <td class="products-cell" title="Enraizante para orquídeas">Enraizante para orquídeas</td>
+          <td>14/03/2026 21:51</td>
+          <td>14/03/2026 21:51</td>
+          <td><a href="https://therealgreen.com.mx/67162145044/checkouts/ac/hWN9rGKGtyafTgok9ogbDNSr/recover?key=a9145d6a25130f08c8bc5e41f1d52f28&locale=es-MX" target="_blank" class="btn-recover">Recuperar</a></td>
+        </tr>
+        <tr>
+          <td>Blanca Alejandra Fernández Barriga</td>
+          <td><span class="email-chip">balefdez@gmail.com</span></td>
+          <td class="money">$718.00</td>
+          <td>3</td>
+          <td class="products-cell" title="Enraizante y mejorador de suelos, Enraizante para cactáceas y suculentas, Bio-fertilizante nutritivo">Enraizante y mejorador de suelos, Enraizante para cactáceas …</td>
+          <td>15/03/2026 10:48</td>
+          <td>15/03/2026 10:48</td>
+          <td><a href="https://therealgreen.com.mx/67162145044/checkouts/ac/hWN6wVyjy5zCsj6tQGgA386i/recover?key=8ee4d0ee4cd43cb281deacdfe38ea2ae&locale=es-MX" target="_blank" class="btn-recover">Recuperar</a></td>
+        </tr>
+        <tr>
+          <td>Alonso Mendoza Hernandez</td>
+          <td><span class="email-chip">alonsomhdez@gmail.com</span></td>
+          <td class="money">$310.00</td>
+          <td>1</td>
+          <td class="products-cell" title="Auxiliar para el control de plagas">Auxiliar para el control de plagas</td>
+          <td>15/03/2026 17:46</td>
+          <td>15/03/2026 17:46</td>
+          <td><a href="https://therealgreen.com.mx/67162145044/checkouts/ac/hWN9tP0g9qKMNPkAWmsmac1B/recover?key=9b170648c8b0e6f6cf61ea9d9d009078&locale=es-MX" target="_blank" class="btn-recover">Recuperar</a></td>
+        </tr>
+        <tr>
+          <td>—</td>
+          <td><span class="email-chip">laperlablanca_241189@hotmail.com</span></td>
+          <td class="money">$2,182.50</td>
+          <td>5</td>
+          <td class="products-cell" title="Sustrato para plantas de interior 3L, Sustrato para orquídeas 3L, Enraizante y mejorador de suelos, Enraizante para orquídeas, Bio-fertilizante nutritivo">Sustrato para plantas de interior 3L, Sustrato para orquídea…</td>
+          <td>16/03/2026 21:26</td>
+          <td>16/03/2026 21:26</td>
+          <td><a href="https://therealgreen.com.mx/67162145044/checkouts/ac/hWN9w7sNT46qH7YALwkFQzZp/recover?key=10583198362ff0211611d43355a3ff9a&locale=es-MX" target="_blank" class="btn-recover">Recuperar</a></td>
+        </tr>
+        <tr>
+          <td>—</td>
+          <td><span class="email-chip">carolina_montealegre@hotmail.com</span></td>
+          <td class="money">$180.00</td>
+          <td>1</td>
+          <td class="products-cell" title="Enraizante para orquídeas">Enraizante para orquídeas</td>
+          <td>17/03/2026 15:09</td>
+          <td>17/03/2026 15:09</td>
+          <td><a href="https://therealgreen.com.mx/67162145044/checkouts/ac/hWN9xs2i0EH6XUxiJ3qWWZe6/recover?key=adabbbe33fb2dec194a30777d32cb07a&locale=es-MX" target="_blank" class="btn-recover">Recuperar</a></td>
+        </tr>
+        <tr>
+          <td>Patricia Porras</td>
+          <td><span class="email-chip">pattypoamayo29@gmail.com</span></td>
+          <td class="money">$330.00</td>
+          <td>1</td>
+          <td class="products-cell" title="Auxiliar para el control de plagas">Auxiliar para el control de plagas</td>
+          <td>17/03/2026 17:48</td>
+          <td>17/03/2026 17:48</td>
+          <td><a href="https://therealgreen.com.mx/67162145044/checkouts/ac/hWN9y7de0USxmr8XHsmu6cGv/recover?key=b8ea038d5c72df9d0bfa7713ec9b3cd1&locale=es-MX" target="_blank" class="btn-recover">Recuperar</a></td>
+        </tr>
+        <tr>
+          <td>Hugo Clorio Cruz</td>
+          <td><span class="email-chip">hugo_clorio@hotmail.com</span></td>
+          <td class="money">$550.00</td>
+          <td>1</td>
+          <td class="products-cell" title="Auxiliar para el control de plagas">Auxiliar para el control de plagas</td>
+          <td>17/03/2026 18:44</td>
+          <td>17/03/2026 18:44</td>
+          <td><a href="https://therealgreen.com.mx/67162145044/checkouts/ac/hWN9yDvM7EN5jP1F0HFrMPVR/recover?key=57a7c98fb1b2b8e9973230f2ef64d382&locale=es-MX" target="_blank" class="btn-recover">Recuperar</a></td>
+        </tr>
+        <tr>
+          <td>Eduardo Hernandez</td>
+          <td><span class="email-chip">lalo.ramos@gmail.com</span></td>
+          <td class="money">$260.00</td>
+          <td>1</td>
+          <td class="products-cell" title="Enraizante para orquídeas">Enraizante para orquídeas</td>
+          <td>18/03/2026 19:45</td>
+          <td>18/03/2026 19:45</td>
+          <td><a href="https://therealgreen.com.mx/67162145044/checkouts/ac/hWNA0fZ5kk3DRh95iqqkuD8z/recover?key=9a1663db066bbb121c2f7a7d3116a482&locale=es-MX" target="_blank" class="btn-recover">Recuperar</a></td>
+        </tr>
+        <tr>
+          <td>Magali Fernández Meza</td>
+          <td><span class="email-chip">maggie_25kmomili@hotmail.com</span></td>
+          <td class="money">$819.00</td>
+          <td>2</td>
+          <td class="products-cell" title="Enraizante para orquídeas, Kit Plantas Felices Chico">Enraizante para orquídeas, Kit Plantas Felices Chico</td>
+          <td>19/03/2026 16:36</td>
+          <td>19/03/2026 16:36</td>
+          <td><a href="https://therealgreen.com.mx/67162145044/checkouts/ac/hWN9JbME94gn9keiDLDmlhuT/recover?key=75b194b4dfc54b2382d5a5b912124344&locale=es-MX" target="_blank" class="btn-recover">Recuperar</a></td>
+        </tr>
+        <tr>
+          <td>Ivan Galindo Torres</td>
+          <td><span class="email-chip">galtor.ivan97@gmail.com</span></td>
+          <td class="money">$853.00</td>
+          <td>3</td>
+          <td class="products-cell" title="Auxiliar para el control de hongos, virus y bacterias, Enraizante para orquídeas, Bio-fertilizante nutritivo">Auxiliar para el control de hongos, virus y bacterias, Enrai…</td>
+          <td>20/03/2026 09:43</td>
+          <td>20/03/2026 09:43</td>
+          <td><a href="https://therealgreen.com.mx/67162145044/checkouts/ac/hWNA4NybpCa2d6vBM6ocwXZp/recover?key=32a43e3f4b0af98e09d8e5080467ff3b&locale=es-MX" target="_blank" class="btn-recover">Recuperar</a></td>
+        </tr>
+        <tr>
+          <td>—</td>
+          <td><span class="email-chip">monica.zobregon@gmail.com</span></td>
+          <td class="money">$206.10</td>
+          <td>1</td>
+          <td class="products-cell" title="Bio-fertilizante nutritivo">Bio-fertilizante nutritivo</td>
+          <td>20/03/2026 12:39</td>
+          <td>20/03/2026 18:08</td>
+          <td><a href="https://therealgreen.com.mx/67162145044/checkouts/ac/hWNA4f7uAmSk3RGAXepBNhU0/recover?key=231485e34a4df62cceb1b25e3a33e7dc&locale=es-MX" target="_blank" class="btn-recover">Recuperar</a></td>
+        </tr>
+        <tr>
+          <td>Karla Becerril</td>
+          <td><span class="email-chip">karlavba@hotmail.com</span></td>
+          <td class="money">$610.00</td>
+          <td>1</td>
+          <td class="products-cell" title="Kit de emergencia">Kit de emergencia</td>
+          <td>22/03/2026 09:36</td>
+          <td>22/03/2026 09:56</td>
+          <td><a href="https://therealgreen.com.mx/67162145044/checkouts/ac/hWN9ljw0QfGmzQId0X22GgRl/recover?key=1eb0f610ed8f5b132008c1a570eac0f1&locale=es-MX" target="_blank" class="btn-recover">Recuperar</a></td>
+        </tr>
+        <tr>
+          <td>Ximena Serrano Luna</td>
+          <td><span class="email-chip">ximenina.luna@gmail.com</span></td>
+          <td class="money">$253.30</td>
+          <td>1</td>
+          <td class="products-cell" title="Bio-fertilizante nutritivo">Bio-fertilizante nutritivo</td>
+          <td>24/03/2026 19:49</td>
+          <td>24/03/2026 19:49</td>
+          <td><a href="https://therealgreen.com.mx/67162145044/checkouts/ac/hWNAEmyFtZJtmFxA7tMZeMsi/recover?key=bf19828625c2ad44bb747adb5ef6022a&locale=es-MX" target="_blank" class="btn-recover">Recuperar</a></td>
+        </tr>
+        <tr>
+          <td>Salvador Muñoz</td>
+          <td><span class="email-chip">mmasociados2018@gmail.com</span></td>
+          <td class="money">$260.00</td>
+          <td>1</td>
+          <td class="products-cell" title="Enraizante para orquídeas">Enraizante para orquídeas</td>
+          <td>25/03/2026 07:03</td>
+          <td>25/03/2026 07:03</td>
+          <td><a href="https://therealgreen.com.mx/67162145044/checkouts/ac/hWNAFu3za5gfdm0cAcG0XWKn/recover?key=fdcadb48c0e946f6c98f3188408ab1db&locale=es-MX" target="_blank" class="btn-recover">Recuperar</a></td>
+        </tr>
+        <tr>
+          <td>L G</td>
+          <td><span class="email-chip">jhuf@yahoo.com</span></td>
+          <td class="money">$240.00</td>
+          <td>1</td>
+          <td class="products-cell" title="Enraizante para orquídeas">Enraizante para orquídeas</td>
+          <td>25/03/2026 07:22</td>
+          <td>25/03/2026 07:22</td>
+          <td><a href="https://therealgreen.com.mx/67162145044/checkouts/ac/hWNAFvz43MAsZStsCyMKFhQ1/recover?key=7e0c4c5cc5855292fe545f7fec29efc9&locale=es-MX" target="_blank" class="btn-recover">Recuperar</a></td>
+        </tr>
+        <tr>
+          <td>Raquel Gonzales</td>
+          <td><span class="email-chip">raquel.glsgal@outlook.com</span></td>
+          <td class="money">$846.00</td>
+          <td>2</td>
+          <td class="products-cell" title="Bio-fertilizante nutritivo, Auxiliar para el control de plagas">Bio-fertilizante nutritivo, Auxiliar para el control de plag…</td>
+          <td>25/03/2026 16:53</td>
+          <td>25/03/2026 16:53</td>
+          <td><a href="https://therealgreen.com.mx/67162145044/checkouts/ac/hWNACh4JCuuCV7NevjbGH1gv/recover?key=f16fb6a81ceb830128763b888704e8ea&locale=es-MX" target="_blank" class="btn-recover">Recuperar</a></td>
+        </tr>
+        <tr>
+          <td>Enrique Rodriguez Jimenez</td>
+          <td><span class="email-chip">enrique2565@hotmail.com</span></td>
+          <td class="money">$717.00</td>
+          <td>2</td>
+          <td class="products-cell" title="Planta un árbol con tu compra, Kit para principiantes">Planta un árbol con tu compra, Kit para principiantes</td>
+          <td>26/03/2026 13:03</td>
+          <td>30/03/2026 14:48</td>
+          <td><a href="https://therealgreen.com.mx/67162145044/checkouts/ac/hWNA2CuBSc2lLJvfQdw3qCNl/recover?key=4c8bfe812e0eb2a1a99b348e560809c7&locale=es-MX" target="_blank" class="btn-recover">Recuperar</a></td>
+        </tr>
+        <tr>
+          <td>María Alicia</td>
+          <td><span class="email-chip">josemaria5715@gmail.com</span></td>
+          <td class="money">$240.00</td>
+          <td>1</td>
+          <td class="products-cell" title="Enraizante y mejorador de suelos">Enraizante y mejorador de suelos</td>
+          <td>27/03/2026 09:12</td>
+          <td>27/03/2026 09:12</td>
+          <td><a href="https://therealgreen.com.mx/67162145044/checkouts/ac/hWNA6bjcHvlJiGQtR06bgJKa/recover?key=0dc06cc875260b2656b75d4b9f549991&locale=es-MX" target="_blank" class="btn-recover">Recuperar</a></td>
+        </tr>
+        <tr>
+          <td>FABIOLA ZAMORA</td>
+          <td><span class="email-chip">FABIOLAZAMORALAJO@GMAIL.COM</span></td>
+          <td class="money">$358.00</td>
+          <td>1</td>
+          <td class="products-cell" title="Bio-fertilizante nutritivo">Bio-fertilizante nutritivo</td>
+          <td>28/03/2026 16:06</td>
+          <td>28/03/2026 16:06</td>
+          <td><a href="https://therealgreen.com.mx/67162145044/checkouts/ac/hWNANqdZawMsaDpL9PPCa8Zd/recover?key=dc1124617fc40911c0b6bf19b73c251e&locale=es-MX" target="_blank" class="btn-recover">Recuperar</a></td>
+        </tr>
+        <tr>
+          <td>Malu Monterrubio</td>
+          <td><span class="email-chip">malusun@hotmail.com</span></td>
+          <td class="money">$505.00</td>
+          <td>2</td>
+          <td class="products-cell" title="Auxiliar para el control de hongos, virus y bacterias, Auxiliar para el control de plagas">Auxiliar para el control de hongos, virus y bacterias, Auxil…</td>
+          <td>29/03/2026 06:50</td>
+          <td>29/03/2026 10:46</td>
+          <td><a href="https://therealgreen.com.mx/67162145044/checkouts/ac/hWNAPHxht11ckzH1cXJ6hil7/recover?key=dab3ac17222bdafea3ca573e894e2c49&locale=es-MX" target="_blank" class="btn-recover">Recuperar</a></td>
+        </tr>
+        <tr>
+          <td>Yolanda Aguilar</td>
+          <td><span class="email-chip">petalo.cristal@gmail.com</span></td>
+          <td class="money">$635.00</td>
+          <td>2</td>
+          <td class="products-cell" title="Auxiliar para el control de hongos, virus y bacterias, Enraizante para orquídeas">Auxiliar para el control de hongos, virus y bacterias, Enrai…</td>
+          <td>29/03/2026 18:07</td>
+          <td>29/03/2026 18:07</td>
+          <td><a href="https://therealgreen.com.mx/67162145044/checkouts/ac/hWNA2R9oPP8YSvRoS0k08Vxx/recover?key=08e991acf27913b622cc492223dc0309&locale=es-MX" target="_blank" class="btn-recover">Recuperar</a></td>
+        </tr>
+        <tr>
+          <td>Karina Olivera</td>
+          <td><span class="email-chip">karina_olivera@hotmail.com</span></td>
+          <td class="money">$495.00</td>
+          <td>2</td>
+          <td class="products-cell" title="Auxiliar para el control de hongos, virus y bacterias, Auxiliar para el control de plagas">Auxiliar para el control de hongos, virus y bacterias, Auxil…</td>
+          <td>30/03/2026 20:07</td>
+          <td>05/04/2026 19:09</td>
+          <td><a href="https://therealgreen.com.mx/67162145044/checkouts/ac/hWN9M5fzQdt1YiuLI82D1XGL/recover?key=b584fa1539fbbfc2a8ba1bd98b2c8784&locale=es-MX" target="_blank" class="btn-recover">Recuperar</a></td>
+        </tr>
+        <tr>
+          <td>—</td>
+          <td><span class="email-chip">rocio.rosas@hotmail.com</span></td>
+          <td class="money">$722.00</td>
+          <td>3</td>
+          <td class="products-cell" title="Bio-fertilizante nutritivo, Enraizante y mejorador de suelos, Auxiliar para el control de hongos, virus y bacterias">Bio-fertilizante nutritivo, Enraizante y mejorador de suelos…</td>
+          <td>31/03/2026 09:09</td>
+          <td>31/03/2026 09:09</td>
+          <td><a href="https://therealgreen.com.mx/67162145044/checkouts/ac/hWNAJQ5gl6GLkF5TCKsW6goj/recover?key=78282d38d22dd07627cba83aa50ce381&locale=es-MX" target="_blank" class="btn-recover">Recuperar</a></td>
+        </tr>
+        <tr>
+          <td>alina angeles gomez</td>
+          <td><span class="email-chip">alina.angeles@hotmail.com</span></td>
+          <td class="money">$1,613.70</td>
+          <td>5</td>
+          <td class="products-cell" title="Bolsa "Quien tiene plantas... su mal espanta", Enraizante y mejorador de suelos, Sustrato para plantas de interior 3L, Enraizante para orquídeas, Kit césped verde">Bolsa "Quien tiene plantas... su mal espanta", Enraizante y …</td>
+          <td>31/03/2026 09:10</td>
+          <td>31/03/2026 09:10</td>
+          <td><a href="https://therealgreen.com.mx/67162145044/checkouts/ac/hWNAUDqLK3qIu6vGkgKgtcpd/recover?key=d3e45750a9353e8d3f257dab3d5e7642&locale=es-MX" target="_blank" class="btn-recover">Recuperar</a></td>
+        </tr>
+        <tr>
+          <td>DIANA GRISEL AVILA</td>
+          <td><span class="email-chip">dianavila_grisel@hotmail.com</span></td>
+          <td class="money">$275.00</td>
+          <td>1</td>
+          <td class="products-cell" title="Auxiliar para el control de hongos, virus y bacterias">Auxiliar para el control de hongos, virus y bacterias</td>
+          <td>31/03/2026 21:39</td>
+          <td>31/03/2026 21:39</td>
+          <td><a href="https://therealgreen.com.mx/67162145044/checkouts/ac/hWNAVRddFvyK4cdET531RoyP/recover?key=17b8343f95b32e5943b0ea71040953fa&locale=es-MX" target="_blank" class="btn-recover">Recuperar</a></td>
+        </tr>
+        <tr>
+          <td>Ibrahim Silva</td>
+          <td><span class="email-chip">malagaox@gmail.com</span></td>
+          <td class="money">$330.00</td>
+          <td>1</td>
+          <td class="products-cell" title="Auxiliar para el control de plagas">Auxiliar para el control de plagas</td>
+          <td>01/04/2026 06:04</td>
+          <td>01/04/2026 06:04</td>
+          <td><a href="https://therealgreen.com.mx/67162145044/checkouts/ac/hWNAWHZ4LjK2a9AFpDVWGGQL/recover?key=24d628fbb32202b1a7f5df7cbd606f94&locale=es-MX" target="_blank" class="btn-recover">Recuperar</a></td>
+        </tr>
+        <tr>
+          <td>Cecilia Soto</td>
+          <td><span class="email-chip">cecsotvar@gmail.com</span></td>
+          <td class="money">$440.00</td>
+          <td>1</td>
+          <td class="products-cell" title="Enraizante para orquídeas">Enraizante para orquídeas</td>
+          <td>01/04/2026 16:17</td>
+          <td>01/04/2026 16:17</td>
+          <td><a href="https://therealgreen.com.mx/67162145044/checkouts/ac/hWNAXHdEVBX22MjaSkIX5egD/recover?key=83b9e5504892242e2314d4b106101a3c&locale=es-MX" target="_blank" class="btn-recover">Recuperar</a></td>
+        </tr>
+        <tr>
+          <td>Cinthia Garcia Nava</td>
+          <td><span class="email-chip">cinthia._89@hotmail.com</span></td>
+          <td class="money">$996.30</td>
+          <td>2</td>
+          <td class="products-cell" title="Enraizante para orquídeas, Kit Plantas Felices Mediano">Enraizante para orquídeas, Kit Plantas Felices Mediano</td>
+          <td>02/04/2026 10:41</td>
+          <td>02/04/2026 10:41</td>
+          <td><a href="https://therealgreen.com.mx/67162145044/checkouts/ac/hWNAZ2Y5RF6pG5e94eV9BLDl/recover?key=aa7677379e7a74a4441d21e14142dd83&locale=es-MX" target="_blank" class="btn-recover">Recuperar</a></td>
+        </tr>
+        <tr>
+          <td>Mario Lizárraga Contreras</td>
+          <td><span class="email-chip">puntofokaladm@hotmail.com</span></td>
+          <td class="money">$539.00</td>
+          <td>2</td>
+          <td class="products-cell" title="Bio-fertilizante nutritivo, Auxiliar para el control de plagas">Bio-fertilizante nutritivo, Auxiliar para el control de plag…</td>
+          <td>03/04/2026 05:00</td>
+          <td>03/04/2026 13:49</td>
+          <td><a href="https://therealgreen.com.mx/67162145044/checkouts/ac/hWNAaspVtRHR4QwID8juwqdl/recover?key=c6440a7924055f107653ad53958f2431&locale=es-MX" target="_blank" class="btn-recover">Recuperar</a></td>
+        </tr>
+        <tr>
+          <td>Manuel Garcia</td>
+          <td><span class="email-chip">josemanuel.garcia269001@gmail.com</span></td>
+          <td class="money">$580.00</td>
+          <td>1</td>
+          <td class="products-cell" title="Kit de emergencia">Kit de emergencia</td>
+          <td>03/04/2026 07:21</td>
+          <td>06/04/2026 10:30</td>
+          <td><a href="https://therealgreen.com.mx/67162145044/checkouts/ac/hWNAb6yvwvNoJ1TEWfvdMIin/recover?key=9a02ff6691834c6e124bee08a2a6bb82&locale=es-MX" target="_blank" class="btn-recover">Recuperar</a></td>
+        </tr>
+        <tr>
+          <td>Isaac Cornejo</td>
+          <td><span class="email-chip">isaacshoes@gmail.com</span></td>
+          <td class="money">$348.00</td>
+          <td>1</td>
+          <td class="products-cell" title="Bio-fertilizante nutritivo">Bio-fertilizante nutritivo</td>
+          <td>03/04/2026 22:12</td>
+          <td>03/04/2026 22:12</td>
+          <td><a href="https://therealgreen.com.mx/67162145044/checkouts/ac/hWNAcZ5u9wGPpBhIm6yyjtS5/recover?key=6799c7965755ba6ccacada76c8449f80&locale=es-MX" target="_blank" class="btn-recover">Recuperar</a></td>
+        </tr>
+        <tr>
+          <td>María Guadalupe Guardiola Chávez</td>
+          <td><span class="email-chip">guarcom@hotmail.com</span></td>
+          <td class="money">$750.00</td>
+          <td>1</td>
+          <td class="products-cell" title="Auxiliar para el control de plagas">Auxiliar para el control de plagas</td>
+          <td>04/04/2026 00:11</td>
+          <td>04/04/2026 11:35</td>
+          <td><a href="https://therealgreen.com.mx/67162145044/checkouts/ac/hWNAck3HMVdoqbhTfHnBxzAf/recover?key=63c32d743de6a7fe2276c7df532480c3&locale=es-MX" target="_blank" class="btn-recover">Recuperar</a></td>
+        </tr>
+        <tr>
+          <td>shantall aspe</td>
+          <td><span class="email-chip">tobyera@gmail.com</span></td>
+          <td class="money">$438.00</td>
+          <td>2</td>
+          <td class="products-cell" title="Bio-fertilizante nutritivo, Auxiliar para el control de plagas">Bio-fertilizante nutritivo, Auxiliar para el control de plag…</td>
+          <td>04/04/2026 14:00</td>
+          <td>04/04/2026 14:00</td>
+          <td><a href="https://therealgreen.com.mx/67162145044/checkouts/ac/hWNAe7Mb3PtDF5GSaA6Qo4bh/recover?key=c1557bbb36f0980a082d2cd3b3973483&locale=es-MX" target="_blank" class="btn-recover">Recuperar</a></td>
+        </tr>
+        <tr>
+          <td>Erika Jazmin Mena Hernandez</td>
+          <td><span class="email-chip">erika.22mena@gmail.com</span></td>
+          <td class="money">$440.00</td>
+          <td>1</td>
+          <td class="products-cell" title="Auxiliar para el control de plagas">Auxiliar para el control de plagas</td>
+          <td>19/04/2026 18:27</td>
+          <td>19/04/2026 19:06</td>
+          <td><a href="https://therealgreen.com.mx/67162145044/checkouts/ac/hWNAhBxtcax4d6PCvejYLh8K/recover?key=6e281204dea1a800b5d29aea45cd1949&locale=es-MX" target="_blank" class="btn-recover">Recuperar</a></td>
+        </tr>
+        <tr>
+          <td>Alma Itati Valdés Esquivel</td>
+          <td><span class="email-chip">itati300993@gmail.com</span></td>
+          <td class="money">$590.00</td>
+          <td>1</td>
+          <td class="products-cell" title="Kit de emergencia">Kit de emergencia</td>
+          <td>06/04/2026 14:31</td>
+          <td>06/04/2026 14:31</td>
+          <td><a href="https://therealgreen.com.mx/67162145044/checkouts/ac/hWNAYztllz0krJNejsnSa7Yf/recover?key=df730e3d3f7d51f44d7a1ea0a4ccc300&locale=es-MX" target="_blank" class="btn-recover">Recuperar</a></td>
+        </tr>
+        <tr>
+          <td>Omar Marin</td>
+          <td><span class="email-chip">omar.slmarin@outlook.com</span></td>
+          <td class="money">$439.00</td>
+          <td>2</td>
+          <td class="products-cell" title="Bio-fertilizante nutritivo, Enraizante y mejorador de suelos">Bio-fertilizante nutritivo, Enraizante y mejorador de suelos</td>
+          <td>07/04/2026 09:26</td>
+          <td>07/04/2026 09:26</td>
+          <td><a href="https://therealgreen.com.mx/67162145044/checkouts/ac/hWNAkidLbQBaxrzwArd1IsDZ/recover?key=e8ebdd72e8528a3c9e78cb0a878f15ab&locale=es-MX" target="_blank" class="btn-recover">Recuperar</a></td>
+        </tr>
+        <tr>
+          <td>—</td>
+          <td><span class="email-chip">ma2004gl@hotmail.com</span></td>
+          <td class="money">$1,286.10</td>
+          <td>3</td>
+          <td class="products-cell" title="Enraizante para orquídeas, Sustrato para plantas de interior 3L, Kit Plantas Felices Chico">Enraizante para orquídeas, Sustrato para plantas de interior…</td>
+          <td>07/04/2026 22:01</td>
+          <td>07/04/2026 22:01</td>
+          <td><a href="https://therealgreen.com.mx/67162145044/checkouts/ac/hWNAlwlbox6XQZEvD8uUFzXd/recover?key=98e213d3b871fd3f5958a6d2d132661f&locale=es-MX" target="_blank" class="btn-recover">Recuperar</a></td>
+        </tr>
+        <tr>
+          <td>Jessica alejandra Ochoa trujillo</td>
+          <td><span class="email-chip">jessicaochoa87@hotmail.com</span></td>
+          <td class="money">$1,505.70</td>
+          <td>6</td>
+          <td class="products-cell" title="Bolsa "Quien tiene plantas... su mal espanta", Sustrato para cactáceas y suculentas 3L, Sustrato para plantas de interior 3L, Bio-fertilizante nutritivo, Enraizante y mejorador de suelos, Enraizante y mejorador de suelos">Bolsa "Quien tiene plantas... su mal espanta", Sustrato para…</td>
+          <td>08/04/2026 06:47</td>
+          <td>08/04/2026 06:47</td>
+          <td><a href="https://therealgreen.com.mx/67162145044/checkouts/ac/hWNAlykYIyLd82hCBXtVFMUE/recover?key=cd5131eea69550e58ed65f78aaea67eb&locale=es-MX" target="_blank" class="btn-recover">Recuperar</a></td>
+        </tr>
+        <tr>
+          <td>Pilar Sanchez cardenas</td>
+          <td><span class="email-chip">mariadelpilar.sancar@gmail.com</span></td>
+          <td class="money">$330.00</td>
+          <td>1</td>
+          <td class="products-cell" title="Auxiliar para el control de plagas">Auxiliar para el control de plagas</td>
+          <td>08/04/2026 10:03</td>
+          <td>08/04/2026 10:03</td>
+          <td><a href="https://therealgreen.com.mx/67162145044/checkouts/ac/hWN9vDEVO5UiCnimbbiwiyZU/recover?key=a717f3dc642a5630cc4fdf2775a67ecc&locale=es-MX" target="_blank" class="btn-recover">Recuperar</a></td>
+        </tr>
+        <tr>
+          <td>Jose carlos Bravo rodrigue</td>
+          <td><span class="email-chip">corsek5@gmail.com</span></td>
+          <td class="money">$821.75</td>
+          <td>4</td>
+          <td class="products-cell" title="Auxiliar para el control de plagas, Auxiliar para el control de hongos, virus y bacterias, Bio-fertilizante nutritivo, Enraizante y mejorador de suelos">Auxiliar para el control de plagas, Auxiliar para el control…</td>
+          <td>09/04/2026 09:40</td>
+          <td>09/04/2026 09:40</td>
+          <td><a href="https://therealgreen.com.mx/67162145044/checkouts/ac/hWNApQnNYsNHzu9d62n0f0C1/recover?key=cf7f4c6b16b03f575f164e9137bd6b55&locale=es-MX" target="_blank" class="btn-recover">Recuperar</a></td>
+        </tr>
+        <tr>
+          <td>—</td>
+          <td><span class="email-chip">berenicechavarria@gmail.com</span></td>
+          <td class="money">$1,217.70</td>
+          <td>3</td>
+          <td class="products-cell" title="Bio-fertilizante nutritivo, Auxiliar para el control de hongos, virus y bacterias, Kit Orquideas">Bio-fertilizante nutritivo, Auxiliar para el control de hong…</td>
+          <td>09/04/2026 09:54</td>
+          <td>09/04/2026 09:54</td>
+          <td><a href="https://therealgreen.com.mx/67162145044/checkouts/ac/hWNAhJekpcG8vlY6k70YQWcz/recover?key=fb230f3287784e4de23e5a459129f04c&locale=es-MX" target="_blank" class="btn-recover">Recuperar</a></td>
+        </tr>
+        <tr>
+          <td>—</td>
+          <td><span class="email-chip">alejandra.quiroz.lerma@gmail.com</span></td>
+          <td class="money">$298.00</td>
+          <td>1</td>
+          <td class="products-cell" title="Bio-fertilizante nutritivo">Bio-fertilizante nutritivo</td>
+          <td>09/04/2026 11:37</td>
+          <td>09/04/2026 11:37</td>
+          <td><a href="https://therealgreen.com.mx/67162145044/checkouts/ac/hWNApeemyzf5AtbvnJhSNWAj/recover?key=b03ecb08e55824cc644b099a3ef36a16&locale=es-MX" target="_blank" class="btn-recover">Recuperar</a></td>
+        </tr>
+        <tr>
+          <td>Judith Lopez Flores</td>
+          <td><span class="email-chip">yuyis-33@live.com</span></td>
+          <td class="money">$260.00</td>
+          <td>1</td>
+          <td class="products-cell" title="Enraizante para orquídeas Concentrado">Enraizante para orquídeas Concentrado</td>
+          <td>09/04/2026 20:13</td>
+          <td>09/04/2026 20:13</td>
+          <td><a href="https://therealgreen.com.mx/67162145044/checkouts/ac/hWNAqUxRZbESSf9gtRce1MFF/recover?key=f1e0116bc2c7205d7cbaadc28f784d61&locale=es-MX" target="_blank" class="btn-recover">Recuperar</a></td>
+        </tr>
+        <tr>
+          <td>Gloria Cravioto</td>
+          <td><span class="email-chip">craviotogloria@gmail.com</span></td>
+          <td class="money">$240.00</td>
+          <td>1</td>
+          <td class="products-cell" title="Enraizante para orquídeas Concentrado">Enraizante para orquídeas Concentrado</td>
+          <td>09/04/2026 22:42</td>
+          <td>09/04/2026 22:42</td>
+          <td><a href="https://therealgreen.com.mx/67162145044/checkouts/ac/hWNAqjfn8uPy5leF4MnPywCX/recover?key=229dd50d932dd1fa627e578a78cac32e&locale=es-MX" target="_blank" class="btn-recover">Recuperar</a></td>
+        </tr>
+        <tr>
+          <td>Irene janet Ibarra viera</td>
+          <td><span class="email-chip">jantide@hotmail.com</span></td>
+          <td class="money">$260.00</td>
+          <td>1</td>
+          <td class="products-cell" title="Enraizante para orquídeas Concentrado">Enraizante para orquídeas Concentrado</td>
+          <td>10/04/2026 08:35</td>
+          <td>10/04/2026 08:35</td>
+          <td><a href="https://therealgreen.com.mx/67162145044/checkouts/ac/hWNAriAA1bIDfH7tBUhQRajZ/recover?key=661c67c39a8e4ab76ff827c9db411358&locale=es-MX" target="_blank" class="btn-recover">Recuperar</a></td>
+        </tr>
+        <tr>
+          <td>Esmeralda May</td>
+          <td><span class="email-chip">esmeralda_120906@hotmail.com</span></td>
+          <td class="money">$455.00</td>
+          <td>2</td>
+          <td class="products-cell" title="Auxiliar para el control de plagas, Auxiliar para el control de hongos, virus y bacterias">Auxiliar para el control de plagas, Auxiliar para el control…</td>
+          <td>10/04/2026 16:16</td>
+          <td>10/04/2026 16:16</td>
+          <td><a href="https://therealgreen.com.mx/67162145044/checkouts/ac/hWNA5Q0KoW2JyJ2j7E8kOYUM/recover?key=02983b6a1b794fd0435219be83605abc&locale=es-MX" target="_blank" class="btn-recover">Recuperar</a></td>
+        </tr>
+        <tr>
+          <td>Enrique Rodriguez Jimenez</td>
+          <td><span class="email-chip">erodriguez@nanobotanix.com</span></td>
+          <td class="money">$142.40</td>
+          <td>1</td>
+          <td class="products-cell" title="Bio-fertilizante nutritivo Concentrado">Bio-fertilizante nutritivo Concentrado</td>
+          <td>11/04/2026 11:02</td>
+          <td>11/04/2026 11:02</td>
+          <td><a href="https://therealgreen.com.mx/67162145044/checkouts/ac/hWNApcqL2WOwj3VFOOPgbAtl/recover?key=0703c5d5cd7df134916069bca780277b&locale=es-MX" target="_blank" class="btn-recover">Recuperar</a></td>
+        </tr>
+        <tr>
+          <td>—</td>
+          <td><span class="email-chip">sagoly@hotmail.com</span></td>
+          <td class="money">$250.00</td>
+          <td>1</td>
+          <td class="products-cell" title="Auxiliar para el control de plagas">Auxiliar para el control de plagas</td>
+          <td>11/04/2026 15:17</td>
+          <td>11/04/2026 15:17</td>
+          <td><a href="https://therealgreen.com.mx/67162145044/checkouts/ac/hWNAuap4DoG1X5HCW3fDMPmz/recover?key=ed4aa1ac086c81c79e74c45d43f9c181&locale=es-MX" target="_blank" class="btn-recover">Recuperar</a></td>
+        </tr>
+        <tr>
+          <td>—</td>
+          <td><span class="email-chip">vsotero368@gmail.com</span></td>
+          <td class="money">$180.00</td>
+          <td>1</td>
+          <td class="products-cell" title="Auxiliar para el control de plagas">Auxiliar para el control de plagas</td>
+          <td>11/04/2026 22:39</td>
+          <td>11/04/2026 22:39</td>
+          <td><a href="https://therealgreen.com.mx/67162145044/checkouts/ac/hWNAvRbRVBvHZl3THh0BRv05/recover?key=141e4860761612994362c4dd3dbbca60&locale=es-MX" target="_blank" class="btn-recover">Recuperar</a></td>
+        </tr>
+        <tr>
+          <td>Mónica Aurora Vélez Castro</td>
+          <td><span class="email-chip">aurora.jftcet@gmail.com</span></td>
+          <td class="money">$244.65</td>
+          <td>1</td>
+          <td class="products-cell" title="Bio-fertilizante nutritivo Concentrado">Bio-fertilizante nutritivo Concentrado</td>
+          <td>12/04/2026 08:00</td>
+          <td>12/04/2026 16:26</td>
+          <td><a href="https://therealgreen.com.mx/67162145044/checkouts/ac/hWNAwMByOpy5JZfe5C4PFIVV/recover?key=25136ad9552580b73aa4bdf4a653eb24&locale=es-MX" target="_blank" class="btn-recover">Recuperar</a></td>
+        </tr>
+        <tr>
+          <td>Lourdes Marisela Sánchez Ramos</td>
+          <td><span class="email-chip">lourdesmariselasanchezramos@gmail.com</span></td>
+          <td class="money">$440.00</td>
+          <td>1</td>
+          <td class="products-cell" title="Enraizante para orquídeas Concentrado">Enraizante para orquídeas Concentrado</td>
+          <td>12/04/2026 10:11</td>
+          <td>12/04/2026 10:11</td>
+          <td><a href="https://therealgreen.com.mx/67162145044/checkouts/ac/hWNAwZS5egtzwMm1zYrKKwCn/recover?key=9fadfadc6b6c2216cc0a149a0e0f82c8&locale=es-MX" target="_blank" class="btn-recover">Recuperar</a></td>
+        </tr>
+        <tr>
+          <td>Pamela Alarcon</td>
+          <td><span class="email-chip">pamelahp4@gmail.com</span></td>
+          <td class="money">$455.00</td>
+          <td>2</td>
+          <td class="products-cell" title="Auxiliar para el control de hongos, virus y bacterias, Auxiliar para el control de plagas">Auxiliar para el control de hongos, virus y bacterias, Auxil…</td>
+          <td>12/04/2026 14:00</td>
+          <td>12/04/2026 14:00</td>
+          <td><a href="https://therealgreen.com.mx/67162145044/checkouts/ac/hWNAwwQHEtxZaYuMWobEXsAC/recover?key=5cf21bd90809fcc05e26801139149f9a&locale=es-MX" target="_blank" class="btn-recover">Recuperar</a></td>
+        </tr>
+        <tr>
+          <td>Cristina Muñoz Peralta o CRIS</td>
+          <td><span class="email-chip">sun_stars_sea@hotmail.com</span></td>
+          <td class="money">$258.00</td>
+          <td>1</td>
+          <td class="products-cell" title="Bio-fertilizante nutritivo Concentrado">Bio-fertilizante nutritivo Concentrado</td>
+          <td>14/04/2026 08:50</td>
+          <td>14/04/2026 08:50</td>
+          <td><a href="https://therealgreen.com.mx/67162145044/checkouts/ac/hWNB195waXqyM0kH0OMkgmIL/recover?key=4a59078acd6916b02c1e5d66873a77d4&locale=es-MX" target="_blank" class="btn-recover">Recuperar</a></td>
+        </tr>
+        <tr>
+          <td>Gilberto Mendoza Cuen</td>
+          <td><span class="email-chip">gilcuen2@hotmail.com</span></td>
+          <td class="money">$425.00</td>
+          <td>2</td>
+          <td class="products-cell" title="Auxiliar para el control de hongos, virus y bacterias, Auxiliar para el control de plagas">Auxiliar para el control de hongos, virus y bacterias, Auxil…</td>
+          <td>14/04/2026 10:13</td>
+          <td>14/04/2026 11:05</td>
+          <td><a href="https://therealgreen.com.mx/67162145044/checkouts/ac/hWNB1Cy2bFhsg4YsGu35Jo3d/recover?key=b23a10acf9a0a2e865a6990ccfbf12f5&locale=es-MX" target="_blank" class="btn-recover">Recuperar</a></td>
+        </tr>
+        <tr>
+          <td>Paco Sandria</td>
+          <td><span class="email-chip">sandriamedina@gmail.com</span></td>
+          <td class="money">$300.00</td>
+          <td>1</td>
+          <td class="products-cell" title="Auxiliar para el control de plagas">Auxiliar para el control de plagas</td>
+          <td>15/04/2026 10:11</td>
+          <td>15/04/2026 10:11</td>
+          <td><a href="https://therealgreen.com.mx/67162145044/checkouts/ac/hWNB3dNxes88W8rI95zDwtKj/recover?key=c91671627437f63416e2a76c6227f376&locale=es-MX" target="_blank" class="btn-recover">Recuperar</a></td>
+        </tr>
+        <tr>
+          <td>Adrian Joaquin</td>
+          <td><span class="email-chip">joaquinreyesadrian@gmail.com</span></td>
+          <td class="money">$230.00</td>
+          <td>1</td>
+          <td class="products-cell" title="Enraizante para orquídeas Concentrado">Enraizante para orquídeas Concentrado</td>
+          <td>15/04/2026 10:24</td>
+          <td>15/04/2026 10:24</td>
+          <td><a href="https://therealgreen.com.mx/67162145044/checkouts/ac/hWNB3ep1EK5ZoCFeW3t5KCHZ/recover?key=3b72aa5b4944a4a154b30c2ecbe06b10&locale=es-MX" target="_blank" class="btn-recover">Recuperar</a></td>
+        </tr>
+        <tr>
+          <td>Katia Luna</td>
+          <td><span class="email-chip">lunakatia96@gmail.com</span></td>
+          <td class="money">$260.00</td>
+          <td>1</td>
+          <td class="products-cell" title="Auxiliar para el control de plagas">Auxiliar para el control de plagas</td>
+          <td>15/04/2026 11:34</td>
+          <td>15/04/2026 11:34</td>
+          <td><a href="https://therealgreen.com.mx/67162145044/checkouts/ac/hWNB3lgMUV0jsWAdXk6oqTz7/recover?key=1a9bade01de2d165af81b480e73f281a&locale=es-MX" target="_blank" class="btn-recover">Recuperar</a></td>
+        </tr>
+        <tr>
+          <td>Jessica Garcia</td>
+          <td><span class="email-chip">jessica.galejo@outlook.es</span></td>
+          <td class="money">$265.00</td>
+          <td>1</td>
+          <td class="products-cell" title="Sustrato para plantas de interior 3L">Sustrato para plantas de interior 3L</td>
+          <td>15/04/2026 15:46</td>
+          <td>15/04/2026 16:10</td>
+          <td><a href="https://therealgreen.com.mx/67162145044/checkouts/ac/hWNB4AiVJ8eTqrVu8g4ku9mT/recover?key=1907d648c592fe5a9abfcf17090cb37b&locale=es-MX" target="_blank" class="btn-recover">Recuperar</a></td>
+        </tr>
+        <tr>
+          <td>—</td>
+          <td><span class="email-chip">monserrat.ceballos9166@gmail.com</span></td>
+          <td class="money">$178.00</td>
+          <td>1</td>
+          <td class="products-cell" title="Bio-fertilizante nutritivo Concentrado">Bio-fertilizante nutritivo Concentrado</td>
+          <td>16/04/2026 17:08</td>
+          <td>16/04/2026 17:08</td>
+          <td><a href="https://therealgreen.com.mx/67162145044/checkouts/ac/hWNB6eKORoDyiij9HXbb97iL/recover?key=0b3de2410282eeadc6543aba5b5bbd0c&locale=es-MX" target="_blank" class="btn-recover">Recuperar</a></td>
+        </tr>
+        <tr>
+          <td>Barbara Blakely</td>
+          <td><span class="email-chip">barbieblakely@gmail.com</span></td>
+          <td class="money">$230.00</td>
+          <td>1</td>
+          <td class="products-cell" title="Auxiliar para el control de plagas">Auxiliar para el control de plagas</td>
+          <td>16/04/2026 22:50</td>
+          <td>16/04/2026 22:50</td>
+          <td><a href="https://therealgreen.com.mx/67162145044/checkouts/ac/hWNB7E8mtEww4hgzgJbYVEUz/recover?key=34dd1b5302f4c13d24e3670a54ca8c9f&locale=es-MX" target="_blank" class="btn-recover">Recuperar</a></td>
+        </tr>
+        <tr>
+          <td>—</td>
+          <td><span class="email-chip">isaduva@gmail.com</span></td>
+          <td class="money">$360.00</td>
+          <td>1</td>
+          <td class="products-cell" title="Enraizante para orquídeas Concentrado">Enraizante para orquídeas Concentrado</td>
+          <td>17/04/2026 20:15</td>
+          <td>17/04/2026 20:15</td>
+          <td><a href="https://therealgreen.com.mx/67162145044/checkouts/ac/hWNA5ONa4ks0DBYwPxjzB5WS/recover?key=504b2441cf78e00dc4d41b0f7f220010&locale=es-MX" target="_blank" class="btn-recover">Recuperar</a></td>
+        </tr>
+        <tr>
+          <td>Vanessa Miramontes</td>
+          <td><span class="email-chip">ymiramontes88@hotmail.com</span></td>
+          <td class="money">$330.00</td>
+          <td>1</td>
+          <td class="products-cell" title="Auxiliar para el control de plagas">Auxiliar para el control de plagas</td>
+          <td>18/04/2026 23:14</td>
+          <td>18/04/2026 23:14</td>
+          <td><a href="https://therealgreen.com.mx/67162145044/checkouts/ac/hWNB2F1n21ZhJdIfC0cs2NTF/recover?key=c789d30e03f588f4f3b85e1d150acba7&locale=es-MX" target="_blank" class="btn-recover">Recuperar</a></td>
+        </tr>
+        <tr>
+          <td>—</td>
+          <td><span class="email-chip">alina.angeles@hotmail.com</span></td>
+          <td class="money">$755.00</td>
+          <td>3</td>
+          <td class="products-cell" title="Sustrato para plantas de interior 3L, Enraizante para orquídeas Concentrado, Auxiliar para el control de plagas">Sustrato para plantas de interior 3L, Enraizante para orquíd…</td>
+          <td>19/04/2026 10:35</td>
+          <td>19/04/2026 10:35</td>
+          <td><a href="https://therealgreen.com.mx/67162145044/checkouts/ac/hWNBD5H95DGPNMGtGGYglKBV/recover?key=b6cf795d2c576189c983e521e056b47d&locale=es-MX" target="_blank" class="btn-recover">Recuperar</a></td>
+        </tr>
+        <tr>
+          <td>Maria Pliego Sanchez</td>
+          <td><span class="email-chip">plisamagu1@hotmail.com</span></td>
+          <td class="money">$470.00</td>
+          <td>1</td>
+          <td class="products-cell" title="Auxiliar para el control de hongos, virus y bacterias">Auxiliar para el control de hongos, virus y bacterias</td>
+          <td>19/04/2026 16:51</td>
+          <td>19/04/2026 16:51</td>
+          <td><a href="https://therealgreen.com.mx/67162145044/checkouts/ac/hWNBDhPsjeuXQPHRRXKjNGUb/recover?key=769d93db44141fafa47cd3304a71ab32&locale=es-MX" target="_blank" class="btn-recover">Recuperar</a></td>
+        </tr>
+        <tr>
+          <td>—</td>
+          <td><span class="email-chip">orozgriz_97@hotmail.com</span></td>
+          <td class="money">$518.00</td>
+          <td>3</td>
+          <td class="products-cell" title="Enraizante para orquídeas Concentrado, Enraizante y mejorador de suelos Concentrado, Bio-fertilizante nutritivo Concentrado">Enraizante para orquídeas Concentrado, Enraizante y mejorado…</td>
+          <td>21/04/2026 00:15</td>
+          <td>21/04/2026 00:15</td>
+          <td><a href="https://therealgreen.com.mx/67162145044/checkouts/ac/hWNB55PN1AfTA1XQILEHBgwL/recover?key=b3af17160dfc0c09ad2e8c6226efcfa7&locale=es-MX" target="_blank" class="btn-recover">Recuperar</a></td>
+        </tr>
+        <tr>
+          <td>—</td>
+          <td><span class="email-chip">alejandra_can@hotmail.com</span></td>
+          <td class="money">$409.00</td>
+          <td>2</td>
+          <td class="products-cell" title="Bio-fertilizante nutritivo Concentrado, Auxiliar para el control de plagas">Bio-fertilizante nutritivo Concentrado, Auxiliar para el con…</td>
+          <td>21/04/2026 13:09</td>
+          <td>21/04/2026 13:09</td>
+          <td><a href="https://therealgreen.com.mx/67162145044/checkouts/ac/hWN9c9zryW4pONv6GYljI40H/recover?key=412ac72b1be3e63c16b6ed22afc76814&locale=es-MX" target="_blank" class="btn-recover">Recuperar</a></td>
+        </tr>
+        <tr>
+          <td>Olivia Garcia</td>
+          <td><span class="email-chip">olivia.gc212@gmail.com</span></td>
+          <td class="money">$615.00</td>
+          <td>2</td>
+          <td class="products-cell" title="Enraizante para orquídeas Concentrado, Auxiliar para el control de hongos, virus y bacterias">Enraizante para orquídeas Concentrado, Auxiliar para el cont…</td>
+          <td>21/04/2026 17:15</td>
+          <td>25/04/2026 08:23</td>
+          <td><a href="https://therealgreen.com.mx/67162145044/checkouts/ac/hWNBIQ7HCnmMyOt6MeoeFMOO/recover?key=0f957040ce9f27640b2030f45f078eb3&locale=es-MX" target="_blank" class="btn-recover">Recuperar</a></td>
+        </tr>
+        <tr>
+          <td>Sarai Arenas Castillo</td>
+          <td><span class="email-chip">sararenas08@gmail.com</span></td>
+          <td class="money">$230.00</td>
+          <td>1</td>
+          <td class="products-cell" title="Auxiliar para el control de plagas">Auxiliar para el control de plagas</td>
+          <td>22/04/2026 09:54</td>
+          <td>22/04/2026 09:54</td>
+          <td><a href="https://therealgreen.com.mx/67162145044/checkouts/ac/hWNBK4aTxQM14uIaHDLdjgoL/recover?key=7d4cfe426cad2e44e3bd909b9713c27b&locale=es-MX" target="_blank" class="btn-recover">Recuperar</a></td>
+        </tr>
+        <tr>
+          <td>Maribel Ramos</td>
+          <td><span class="email-chip">maribel_ramosg@hotmail.com</span></td>
+          <td class="money">$260.00</td>
+          <td>1</td>
+          <td class="products-cell" title="Enraizante para orquídeas Concentrado">Enraizante para orquídeas Concentrado</td>
+          <td>22/04/2026 19:45</td>
+          <td>22/04/2026 19:45</td>
+          <td><a href="https://therealgreen.com.mx/67162145044/checkouts/ac/hWNBL30rXL8tKj5sWELd9YpN/recover?key=ff5daa942843a4fa62317a21fb6c953c&locale=es-MX" target="_blank" class="btn-recover">Recuperar</a></td>
+        </tr>
+        <tr>
+          <td>Olivia Garcia</td>
+          <td><span class="email-chip">olivia.gc212@gmail.com</span></td>
+          <td class="money">$833.00</td>
+          <td>3</td>
+          <td class="products-cell" title="Auxiliar para el control de hongos, virus y bacterias, Auxiliar para el control de plagas, Bio-fertilizante nutritivo Concentrado">Auxiliar para el control de hongos, virus y bacterias, Auxil…</td>
+          <td>22/04/2026 19:58</td>
+          <td>22/04/2026 19:58</td>
+          <td><a href="https://therealgreen.com.mx/67162145044/checkouts/ac/hWNBAezPIpWlNwEvqf4uE6LA/recover?key=24135924b2755594af94281c603c83a4&locale=es-MX" target="_blank" class="btn-recover">Recuperar</a></td>
+        </tr>
+        <tr>
+          <td>Francisco Antonio Martinez de la Cruz Martinez de la Cruz</td>
+          <td><span class="email-chip">donpanchomty0468@gmail.com</span></td>
+          <td class="money">$577.00</td>
+          <td>1</td>
+          <td class="products-cell" title="Kit para principiantes">Kit para principiantes</td>
+          <td>22/04/2026 20:45</td>
+          <td>22/04/2026 20:45</td>
+          <td><a href="https://therealgreen.com.mx/67162145044/checkouts/ac/hWNBL8qBnBAfwQJoSEeBSSwr/recover?key=1fb08a6bc747fdfd487b89123c2aa225&locale=es-MX" target="_blank" class="btn-recover">Recuperar</a></td>
+        </tr>
+        <tr>
+          <td>Ruben alexis Barron cervantes</td>
+          <td><span class="email-chip">rubenalexis803@gmail.com</span></td>
+          <td class="money">$238.40</td>
+          <td>1</td>
+          <td class="products-cell" title="Auxiliar para el control de plagas">Auxiliar para el control de plagas</td>
+          <td>23/04/2026 07:29</td>
+          <td>23/04/2026 07:29</td>
+          <td><a href="https://therealgreen.com.mx/67162145044/checkouts/ac/hWNBMCHoq1eEbBRAdl45iy5o/recover?key=599f82c994d49c8833afc04c422bed85&locale=es-MX" target="_blank" class="btn-recover">Recuperar</a></td>
+        </tr>
+        <tr>
+          <td>Cinthia Diaz gutierrez</td>
+          <td><span class="email-chip">cinthiadiaz15@hotmail.com</span></td>
+          <td class="money">$378.00</td>
+          <td>1</td>
+          <td class="products-cell" title="Bio-fertilizante nutritivo Concentrado">Bio-fertilizante nutritivo Concentrado</td>
+          <td>25/04/2026 23:15</td>
+          <td>26/04/2026 21:16</td>
+          <td><a href="https://therealgreen.com.mx/67162145044/checkouts/ac/hWNBSRbzyb90Jw3TT61ZCvh3/recover?key=eaf05d6caa5154d25da64e14474fddc6&locale=es-MX" target="_blank" class="btn-recover">Recuperar</a></td>
+        </tr>
+        <tr>
+          <td>—</td>
+          <td><span class="email-chip">carmina1589@gmail.com</span></td>
+          <td class="money">$180.00</td>
+          <td>1</td>
+          <td class="products-cell" title="Enraizante para orquídeas Concentrado">Enraizante para orquídeas Concentrado</td>
+          <td>26/04/2026 12:44</td>
+          <td>26/04/2026 12:44</td>
+          <td><a href="https://therealgreen.com.mx/67162145044/checkouts/ac/hWNBTjw4Iktw6JQLoIGVokID/recover?key=f9c4713105a60f93160628d1454075d3&locale=es-MX" target="_blank" class="btn-recover">Recuperar</a></td>
+        </tr>
+        <tr>
+          <td>Enrique Rodriguez Jimenez</td>
+          <td><span class="email-chip">erodriguez@nanobotanix.com</span></td>
+          <td class="money">$88.00</td>
+          <td>1</td>
+          <td class="products-cell" title="Planta un árbol con tu compra">Planta un árbol con tu compra</td>
+          <td>27/04/2026 11:17</td>
+          <td>27/04/2026 11:34</td>
+          <td><a href="https://therealgreen.com.mx/67162145044/checkouts/ac/hWNB8pYLITx2sganne67m9oH/recover?key=74245ee1dab4ea132040426f56a22734&locale=es-MX" target="_blank" class="btn-recover">Recuperar</a></td>
+        </tr>
+        <tr>
+          <td>Grissel Guadalupe Castrejón Ocampo</td>
+          <td><span class="email-chip">griss.castrejon92@gmail.com</span></td>
+          <td class="money">$260.00</td>
+          <td>1</td>
+          <td class="products-cell" title="Auxiliar para el control de plagas">Auxiliar para el control de plagas</td>
+          <td>27/04/2026 12:07</td>
+          <td>27/04/2026 12:07</td>
+          <td><a href="https://therealgreen.com.mx/67162145044/checkouts/ac/hWNBW3xCFSr5LXJ9KEZcDTtZ/recover?key=a5ddd733b4192522c6ae69fde68f99d3&locale=es-MX" target="_blank" class="btn-recover">Recuperar</a></td>
+        </tr>
+        <tr>
+          <td>Roberto Arreola</td>
+          <td><span class="email-chip">betoroto@hotmail.com</span></td>
+          <td class="money">$260.00</td>
+          <td>1</td>
+          <td class="products-cell" title="Auxiliar para el control de plagas">Auxiliar para el control de plagas</td>
+          <td>28/04/2026 13:53</td>
+          <td>28/04/2026 13:53</td>
+          <td><a href="https://therealgreen.com.mx/67162145044/checkouts/ac/hWNBYaeV61Qw8RSfi17fs4yf/recover?key=aab14941a013bd4b102760b627538214&locale=es-MX" target="_blank" class="btn-recover">Recuperar</a></td>
+        </tr>
+        <tr>
+          <td>Nadia Garcia</td>
+          <td><span class="email-chip">n1di1p@gmail.com</span></td>
+          <td class="money">$260.00</td>
+          <td>1</td>
+          <td class="products-cell" title="Auxiliar para el control de plagas">Auxiliar para el control de plagas</td>
+          <td>28/04/2026 14:10</td>
+          <td>28/04/2026 14:10</td>
+          <td><a href="https://therealgreen.com.mx/67162145044/checkouts/ac/hWNBYbUoQFVFFhsMkn1lmi37/recover?key=3dbdf881feefad4fa80452f20b13d8da&locale=es-MX" target="_blank" class="btn-recover">Recuperar</a></td>
+        </tr>
+        <tr>
+          <td>Ili Mirafuentes Espinosa</td>
+          <td><span class="email-chip">caroiliana2006@yahoo.com.mx</span></td>
+          <td class="money">$410.00</td>
+          <td>1</td>
+          <td class="products-cell" title="Enraizante para orquídeas Concentrado">Enraizante para orquídeas Concentrado</td>
+          <td>28/04/2026 22:25</td>
+          <td>28/04/2026 22:25</td>
+          <td><a href="https://therealgreen.com.mx/67162145044/checkouts/ac/hWNBZQWxR6YQHh2T4jK1Vhxp/recover?key=aeed9cb407ce60002c049d7e13db5394&locale=es-MX" target="_blank" class="btn-recover">Recuperar</a></td>
+        </tr>
+        <tr>
+          <td>Irais Martinez</td>
+          <td><span class="email-chip">iraismtz0608@gmail.com</span></td>
+          <td class="money">$846.00</td>
+          <td>2</td>
+          <td class="products-cell" title="Auxiliar para el control de plagas, Bio-fertilizante nutritivo Concentrado">Auxiliar para el control de plagas, Bio-fertilizante nutriti…</td>
+          <td>30/04/2026 13:52</td>
+          <td>30/04/2026 13:52</td>
+          <td><a href="https://therealgreen.com.mx/67162145044/checkouts/ac/hWNBdI2PAFHJvEU2md4qwSG1/recover?key=0c7030647a9eddbb30f72cafbbba8c1d&locale=es-MX" target="_blank" class="btn-recover">Recuperar</a></td>
+        </tr>
+        <tr>
+          <td>Luciana Gonzalez de Leon</td>
+          <td><span class="email-chip">lucianagdeleon@gmail.com</span></td>
+          <td class="money">$820.00</td>
+          <td>2</td>
+          <td class="products-cell" title="Auxiliar para el control de plagas, Auxiliar para el control de hongos, virus y bacterias">Auxiliar para el control de plagas, Auxiliar para el control…</td>
+          <td>30/04/2026 15:05</td>
+          <td>30/04/2026 15:05</td>
+          <td><a href="https://therealgreen.com.mx/67162145044/checkouts/ac/hWNBdPuPszuTUNgKCcJ7DGAj/recover?key=2f933642b6b47edac84567a7c3c41ea0&locale=es-MX" target="_blank" class="btn-recover">Recuperar</a></td>
+        </tr>
+        <tr>
+          <td>Alicia Angelica Moreno</td>
+          <td><span class="email-chip">angie.moreno74@hotmail.com</span></td>
+          <td class="money">$1,033.20</td>
+          <td>5</td>
+          <td class="products-cell" title="Auxiliar para el control de plagas, Enraizante y mejorador de suelos Concentrado, Enraizante para orquídeas Concentrado, Bio-fertilizante nutritivo Concentrado, Enraizante para cactáceas y suculentas">Auxiliar para el control de plagas, Enraizante y mejorador d…</td>
+          <td>01/05/2026 09:01</td>
+          <td>01/05/2026 09:01</td>
+          <td><a href="https://therealgreen.com.mx/67162145044/checkouts/ac/hWNBaLZzVfNzD6ctHQIqDEg5/recover?key=2a2bbb01d35903b88dfd136c6401d867&locale=es-MX" target="_blank" class="btn-recover">Recuperar</a></td>
+        </tr>
+        <tr>
+          <td>Dulce Marianne Rodriguez Garay</td>
+          <td><span class="email-chip">dulce.marianne25@gmail.com</span></td>
+          <td class="money">$330.00</td>
+          <td>1</td>
+          <td class="products-cell" title="Auxiliar para el control de plagas">Auxiliar para el control de plagas</td>
+          <td>01/05/2026 09:05</td>
+          <td>01/05/2026 09:05</td>
+          <td><a href="https://therealgreen.com.mx/67162145044/checkouts/ac/hWNAPjUqC0M324u5AtSjI0pd/recover?key=0c150c99ab7895ccc46aa7b466b55563&locale=es-MX" target="_blank" class="btn-recover">Recuperar</a></td>
+        </tr>
+        <tr>
+          <td>David Cruz Ortiz</td>
+          <td><span class="email-chip">cuod.cruz.ortiz@gmail.com</span></td>
+          <td class="money">$911.88</td>
+          <td>1</td>
+          <td class="products-cell" title="Bio-fertilizante nutritivo Concentrado">Bio-fertilizante nutritivo Concentrado</td>
+          <td>01/05/2026 14:46</td>
+          <td>01/05/2026 14:46</td>
+          <td><a href="https://therealgreen.com.mx/67162145044/checkouts/ac/hWNBfiepRPzqO6l09A116rEA/recover?key=31ecce4232f98aa65b344b3d60078730&locale=es-MX" target="_blank" class="btn-recover">Recuperar</a></td>
+        </tr>
+        <tr>
+          <td>Claudia VELAZQUEZ</td>
+          <td><span class="email-chip">claudiavelbar@gmail.com</span></td>
+          <td class="money">$260.00</td>
+          <td>1</td>
+          <td class="products-cell" title="Enraizante para orquídeas Concentrado">Enraizante para orquídeas Concentrado</td>
+          <td>01/05/2026 20:56</td>
+          <td>01/05/2026 20:56</td>
+          <td><a href="https://therealgreen.com.mx/67162145044/checkouts/ac/hWNBc4LVnoAxl6v6GnWpV6cz/recover?key=df10eed3e7013993dc1db3a0873e5c5a&locale=es-MX" target="_blank" class="btn-recover">Recuperar</a></td>
+        </tr>
+        <tr>
+          <td>—</td>
+          <td><span class="email-chip">julioemonroy@gmail.com</span></td>
+          <td class="money">$747.00</td>
+          <td>1</td>
+          <td class="products-cell" title="Kit Plantas Felices Mediano">Kit Plantas Felices Mediano</td>
+          <td>02/05/2026 11:07</td>
+          <td>02/05/2026 11:07</td>
+          <td><a href="https://therealgreen.com.mx/67162145044/checkouts/ac/hWNBhinJReGzo12EbQv7Z8yX/recover?key=6c899c5cb9747030b53c696b2131b56e&locale=es-MX" target="_blank" class="btn-recover">Recuperar</a></td>
+        </tr>
+        <tr>
+          <td>—</td>
+          <td><span class="email-chip">gdd2414delacruz@gmail.com</span></td>
+          <td class="money">$430.00</td>
+          <td>1</td>
+          <td class="products-cell" title="Sustrato para plantas de interior 3L">Sustrato para plantas de interior 3L</td>
+          <td>03/05/2026 11:12</td>
+          <td>03/05/2026 11:12</td>
+          <td><a href="https://therealgreen.com.mx/67162145044/checkouts/ac/hWNBk5fHJB5ySDZ0K0UMF8JV/recover?key=50ba4deac0a9d7a119fe5b5108fd3d53&locale=es-MX" target="_blank" class="btn-recover">Recuperar</a></td>
+        </tr>
+        <tr>
+          <td>Daniela Ríos González</td>
+          <td><span class="email-chip">danielaariosg@gmail.com</span></td>
+          <td class="money">$1,099.80</td>
+          <td>4</td>
+          <td class="products-cell" title="Enraizante para cactáceas y suculentas, Auxiliar para el control de plagas, Auxiliar para el control de hongos, virus y bacterias, Bio-fertilizante nutritivo Concentrado">Enraizante para cactáceas y suculentas, Auxiliar para el con…</td>
+          <td>03/05/2026 12:29</td>
+          <td>03/05/2026 19:26</td>
+          <td><a href="https://therealgreen.com.mx/67162145044/checkouts/ac/hWNBkBMo8ys6SvXt8Zh7FBth/recover?key=8c1a4999d111e0107a2dbb5c775949a4&locale=es-MX" target="_blank" class="btn-recover">Recuperar</a></td>
+        </tr>
+        <tr>
+          <td>Eugenia Mersico</td>
+          <td><span class="email-chip">eumersico@gmail.com</span></td>
+          <td class="money">$743.00</td>
+          <td>3</td>
+          <td class="products-cell" title="Sustrato para plantas de interior 3L, Auxiliar para el control de plagas, Bio-fertilizante nutritivo Concentrado">Sustrato para plantas de interior 3L, Auxiliar para el contr…</td>
+          <td>03/05/2026 17:46</td>
+          <td>03/05/2026 17:46</td>
+          <td><a href="https://therealgreen.com.mx/67162145044/checkouts/ac/hWNBduQdqB4Z6rcBWmTunzub/recover?key=32f3cb6bcaf6d3e06d76bd5238d27ef9&locale=es-MX" target="_blank" class="btn-recover">Recuperar</a></td>
+        </tr>
+        <tr>
+          <td>Adriana Gonzalez</td>
+          <td><span class="email-chip">algdmx@yahoo.com.mx</span></td>
+          <td class="money">$310.00</td>
+          <td>1</td>
+          <td class="products-cell" title="Auxiliar para el control de plagas">Auxiliar para el control de plagas</td>
+          <td>05/05/2026 07:45</td>
+          <td>05/05/2026 07:45</td>
+          <td><a href="https://therealgreen.com.mx/67162145044/checkouts/ac/hWNBoSjjFd6pDWP9rxtWRQ8X/recover?key=d89fcb5d19e8e2ee7e9c4d7daa701c08&locale=es-MX" target="_blank" class="btn-recover">Recuperar</a></td>
+        </tr>
+        <tr>
+          <td>María Fernanda Manteca</td>
+          <td><span class="email-chip">malefernanda@hotmail.com</span></td>
+          <td class="money">$410.00</td>
+          <td>2</td>
+          <td class="products-cell" title="Enraizante para orquídeas Concentrado, Auxiliar para el control de plagas">Enraizante para orquídeas Concentrado, Auxiliar para el cont…</td>
+          <td>05/05/2026 08:34</td>
+          <td>05/05/2026 08:34</td>
+          <td><a href="https://therealgreen.com.mx/67162145044/checkouts/ac/hWNBoXC7u7kKGHzesoHbi6Iz/recover?key=92e5cb653536d5318f29948ecec5170c&locale=es-MX" target="_blank" class="btn-recover">Recuperar</a></td>
+        </tr>
+        <tr>
+          <td>Angelica Rocio Miramontes Hernandez</td>
+          <td><span class="email-chip">chiomhz@hotmail.com</span></td>
+          <td class="money">$1,472.40</td>
+          <td>6</td>
+          <td class="products-cell" title="Bio-fertilizante nutritivo Concentrado, Bolsa "Quien tiene plantas... su mal espanta", Sustrato para cactáceas y suculentas 3L, Enraizante para orquídeas Concentrado, Enraizante y mejorador de suelos Concentrado, Sustrato para plantas de interior 3L">Bio-fertilizante nutritivo Concentrado, Bolsa "Quien tiene p…</td>
+          <td>05/05/2026 09:49</td>
+          <td>05/05/2026 14:00</td>
+          <td><a href="https://therealgreen.com.mx/67162145044/checkouts/ac/hWN4384AwDjilKqngCTtXrpB/recover?key=4a465206a4f6771d4a37d694a3258b41&locale=es-MX" target="_blank" class="btn-recover">Recuperar</a></td>
+        </tr>
+        <tr>
+          <td>Beatris Medellin</td>
+          <td><span class="email-chip">beatris.medellin@gmail.com</span></td>
+          <td class="money">$378.00</td>
+          <td>1</td>
+          <td class="products-cell" title="Bio-fertilizante nutritivo Concentrado">Bio-fertilizante nutritivo Concentrado</td>
+          <td>05/05/2026 09:56</td>
+          <td>05/05/2026 09:56</td>
+          <td><a href="https://therealgreen.com.mx/67162145044/checkouts/ac/hWNBog9p1uqtPFWrBewFNqNd/recover?key=021cbb86a04305db65177e03582566a1&locale=es-MX" target="_blank" class="btn-recover">Recuperar</a></td>
+        </tr>
+        <tr>
+          <td>Maribel Ramos</td>
+          <td><span class="email-chip">maribel_ramosg@hotmail.com</span></td>
+          <td class="money">$260.00</td>
+          <td>1</td>
+          <td class="products-cell" title="Enraizante para orquídeas Concentrado">Enraizante para orquídeas Concentrado</td>
+          <td>05/05/2026 14:11</td>
+          <td>05/05/2026 14:11</td>
+          <td><a href="https://therealgreen.com.mx/67162145044/checkouts/ac/hWNBp64URE3Q0uRtjjWVfHHt/recover?key=2657d86a4a50b548682c98deb7c50084&locale=es-MX" target="_blank" class="btn-recover">Recuperar</a></td>
+        </tr>
+        <tr>
+          <td>María Fernanda Manteca</td>
+          <td><span class="email-chip">malefernanda@hotmail.com</span></td>
+          <td class="money">$480.00</td>
+          <td>2</td>
+          <td class="products-cell" title="Enraizante para orquídeas Concentrado, Auxiliar para el control de plagas">Enraizante para orquídeas Concentrado, Auxiliar para el cont…</td>
+          <td>06/05/2026 00:18</td>
+          <td>06/05/2026 00:18</td>
+          <td><a href="https://therealgreen.com.mx/67162145044/checkouts/ac/hWNAddANLyj0W3R8s2W8Ymsz/recover?key=6a1fb42a4f24b05efd267671f082ed51&locale=es-MX" target="_blank" class="btn-recover">Recuperar</a></td>
+        </tr>
+        <tr>
+          <td>—</td>
+          <td><span class="email-chip">adramero@gmail.com</span></td>
+          <td class="money">$180.00</td>
+          <td>1</td>
+          <td class="products-cell" title="Enraizante para orquídeas Concentrado">Enraizante para orquídeas Concentrado</td>
+          <td>06/05/2026 13:00</td>
+          <td>06/05/2026 13:00</td>
+          <td><a href="https://therealgreen.com.mx/67162145044/checkouts/ac/hWNBrKsfdtWA4QojFonGs17R/recover?key=97290a9917cb74a91ebb8be0f4361135&locale=es-MX" target="_blank" class="btn-recover">Recuperar</a></td>
+        </tr>
+        <tr>
+          <td>Rosario Gutierrez</td>
+          <td><span class="email-chip">rosariogutierrez.labra@gmail.com</span></td>
+          <td class="money">$736.00</td>
+          <td>3</td>
+          <td class="products-cell" title="Bio-fertilizante nutritivo Concentrado, Enraizante para orquídeas Concentrado, Sustrato para orquídeas 3L">Bio-fertilizante nutritivo Concentrado, Enraizante para orqu…</td>
+          <td>06/05/2026 16:04</td>
+          <td>06/05/2026 16:04</td>
+          <td><a href="https://therealgreen.com.mx/67162145044/checkouts/ac/hWNBrcrBs8sB6zGH0NYF7q41/recover?key=b6826d185b3b5e4dd9ca03dafeefd385&locale=es-MX" target="_blank" class="btn-recover">Recuperar</a></td>
+        </tr>
+        <tr>
+          <td>Mariafernanda Córdoba Arroyo</td>
+          <td><span class="email-chip">fer.cordoba7@gmail.com</span></td>
+          <td class="money">$410.00</td>
+          <td>1</td>
+          <td class="products-cell" title="Enraizante para orquídeas Concentrado">Enraizante para orquídeas Concentrado</td>
+          <td>06/05/2026 22:46</td>
+          <td>06/05/2026 22:46</td>
+          <td><a href="https://therealgreen.com.mx/67162145044/checkouts/ac/hWNBru9xgCUAOC92ZsvJsGE4/recover?key=d8457805ee3d5c1762f10d4cb0197498&locale=es-MX" target="_blank" class="btn-recover">Recuperar</a></td>
+        </tr>
+        <tr>
+          <td>Andrea Lanuza</td>
+          <td><span class="email-chip">sweet_addiction.91@hotmail.com</span></td>
+          <td class="money">$194.00</td>
+          <td>1</td>
+          <td class="products-cell" title="Auxiliar para el control de plagas">Auxiliar para el control de plagas</td>
+          <td>07/05/2026 01:05</td>
+          <td>07/05/2026 01:05</td>
+          <td><a href="https://therealgreen.com.mx/67162145044/checkouts/ac/hWNBsWDWL7V9fAdgNwg4U33h/recover?key=12d3148db7662dcfd7b3fca46dc486ba&locale=es-MX" target="_blank" class="btn-recover">Recuperar</a></td>
+        </tr>
+        <tr>
+          <td>María del Carmen Rodriguez Parra</td>
+          <td><span class="email-chip">ma.carmenrp@hotmail.com</span></td>
+          <td class="money">$1,033.20</td>
+          <td>4</td>
+          <td class="products-cell" title="Enraizante para orquídeas Concentrado, Auxiliar para el control de hongos, virus y bacterias, Bio-fertilizante nutritivo Concentrado, Auxiliar para el control de plagas">Enraizante para orquídeas Concentrado, Auxiliar para el cont…</td>
+          <td>07/05/2026 14:57</td>
+          <td>07/05/2026 14:57</td>
+          <td><a href="https://therealgreen.com.mx/67162145044/checkouts/ac/hWNBrVGlMy4KlaJHA1ciVe4Y/recover?key=f51a2e3309fc0929dab91eef02ad99ee&locale=es-MX" target="_blank" class="btn-recover">Recuperar</a></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<footer>The Real Green · Tablero generado automáticamente · 07/05/2026 16:30 CDMX</footer>
+
+<script>
+function filterTable() {
+  const input = document.getElementById("searchInput").value.toLowerCase();
+  const rows = document.querySelectorAll("#tableBody tr");
+  let visible = 0;
+  rows.forEach(row => {
+    const text = row.innerText.toLowerCase();
+    const show = text.includes(input);
+    row.style.display = show ? "" : "none";
+    if (show) visible++;
+  });
+  document.getElementById("rowCount").textContent = visible + " carritos";
+}
+</script>
+</body>
+</html>
