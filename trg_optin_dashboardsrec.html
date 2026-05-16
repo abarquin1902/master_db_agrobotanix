@@ -517,6 +517,7 @@ async function cargarDatos() {
     $('last-update').textContent = 'Actualizado ' + new Date().toLocaleTimeString('es-MX', {hour:'2-digit',minute:'2-digit'});
     cargarRevenue(prod);
   } catch(e) {
+    console.error('ERROR cargarDatos:', e);
     $('error-box').textContent = 'No se pudo conectar con Supabase. Revisa las credenciales. ' + e.message;
     $('error-box').style.display = 'block';
     $('prod-body').innerHTML = '<div class="empty-row">Sin datos</div>';
