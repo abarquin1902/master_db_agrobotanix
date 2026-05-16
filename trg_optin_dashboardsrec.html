@@ -1,195 +1,503 @@
-
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TRG — Dashboard Recordatorios</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <style>
-*{box-sizing:border-box;margin:0;padding:0}
-body{font-family:var(--font-sans)}
-.wrap{padding:1.5rem 0}
-.section-title{font-size:13px;font-weight:500;color:var(--color-text-secondary);text-transform:uppercase;letter-spacing:.05em;margin-bottom:12px}
-.metric-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin-bottom:1.5rem}
-.metric{background:var(--color-background-secondary);border-radius:var(--border-radius-md);padding:1rem;display:flex;flex-direction:column;gap:4px}
-.metric-label{font-size:12px;color:var(--color-text-secondary)}
-.metric-value{font-size:22px;font-weight:500;color:var(--color-text-primary)}
-.metric-sub{font-size:11px;color:var(--color-text-tertiary)}
-.filters{display:flex;gap:10px;align-items:center;margin-bottom:1.5rem;flex-wrap:wrap}
-.filters label{font-size:13px;color:var(--color-text-secondary)}
-.filters input[type=date]{font-size:13px;padding:6px 10px;height:34px}
-.filters select{font-size:13px;padding:6px 10px;height:34px}
-.filters button{font-size:13px;padding:6px 14px;height:34px;cursor:pointer}
-.chart-card{background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);padding:1.25rem;margin-bottom:1.5rem}
-.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
-.cal-header{font-size:11px;color:var(--color-text-tertiary);text-align:center;padding:4px 0;font-weight:500}
-.cal-day{border-radius:var(--border-radius-md);padding:6px 4px;min-height:62px;border:0.5px solid var(--color-border-tertiary);background:var(--color-background-primary);display:flex;flex-direction:column;gap:2px}
-.cal-day.empty{border-color:transparent;background:transparent}
-.cal-day.today{border-color:var(--color-border-info)}
-.cal-num{font-size:11px;font-weight:500;color:var(--color-text-secondary)}
-.cal-pill{font-size:10px;padding:2px 5px;border-radius:4px;font-weight:500;line-height:1.4}
-.pill-total{background:#E6F1FB;color:#0C447C}
-.pill-si{background:#EAF3DE;color:#27500A}
-.pill-no{background:#FCEBEB;color:#791F1F}
-.pill-rec{background:#EEEDFE;color:#3C3489}
-.legend{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:12px}
-.legend-item{display:flex;align-items:center;gap:5px;font-size:12px;color:var(--color-text-secondary)}
-.legend-dot{width:10px;height:10px;border-radius:2px}
-.prod-table{width:100%;border-collapse:collapse;font-size:13px}
-.prod-table th{text-align:left;font-size:11px;font-weight:500;color:var(--color-text-secondary);padding:6px 8px;border-bottom:0.5px solid var(--color-border-tertiary)}
-.prod-table td{padding:7px 8px;border-bottom:0.5px solid var(--color-border-tertiary);color:var(--color-text-primary)}
-.prod-table tr:last-child td{border-bottom:none}
-.bar-bg{background:var(--color-background-secondary);border-radius:4px;height:6px;flex:1}
-.bar-fill{height:6px;border-radius:4px;background:#378ADD}
-.status-badge{font-size:11px;padding:2px 8px;border-radius:4px;font-weight:500}
-.loading{color:var(--color-text-secondary);font-size:14px;padding:2rem 0;text-align:center}
-.error{color:var(--color-text-danger,#e24b4a);font-size:13px;padding:1rem;background:var(--color-background-danger,#FCEBEB);border-radius:var(--border-radius-md);margin-bottom:1rem}
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #f7f7f5;
+    --surface: #ffffff;
+    --surface2: #f2f2ef;
+    --border: #e5e5e2;
+    --text: #1a1a18;
+    --muted: #6b6b68;
+    --hint: #a8a8a5;
+    --green: #3B6D11;
+    --green-bg: #EAF3DE;
+    --red: #A32D2D;
+    --red-bg: #FCEBEB;
+    --blue: #185FA5;
+    --blue-bg: #E6F1FB;
+    --purple: #3C3489;
+    --purple-bg: #EEEDFE;
+    --amber: #854F0B;
+    --amber-bg: #FAEEDA;
+    --radius: 10px;
+    --radius-sm: 6px;
+  }
+
+  body {
+    font-family: 'Inter', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    font-size: 14px;
+    line-height: 1.6;
+    min-height: 100vh;
+  }
+
+  .page { max-width: 1100px; margin: 0 auto; padding: 2rem 1.5rem; }
+
+  .header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 2rem;
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+  .header h1 {
+    font-size: 20px;
+    font-weight: 600;
+    color: var(--text);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .header h1 span { font-size: 22px; }
+  .last-update { font-size: 12px; color: var(--hint); }
+
+  .filters {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1rem 1.25rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+    margin-bottom: 1.5rem;
+  }
+  .filter-group { display: flex; align-items: center; gap: 8px; }
+  .filter-group label { font-size: 12px; font-weight: 500; color: var(--muted); white-space: nowrap; }
+  .filters input[type=date],
+  .filters select {
+    font-family: 'Inter', sans-serif;
+    font-size: 13px;
+    padding: 6px 10px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    background: var(--bg);
+    color: var(--text);
+    height: 34px;
+    outline: none;
+    cursor: pointer;
+  }
+  .filters input[type=date]:focus,
+  .filters select:focus { border-color: #888; }
+  .btn {
+    font-family: 'Inter', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    padding: 6px 18px;
+    height: 34px;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--text);
+    background: var(--text);
+    color: #fff;
+    cursor: pointer;
+    transition: opacity .15s;
+  }
+  .btn:hover { opacity: .85; }
+  .btn-outline {
+    background: transparent;
+    color: var(--text);
+  }
+
+  .error-box {
+    background: var(--red-bg);
+    color: var(--red);
+    border: 1px solid #f0adad;
+    border-radius: var(--radius-sm);
+    padding: .75rem 1rem;
+    font-size: 13px;
+    margin-bottom: 1.5rem;
+    display: none;
+  }
+
+  .section-label {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: .07em;
+    text-transform: uppercase;
+    color: var(--hint);
+    margin-bottom: .75rem;
+  }
+
+  .metrics-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 10px;
+    margin-bottom: 1.5rem;
+  }
+  .metric {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1rem 1.1rem;
+  }
+  .metric-label { font-size: 12px; color: var(--muted); margin-bottom: 4px; }
+  .metric-value { font-size: 26px; font-weight: 600; line-height: 1.1; }
+  .metric-sub { font-size: 11px; color: var(--hint); margin-top: 4px; }
+
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1.25rem;
+    margin-bottom: 1.25rem;
+  }
+  .card-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 1rem;
+  }
+
+  table { width: 100%; border-collapse: collapse; }
+  thead th {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--hint);
+    text-transform: uppercase;
+    letter-spacing: .05em;
+    padding: 0 8px 8px;
+    border-bottom: 1px solid var(--border);
+    text-align: left;
+  }
+  thead th:not(:first-child) { text-align: right; }
+  tbody td {
+    padding: 9px 8px;
+    font-size: 13px;
+    border-bottom: 1px solid var(--border);
+    color: var(--text);
+    vertical-align: middle;
+  }
+  tbody tr:last-child td { border-bottom: none; }
+  tbody td:not(:first-child) { text-align: right; }
+  .prod-name { max-width: 240px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+  .bar-wrap { display: flex; align-items: center; gap: 8px; justify-content: flex-end; }
+  .bar-bg { flex: 1; max-width: 80px; height: 5px; background: var(--surface2); border-radius: 3px; }
+  .bar-fill { height: 5px; border-radius: 3px; background: var(--blue); }
+  .pct-label { font-size: 11px; color: var(--muted); min-width: 30px; text-align: right; }
+
+  .badge {
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 500;
+    padding: 2px 8px;
+    border-radius: 20px;
+  }
+  .badge-green { background: var(--green-bg); color: var(--green); }
+  .badge-red { background: var(--red-bg); color: var(--red); }
+  .badge-blue { background: var(--blue-bg); color: var(--blue); }
+
+  .cal-nav {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 1rem;
+    justify-content: space-between;
+  }
+  .cal-nav-title { font-size: 14px; font-weight: 600; min-width: 140px; text-align: center; }
+  .cal-nav-btn {
+    font-size: 16px;
+    width: 30px; height: 30px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    background: var(--bg);
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    color: var(--text);
+    transition: background .1s;
+  }
+  .cal-nav-btn:hover { background: var(--surface2); }
+
+  .cal-legend {
+    display: flex; gap: 14px; flex-wrap: wrap; margin-bottom: 1rem;
+  }
+  .cal-legend-item { display: flex; align-items: center; gap: 5px; font-size: 11px; color: var(--muted); }
+  .cal-legend-dot { width: 9px; height: 9px; border-radius: 2px; }
+
+  .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
+  .cal-dh {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--hint);
+    text-align: center;
+    padding: 4px 0 8px;
+    letter-spacing: .03em;
+  }
+  .cal-cell {
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 6px 5px;
+    min-height: 70px;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    background: var(--surface);
+  }
+  .cal-cell.empty { border-color: transparent; background: transparent; }
+  .cal-cell.today { border-color: #185FA5; border-width: 1.5px; }
+  .cal-day-num { font-size: 11px; font-weight: 500; color: var(--muted); }
+  .cal-pill {
+    font-size: 10px;
+    font-weight: 500;
+    padding: 1px 5px;
+    border-radius: 3px;
+    line-height: 1.5;
+    white-space: nowrap;
+  }
+  .p-opt { background: var(--blue-bg); color: var(--blue); }
+  .p-si  { background: var(--green-bg); color: var(--green); }
+  .p-no  { background: var(--red-bg); color: var(--red); }
+  .p-rec { background: var(--purple-bg); color: var(--purple); }
+
+  .chart-wrap { position: relative; width: 100%; height: 220px; }
+
+  .spinner {
+    display: inline-block; width: 18px; height: 18px;
+    border: 2px solid var(--border);
+    border-top-color: var(--text);
+    border-radius: 50%;
+    animation: spin .7s linear infinite;
+    vertical-align: middle; margin-right: 6px;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .loading-row { text-align: center; padding: 2rem; color: var(--muted); font-size: 13px; }
+  .empty-row { text-align: center; padding: 1.5rem; color: var(--hint); font-size: 13px; }
 </style>
+</head>
+<body>
+<div class="page">
 
-<div class="wrap">
-  <h2 class="sr-only">Dashboard de métricas opt-in The Real Green</h2>
+  <div class="header">
+    <h1><span>🌿</span> TRG — Recordatorios</h1>
+    <span class="last-update" id="last-update"></span>
+  </div>
 
-  <div id="error-msg" class="error" style="display:none"></div>
+  <div id="error-box" class="error-box"></div>
 
   <div class="filters">
-    <label>Desde</label>
-    <input type="date" id="date-from">
-    <label>Hasta</label>
-    <input type="date" id="date-to">
-    <label>Producto</label>
-    <select id="filter-producto"><option value="">Todos</option></select>
-    <button onclick="cargarDatos()">Aplicar</button>
+    <div class="filter-group">
+      <label>Desde</label>
+      <input type="date" id="date-from">
+    </div>
+    <div class="filter-group">
+      <label>Hasta</label>
+      <input type="date" id="date-to">
+    </div>
+    <div class="filter-group">
+      <label>Producto</label>
+      <select id="filter-prod"><option value="">Todos</option></select>
+    </div>
+    <button class="btn" onclick="cargarDatos()">Aplicar</button>
+    <button class="btn btn-outline" onclick="resetFiltros()">Este mes</button>
   </div>
 
-  <div class="section-title">resumen general</div>
-  <div class="metric-grid" id="metrics">
-    <div class="metric"><span class="metric-label">Opt-ins enviados</span><span class="metric-value" id="m-total">—</span><span class="metric-sub">total en periodo</span></div>
-    <div class="metric"><span class="metric-label">Aceptaron</span><span class="metric-value" id="m-si" style="color:#3B6D11">—</span><span class="metric-sub" id="m-si-pct">—</span></div>
-    <div class="metric"><span class="metric-label">Rechazaron</span><span class="metric-value" id="m-no" style="color:#A32D2D">—</span><span class="metric-sub" id="m-no-pct">—</span></div>
-    <div class="metric"><span class="metric-label">Sin respuesta</span><span class="metric-value" id="m-ignore">—</span><span class="metric-sub" id="m-ignore-pct">—</span></div>
-    <div class="metric"><span class="metric-label">Recordatorios</span><span class="metric-value" id="m-rec" style="color:#534AB7">—</span><span class="metric-sub">de aplicación enviados</span></div>
-    <div class="metric"><span class="metric-label">Conversión</span><span class="metric-value" id="m-conv">—</span><span class="metric-sub">de enviados con respuesta</span></div>
-  </div>
-
-  <div class="chart-card">
-    <div class="section-title" style="margin-bottom:1rem">opt-ins por producto</div>
-    <div id="prod-wrap">
-      <p class="loading">Cargando...</p>
+  <div class="section-label">resumen general</div>
+  <div class="metrics-grid">
+    <div class="metric">
+      <div class="metric-label">Opt-ins enviados</div>
+      <div class="metric-value" id="m-total">—</div>
+      <div class="metric-sub">en el periodo</div>
+    </div>
+    <div class="metric">
+      <div class="metric-label">Aceptaron</div>
+      <div class="metric-value" id="m-si" style="color:var(--green)">—</div>
+      <div class="metric-sub" id="m-si-pct">—</div>
+    </div>
+    <div class="metric">
+      <div class="metric-label">Rechazaron</div>
+      <div class="metric-value" id="m-no" style="color:var(--red)">—</div>
+      <div class="metric-sub" id="m-no-pct">—</div>
+    </div>
+    <div class="metric">
+      <div class="metric-label">Sin respuesta</div>
+      <div class="metric-value" id="m-ign">—</div>
+      <div class="metric-sub" id="m-ign-pct">—</div>
+    </div>
+    <div class="metric">
+      <div class="metric-label">Recordatorios</div>
+      <div class="metric-value" id="m-rec" style="color:var(--purple)">—</div>
+      <div class="metric-sub">de aplicación enviados</div>
+    </div>
+    <div class="metric">
+      <div class="metric-label">Conversión</div>
+      <div class="metric-value" id="m-conv">—</div>
+      <div class="metric-sub">sí / (sí + no)</div>
     </div>
   </div>
 
-  <div class="chart-card">
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem">
-      <div class="section-title" style="margin-bottom:0">calendario mensual</div>
-      <div style="display:flex;gap:8px;align-items:center">
-        <button onclick="cambiarMes(-1)" style="padding:4px 10px;font-size:13px;cursor:pointer">‹</button>
-        <span id="cal-titulo" style="font-size:13px;font-weight:500;color:var(--color-text-primary);min-width:120px;text-align:center"></span>
-        <button onclick="cambiarMes(1)" style="padding:4px 10px;font-size:13px;cursor:pointer">›</button>
+  <div class="card">
+    <div class="card-title">opt-ins por producto</div>
+    <div id="prod-body">
+      <div class="loading-row"><span class="spinner"></span>Cargando...</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">tendencia diaria — opt-ins enviados</div>
+    <div class="chart-wrap">
+      <canvas id="chart-linea" role="img" aria-label="Tendencia diaria de opt-ins enviados"></canvas>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="cal-nav">
+      <div class="section-label" style="margin:0">calendario mensual</div>
+      <div style="display:flex;align-items:center;gap:8px">
+        <button class="cal-nav-btn" onclick="cambiarMes(-1)">‹</button>
+        <span class="cal-nav-title" id="cal-titulo"></span>
+        <button class="cal-nav-btn" onclick="cambiarMes(1)">›</button>
       </div>
     </div>
-    <div class="legend" style="margin-bottom:1rem">
-      <span class="legend-item"><span class="legend-dot" style="background:#B5D4F4"></span>Opt-ins</span>
-      <span class="legend-item"><span class="legend-dot" style="background:#C0DD97"></span>Aceptaron</span>
-      <span class="legend-item"><span class="legend-dot" style="background:#F7C1C1"></span>Rechazaron</span>
-      <span class="legend-item"><span class="legend-dot" style="background:#CECBF6"></span>Recordatorios</span>
+    <div class="cal-legend">
+      <span class="cal-legend-item"><span class="cal-legend-dot" style="background:#B5D4F4"></span>Opt-ins</span>
+      <span class="cal-legend-item"><span class="cal-legend-dot" style="background:#C0DD97"></span>Aceptaron</span>
+      <span class="cal-legend-item"><span class="cal-legend-dot" style="background:#F7C1C1"></span>Rechazaron</span>
+      <span class="cal-legend-item"><span class="cal-legend-dot" style="background:#CECBF6"></span>Recordatorios</span>
     </div>
     <div class="cal-grid" id="cal-headers"></div>
     <div class="cal-grid" id="cal-body" style="margin-top:4px"></div>
   </div>
 
-  <div class="chart-card">
-    <div class="section-title" style="margin-bottom:1rem">tendencia diaria — opt-ins enviados</div>
-    <div style="position:relative;width:100%;height:200px">
-      <canvas id="chart-linea" role="img" aria-label="Tendencia diaria de opt-ins enviados"></canvas>
-    </div>
-  </div>
 </div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <script>
-const SUPABASE_URL = "https://zpmfzgyjwvzdahzdieex.supabase.co";
-const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpwbWZ6Z3lqd3Z6ZGFoemRpZWV4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQzNzkwOTAsImV4cCI6MjA4OTk1NTA5MH0.SrBtfk2RvNyGTuCNiB1KHRvcN9hXbnqNmJdpbq2K-Dg";
+const SUPABASE_URL = 'TU_SUPABASE_URL';
+const SUPABASE_KEY = 'TU_SUPABASE_ANON_KEY';
 const BU = 'trg';
 
+let allOpts = [], allRecs = [];
 let mesActual = new Date();
-let allData = [];
-let recData = [];
 let lineChart = null;
 
-function $(id){ return document.getElementById(id); }
+const $ = id => document.getElementById(id);
 
-function showError(msg){
-  const el = $('error-msg');
-  el.textContent = msg;
-  el.style.display = 'block';
-}
+function fmtDate(d) { return d.toISOString().slice(0,10); }
 
-async function fetchSupabase(table, params){
-  const url = new URL(`${SUPABASE_URL}/rest/v1/${table}`);
-  Object.entries(params).forEach(([k,v]) => url.searchParams.set(k,v));
-  const r = await fetch(url, {
-    headers:{
-      'apikey': SUPABASE_KEY,
-      'Authorization': `Bearer ${SUPABASE_KEY}`,
-      'Content-Type': 'application/json'
-    }
-  });
-  if(!r.ok) throw new Error(`Supabase error ${r.status}: ${await r.text()}`);
-  return r.json();
-}
-
-function fmtDate(d){ return d.toISOString().slice(0,10); }
-
-function initFechas(){
+function initFechas() {
   const hoy = new Date();
-  const primerDia = new Date(hoy.getFullYear(), hoy.getMonth(), 1);
-  $('date-from').value = fmtDate(primerDia);
+  $('date-from').value = fmtDate(new Date(hoy.getFullYear(), hoy.getMonth(), 1));
   $('date-to').value = fmtDate(hoy);
 }
 
-async function cargarDatos(){
-  $('error-msg').style.display = 'none';
-  const desde = $('date-from').value;
-  const hasta = $('date-to').value + 'T23:59:59';
-  const prod = $('filter-producto').value;
-
-  let qOpt = `business_unit=eq.${BU}&tipo=eq.opt_in&fecha_envio=gte.${desde}&fecha_envio=lte.${hasta}&select=*&limit=2000`;
-  let qRec = `business_unit=eq.${BU}&tipo=eq.recordatorio&enviado_at=gte.${desde}&enviado_at=lte.${hasta}&select=*&limit=2000`;
-  if(prod){ qOpt += `&producto=eq.${encodeURIComponent(prod)}`; qRec += `&producto=eq.${encodeURIComponent(prod)}`; }
-
-  try {
-    const [opts, recs] = await Promise.all([
-      fetchSupabase('notificaciones_programadas', Object.fromEntries(new URLSearchParams(qOpt))),
-      fetchSupabase('notificaciones_programadas', Object.fromEntries(new URLSearchParams(qRec)))
-    ]);
-    allData = opts;
-    recData = recs;
-    renderMetrics();
-    renderProductos();
-    renderCalendario();
-    renderLinea();
-  } catch(e){
-    showError('Error al conectar con Supabase: ' + e.message);
-  }
+function resetFiltros() {
+  initFechas();
+  $('filter-prod').value = '';
+  cargarDatos();
 }
 
-async function cargarProductos(){
+async function fetchAll(table, filters) {
+  const url = new URL(`${SUPABASE_URL}/rest/v1/${table}`);
+  url.searchParams.set('select', '*');
+  url.searchParams.set('limit', '5000');
+  Object.entries(filters).forEach(([k,v]) => url.searchParams.set(k, v));
+  const r = await fetch(url, {
+    headers: {
+      'apikey': SUPABASE_KEY,
+      'Authorization': `Bearer ${SUPABASE_KEY}`
+    }
+  });
+  if (!r.ok) throw new Error(`Error ${r.status}: ${await r.text()}`);
+  return r.json();
+}
+
+async function cargarProductos() {
   try {
-    const data = await fetchSupabase('notificaciones_programadas', {
+    const data = await fetchAll('notificaciones_programadas', {
       'business_unit': `eq.${BU}`,
       'tipo': 'eq.opt_in',
       'select': 'producto'
     });
     const prods = [...new Set(data.map(d => d.producto))].sort();
-    const sel = $('filter-producto');
+    const sel = $('filter-prod');
+    sel.innerHTML = '<option value="">Todos</option>';
     prods.forEach(p => {
       const o = document.createElement('option');
       o.value = p; o.textContent = p;
       sel.appendChild(o);
     });
-  } catch(e){}
+  } catch(e) {}
 }
 
-function renderMetrics(){
-  const enviados = allData.filter(d => d.enviado_at).length;
-  const si = allData.filter(d => d.respondio_si === true).length;
-  const no = allData.filter(d => d.respondio_si === false).length;
-  const ignore = enviados - si - no;
-  const recs = recData.filter(d => d.enviado_at).length;
+async function cargarDatos() {
+  $('error-box').style.display = 'none';
+  const desde = $('date-from').value;
+  const hasta = $('date-to').value + 'T23:59:59';
+  const prod = $('filter-prod').value;
+
+  $('prod-body').innerHTML = '<div class="loading-row"><span class="spinner"></span>Cargando...</div>';
+
+  try {
+    const baseOpt = {
+      'business_unit': `eq.${BU}`,
+      'tipo': 'eq.opt_in',
+      'fecha_envio': `gte.${desde}`,
+      'fecha_envio2': undefined
+    };
+    const filtersOpt = {
+      'business_unit': `eq.${BU}`,
+      'tipo': 'eq.opt_in',
+      'fecha_envio': `gte.${desde}`
+    };
+    const filtersRec = {
+      'business_unit': `eq.${BU}`,
+      'tipo': 'eq.recordatorio',
+      'enviado_at': `gte.${desde}`
+    };
+
+    // Supabase no permite dos filtros con la misma key en URLSearchParams,
+    // así que construimos la URL manualmente para el rango de fechas
+    async function fetchRango(tipo, campoFecha, desde, hasta, prod) {
+      let url = `${SUPABASE_URL}/rest/v1/notificaciones_programadas?select=*&limit=5000`;
+      url += `&business_unit=eq.${BU}`;
+      url += `&tipo=eq.${tipo}`;
+      url += `&${campoFecha}=gte.${desde}`;
+      url += `&${campoFecha}=lte.${encodeURIComponent(hasta)}`;
+      if (prod) url += `&producto=eq.${encodeURIComponent(prod)}`;
+      const r = await fetch(url, {
+        headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
+      });
+      if (!r.ok) throw new Error(`Error ${r.status}`);
+      return r.json();
+    }
+
+    const [opts, recs] = await Promise.all([
+      fetchRango('opt_in', 'fecha_envio', desde, hasta, prod),
+      fetchRango('recordatorio', 'enviado_at', desde, hasta, prod)
+    ]);
+
+    allOpts = opts;
+    allRecs = recs;
+
+    renderMetrics();
+    renderProductos();
+    renderLinea();
+    renderCalendario();
+
+    $('last-update').textContent = 'Actualizado ' + new Date().toLocaleTimeString('es-MX', {hour:'2-digit',minute:'2-digit'});
+  } catch(e) {
+    $('error-box').textContent = 'No se pudo conectar con Supabase. Revisa las credenciales. ' + e.message;
+    $('error-box').style.display = 'block';
+    $('prod-body').innerHTML = '<div class="empty-row">Sin datos</div>';
+  }
+}
+
+function renderMetrics() {
+  const enviados = allOpts.filter(d => d.enviado_at).length;
+  const si  = allOpts.filter(d => d.respondio_si === true).length;
+  const no  = allOpts.filter(d => d.respondio_si === false).length;
+  const ign = Math.max(0, enviados - si - no);
+  const recs = allRecs.filter(d => d.enviado_at).length;
   const conResp = si + no;
   const conv = conResp > 0 ? Math.round(si / conResp * 100) : 0;
 
@@ -198,154 +506,160 @@ function renderMetrics(){
   $('m-si-pct').textContent = enviados > 0 ? Math.round(si/enviados*100) + '% del total' : '—';
   $('m-no').textContent = no;
   $('m-no-pct').textContent = enviados > 0 ? Math.round(no/enviados*100) + '% del total' : '—';
-  $('m-ignore').textContent = ignore > 0 ? ignore : 0;
-  $('m-ignore-pct').textContent = enviados > 0 ? Math.round(Math.max(0,ignore)/enviados*100) + '% del total' : '—';
+  $('m-ign').textContent = ign;
+  $('m-ign-pct').textContent = enviados > 0 ? Math.round(ign/enviados*100) + '% del total' : '—';
   $('m-rec').textContent = recs;
   $('m-conv').textContent = conv + '%';
 }
 
-function renderProductos(){
+function renderProductos() {
   const counts = {};
-  allData.filter(d => d.enviado_at).forEach(d => {
-    if(!counts[d.producto]) counts[d.producto] = {total:0,si:0,no:0};
+  allOpts.filter(d => d.enviado_at).forEach(d => {
+    if (!counts[d.producto]) counts[d.producto] = { total:0, si:0, no:0 };
     counts[d.producto].total++;
-    if(d.respondio_si === true) counts[d.producto].si++;
-    if(d.respondio_si === false) counts[d.producto].no++;
+    if (d.respondio_si === true)  counts[d.producto].si++;
+    if (d.respondio_si === false) counts[d.producto].no++;
   });
-  const prods = Object.entries(counts).sort((a,b) => b[1].total - a[1].total);
-  const maxT = prods.length > 0 ? prods[0][1].total : 1;
-  const wrap = $('prod-wrap');
-  if(prods.length === 0){ wrap.innerHTML = '<p class="loading">Sin datos en este periodo</p>'; return; }
-  wrap.innerHTML = `<table class="prod-table">
-    <thead><tr>
-      <th>Producto</th>
-      <th style="text-align:right">Enviados</th>
-      <th style="text-align:right">Sí</th>
-      <th style="text-align:right">No</th>
-      <th style="min-width:80px">Tasa</th>
-    </tr></thead>
-    <tbody>${prods.map(([p,c]) => {
-      const pct = c.total > 0 ? Math.round(c.si/c.total*100) : 0;
-      const barW = Math.round(c.total/maxT*100);
-      return `<tr>
-        <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${p}</td>
-        <td style="text-align:right">${c.total}</td>
-        <td style="text-align:right;color:#3B6D11">${c.si}</td>
-        <td style="text-align:right;color:#A32D2D">${c.no}</td>
-        <td><div style="display:flex;align-items:center;gap:6px">
-          <div class="bar-bg"><div class="bar-fill" style="width:${barW}%"></div></div>
-          <span style="font-size:11px;color:var(--color-text-secondary);min-width:28px">${pct}%</span>
-        </div></td>
-      </tr>`;
-    }).join('')}</tbody>
-  </table>`;
-}
-
-function renderCalendario(){
-  const y = mesActual.getFullYear();
-  const m = mesActual.getMonth();
-  $('cal-titulo').textContent = new Date(y,m,1).toLocaleDateString('es-MX',{month:'long',year:'numeric'});
-
-  const dias = ['Lun','Mar','Mié','Jue','Vie','Sáb','Dom'];
-  const hdr = $('cal-headers');
-  hdr.innerHTML = dias.map(d => `<div class="cal-header">${d}</div>`).join('');
-
-  const primerDia = new Date(y,m,1);
-  const ultimoDia = new Date(y,m+1,0);
-  const offsetLunes = (primerDia.getDay() + 6) % 7;
-
-  const byDay = {};
-  const byDayRec = {};
-
-  allData.filter(d => d.enviado_at).forEach(d => {
-    const f = d.enviado_at.slice(0,10);
-    const fd = new Date(f + 'T12:00:00');
-    if(fd.getFullYear()===y && fd.getMonth()===m){
-      if(!byDay[f]) byDay[f] = {total:0,si:0,no:0};
-      byDay[f].total++;
-      if(d.respondio_si===true) byDay[f].si++;
-      if(d.respondio_si===false) byDay[f].no++;
-    }
-  });
-  recData.filter(d => d.enviado_at).forEach(d => {
-    const f = d.enviado_at.slice(0,10);
-    const fd = new Date(f + 'T12:00:00');
-    if(fd.getFullYear()===y && fd.getMonth()===m){
-      byDayRec[f] = (byDayRec[f]||0)+1;
-    }
-  });
-
-  const hoy = fmtDate(new Date());
-  const cal = $('cal-body');
-  let html = '';
-  for(let i=0;i<offsetLunes;i++) html += `<div class="cal-day empty"></div>`;
-  for(let d=1;d<=ultimoDia.getDate();d++){
-    const key = `${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
-    const info = byDay[key];
-    const rec = byDayRec[key]||0;
-    const isHoy = key===hoy;
-    html += `<div class="cal-day${isHoy?' today':''}">
-      <span class="cal-num">${d}</span>
-      ${info && info.total>0 ? `<span class="cal-pill pill-total">${info.total} opt</span>` : ''}
-      ${info && info.si>0 ? `<span class="cal-pill pill-si">${info.si} sí</span>` : ''}
-      ${info && info.no>0 ? `<span class="cal-pill pill-no">${info.no} no</span>` : ''}
-      ${rec>0 ? `<span class="cal-pill pill-rec">${rec} rec</span>` : ''}
-    </div>`;
+  const rows = Object.entries(counts).sort((a,b) => b[1].total - a[1].total);
+  if (rows.length === 0) {
+    $('prod-body').innerHTML = '<div class="empty-row">Sin datos en este periodo</div>';
+    return;
   }
-  cal.innerHTML = html;
+  const maxT = rows[0][1].total;
+  $('prod-body').innerHTML = `
+    <table>
+      <thead><tr>
+        <th>Producto</th>
+        <th>Enviados</th>
+        <th>Aceptaron</th>
+        <th>Rechazaron</th>
+        <th>Sin resp.</th>
+        <th>Tasa acept.</th>
+      </tr></thead>
+      <tbody>${rows.map(([p,c]) => {
+        const ign = Math.max(0, c.total - c.si - c.no);
+        const pct = c.total > 0 ? Math.round(c.si/c.total*100) : 0;
+        const barW = Math.round(c.total/maxT*100);
+        return `<tr>
+          <td class="prod-name">${p}</td>
+          <td>${c.total}</td>
+          <td><span class="badge badge-green">${c.si}</span></td>
+          <td><span class="badge badge-red">${c.no}</span></td>
+          <td>${ign}</td>
+          <td>
+            <div class="bar-wrap">
+              <div class="bar-bg"><div class="bar-fill" style="width:${barW}%"></div></div>
+              <span class="pct-label">${pct}%</span>
+            </div>
+          </td>
+        </tr>`;
+      }).join('')}</tbody>
+    </table>`;
 }
 
-function renderLinea(){
+function renderLinea() {
   const counts = {};
-  allData.filter(d => d.enviado_at).forEach(d => {
+  allOpts.filter(d => d.enviado_at).forEach(d => {
     const f = d.enviado_at.slice(0,10);
-    counts[f] = (counts[f]||0)+1;
+    counts[f] = (counts[f]||0) + 1;
   });
   const labels = Object.keys(counts).sort();
   const vals = labels.map(l => counts[l]);
 
-  const ctx = $('chart-linea');
-  if(lineChart) lineChart.destroy();
-  lineChart = new Chart(ctx, {
-    type:'line',
-    data:{
+  if (lineChart) lineChart.destroy();
+  lineChart = new Chart($('chart-linea'), {
+    type: 'line',
+    data: {
       labels: labels.map(l => {
-        const d = new Date(l+'T12:00:00');
-        return d.toLocaleDateString('es-MX',{day:'numeric',month:'short'});
+        const d = new Date(l + 'T12:00:00');
+        return d.toLocaleDateString('es-MX', { day:'numeric', month:'short' });
       }),
-      datasets:[{
-        label:'Opt-ins enviados',
+      datasets: [{
+        label: 'Opt-ins enviados',
         data: vals,
-        borderColor:'#378ADD',
-        backgroundColor:'rgba(55,138,221,0.08)',
-        fill:true,
-        tension:0.3,
-        pointRadius:3,
-        pointBackgroundColor:'#378ADD'
+        borderColor: '#378ADD',
+        backgroundColor: 'rgba(55,138,221,0.07)',
+        fill: true,
+        tension: 0.35,
+        pointRadius: 4,
+        pointBackgroundColor: '#378ADD',
+        pointBorderColor: '#fff',
+        pointBorderWidth: 1.5
       }]
     },
-    options:{
-      responsive:true,
-      maintainAspectRatio:false,
-      plugins:{
-        legend:{display:false}
-      },
-      scales:{
-        x:{
-          ticks:{font:{size:11},autoSkip:true,maxRotation:45},
-          grid:{color:'rgba(128,128,128,0.1)'}
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: {
+        x: {
+          ticks: { font: { size: 11, family: 'Inter' }, autoSkip: true, maxRotation: 45 },
+          grid: { color: 'rgba(0,0,0,0.05)' }
         },
-        y:{
-          beginAtZero:true,
-          ticks:{font:{size:11},stepSize:1},
-          grid:{color:'rgba(128,128,128,0.1)'}
+        y: {
+          beginAtZero: true,
+          ticks: { font: { size: 11, family: 'Inter' }, stepSize: 1 },
+          grid: { color: 'rgba(0,0,0,0.05)' }
         }
       }
     }
   });
 }
 
-function cambiarMes(delta){
+function renderCalendario() {
+  const y = mesActual.getFullYear();
+  const m = mesActual.getMonth();
+  $('cal-titulo').textContent = new Date(y,m,1).toLocaleDateString('es-MX',{month:'long',year:'numeric'});
+
+  ['Lun','Mar','Mié','Jue','Vie','Sáb','Dom'].forEach(d => {
+    const el = document.createElement('div');
+    el.className = 'cal-dh';
+    el.textContent = d;
+    $('cal-headers').appendChild(el);
+  });
+  $('cal-headers').innerHTML = ['Lun','Mar','Mié','Jue','Vie','Sáb','Dom']
+    .map(d => `<div class="cal-dh">${d}</div>`).join('');
+
+  const byOpt = {}, byRec = {};
+  allOpts.filter(d => d.enviado_at).forEach(d => {
+    const f = d.enviado_at.slice(0,10);
+    const fd = new Date(f + 'T12:00:00');
+    if (fd.getFullYear()===y && fd.getMonth()===m) {
+      if (!byOpt[f]) byOpt[f] = { total:0, si:0, no:0 };
+      byOpt[f].total++;
+      if (d.respondio_si===true)  byOpt[f].si++;
+      if (d.respondio_si===false) byOpt[f].no++;
+    }
+  });
+  allRecs.filter(d => d.enviado_at).forEach(d => {
+    const f = d.enviado_at.slice(0,10);
+    const fd = new Date(f + 'T12:00:00');
+    if (fd.getFullYear()===y && fd.getMonth()===m)
+      byRec[f] = (byRec[f]||0) + 1;
+  });
+
+  const hoy = fmtDate(new Date());
+  const ultimoDia = new Date(y, m+1, 0).getDate();
+  const offsetLunes = (new Date(y,m,1).getDay() + 6) % 7;
+
+  let html = '';
+  for (let i=0; i<offsetLunes; i++) html += `<div class="cal-cell empty"></div>`;
+  for (let d=1; d<=ultimoDia; d++) {
+    const key = `${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    const o = byOpt[key];
+    const r = byRec[key]||0;
+    html += `<div class="cal-cell${key===hoy?' today':''}">
+      <span class="cal-day-num">${d}</span>
+      ${o&&o.total ? `<span class="cal-pill p-opt">${o.total} opt</span>` : ''}
+      ${o&&o.si    ? `<span class="cal-pill p-si">${o.si} sí</span>` : ''}
+      ${o&&o.no    ? `<span class="cal-pill p-no">${o.no} no</span>` : ''}
+      ${r          ? `<span class="cal-pill p-rec">${r} rec</span>` : ''}
+    </div>`;
+  }
+  $('cal-body').innerHTML = html;
+}
+
+function cambiarMes(delta) {
   mesActual = new Date(mesActual.getFullYear(), mesActual.getMonth()+delta, 1);
   renderCalendario();
 }
@@ -353,3 +667,5 @@ function cambiarMes(delta){
 initFechas();
 cargarProductos().then(() => cargarDatos());
 </script>
+</body>
+</html>
