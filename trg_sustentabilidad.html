@@ -606,6 +606,16 @@ function render(d) {
       `;
       tbody.appendChild(tr);
     });
+    // Fila de total anual
+    const totalAnual = filas.reduce((s, m) => s + m.clientes, 0);
+    const trTotal = document.createElement('tr');
+    trTotal.style.cssText = 'border-top: 2px solid var(--crema-oscura); font-weight: 600;';
+    trTotal.innerHTML = `
+      <td style="padding-top: 0.75rem; font-size: 0.8rem; color: var(--texto-suave); text-transform: uppercase; letter-spacing: 0.08em;">Total ${año}</td>
+      <td style="padding-top: 0.75rem;"><span class="mes-num" style="color: var(--verde-bosque);">${fmt(totalAnual)}</span></td>
+      <td></td>
+    `;
+    tbody.appendChild(trTotal);
   }
 
   const tabsWrap = document.getElementById('año-tabs');
