@@ -1,0 +1,355 @@
+
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--font-sans)}
+.wrap{padding:1.5rem 0}
+.section-title{font-size:13px;font-weight:500;color:var(--color-text-secondary);text-transform:uppercase;letter-spacing:.05em;margin-bottom:12px}
+.metric-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin-bottom:1.5rem}
+.metric{background:var(--color-background-secondary);border-radius:var(--border-radius-md);padding:1rem;display:flex;flex-direction:column;gap:4px}
+.metric-label{font-size:12px;color:var(--color-text-secondary)}
+.metric-value{font-size:22px;font-weight:500;color:var(--color-text-primary)}
+.metric-sub{font-size:11px;color:var(--color-text-tertiary)}
+.filters{display:flex;gap:10px;align-items:center;margin-bottom:1.5rem;flex-wrap:wrap}
+.filters label{font-size:13px;color:var(--color-text-secondary)}
+.filters input[type=date]{font-size:13px;padding:6px 10px;height:34px}
+.filters select{font-size:13px;padding:6px 10px;height:34px}
+.filters button{font-size:13px;padding:6px 14px;height:34px;cursor:pointer}
+.chart-card{background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);padding:1.25rem;margin-bottom:1.5rem}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
+.cal-header{font-size:11px;color:var(--color-text-tertiary);text-align:center;padding:4px 0;font-weight:500}
+.cal-day{border-radius:var(--border-radius-md);padding:6px 4px;min-height:62px;border:0.5px solid var(--color-border-tertiary);background:var(--color-background-primary);display:flex;flex-direction:column;gap:2px}
+.cal-day.empty{border-color:transparent;background:transparent}
+.cal-day.today{border-color:var(--color-border-info)}
+.cal-num{font-size:11px;font-weight:500;color:var(--color-text-secondary)}
+.cal-pill{font-size:10px;padding:2px 5px;border-radius:4px;font-weight:500;line-height:1.4}
+.pill-total{background:#E6F1FB;color:#0C447C}
+.pill-si{background:#EAF3DE;color:#27500A}
+.pill-no{background:#FCEBEB;color:#791F1F}
+.pill-rec{background:#EEEDFE;color:#3C3489}
+.legend{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:12px}
+.legend-item{display:flex;align-items:center;gap:5px;font-size:12px;color:var(--color-text-secondary)}
+.legend-dot{width:10px;height:10px;border-radius:2px}
+.prod-table{width:100%;border-collapse:collapse;font-size:13px}
+.prod-table th{text-align:left;font-size:11px;font-weight:500;color:var(--color-text-secondary);padding:6px 8px;border-bottom:0.5px solid var(--color-border-tertiary)}
+.prod-table td{padding:7px 8px;border-bottom:0.5px solid var(--color-border-tertiary);color:var(--color-text-primary)}
+.prod-table tr:last-child td{border-bottom:none}
+.bar-bg{background:var(--color-background-secondary);border-radius:4px;height:6px;flex:1}
+.bar-fill{height:6px;border-radius:4px;background:#378ADD}
+.status-badge{font-size:11px;padding:2px 8px;border-radius:4px;font-weight:500}
+.loading{color:var(--color-text-secondary);font-size:14px;padding:2rem 0;text-align:center}
+.error{color:var(--color-text-danger,#e24b4a);font-size:13px;padding:1rem;background:var(--color-background-danger,#FCEBEB);border-radius:var(--border-radius-md);margin-bottom:1rem}
+</style>
+
+<div class="wrap">
+  <h2 class="sr-only">Dashboard de métricas opt-in The Real Green</h2>
+
+  <div id="error-msg" class="error" style="display:none"></div>
+
+  <div class="filters">
+    <label>Desde</label>
+    <input type="date" id="date-from">
+    <label>Hasta</label>
+    <input type="date" id="date-to">
+    <label>Producto</label>
+    <select id="filter-producto"><option value="">Todos</option></select>
+    <button onclick="cargarDatos()">Aplicar</button>
+  </div>
+
+  <div class="section-title">resumen general</div>
+  <div class="metric-grid" id="metrics">
+    <div class="metric"><span class="metric-label">Opt-ins enviados</span><span class="metric-value" id="m-total">—</span><span class="metric-sub">total en periodo</span></div>
+    <div class="metric"><span class="metric-label">Aceptaron</span><span class="metric-value" id="m-si" style="color:#3B6D11">—</span><span class="metric-sub" id="m-si-pct">—</span></div>
+    <div class="metric"><span class="metric-label">Rechazaron</span><span class="metric-value" id="m-no" style="color:#A32D2D">—</span><span class="metric-sub" id="m-no-pct">—</span></div>
+    <div class="metric"><span class="metric-label">Sin respuesta</span><span class="metric-value" id="m-ignore">—</span><span class="metric-sub" id="m-ignore-pct">—</span></div>
+    <div class="metric"><span class="metric-label">Recordatorios</span><span class="metric-value" id="m-rec" style="color:#534AB7">—</span><span class="metric-sub">de aplicación enviados</span></div>
+    <div class="metric"><span class="metric-label">Conversión</span><span class="metric-value" id="m-conv">—</span><span class="metric-sub">de enviados con respuesta</span></div>
+  </div>
+
+  <div class="chart-card">
+    <div class="section-title" style="margin-bottom:1rem">opt-ins por producto</div>
+    <div id="prod-wrap">
+      <p class="loading">Cargando...</p>
+    </div>
+  </div>
+
+  <div class="chart-card">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem">
+      <div class="section-title" style="margin-bottom:0">calendario mensual</div>
+      <div style="display:flex;gap:8px;align-items:center">
+        <button onclick="cambiarMes(-1)" style="padding:4px 10px;font-size:13px;cursor:pointer">‹</button>
+        <span id="cal-titulo" style="font-size:13px;font-weight:500;color:var(--color-text-primary);min-width:120px;text-align:center"></span>
+        <button onclick="cambiarMes(1)" style="padding:4px 10px;font-size:13px;cursor:pointer">›</button>
+      </div>
+    </div>
+    <div class="legend" style="margin-bottom:1rem">
+      <span class="legend-item"><span class="legend-dot" style="background:#B5D4F4"></span>Opt-ins</span>
+      <span class="legend-item"><span class="legend-dot" style="background:#C0DD97"></span>Aceptaron</span>
+      <span class="legend-item"><span class="legend-dot" style="background:#F7C1C1"></span>Rechazaron</span>
+      <span class="legend-item"><span class="legend-dot" style="background:#CECBF6"></span>Recordatorios</span>
+    </div>
+    <div class="cal-grid" id="cal-headers"></div>
+    <div class="cal-grid" id="cal-body" style="margin-top:4px"></div>
+  </div>
+
+  <div class="chart-card">
+    <div class="section-title" style="margin-bottom:1rem">tendencia diaria — opt-ins enviados</div>
+    <div style="position:relative;width:100%;height:200px">
+      <canvas id="chart-linea" role="img" aria-label="Tendencia diaria de opt-ins enviados"></canvas>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script>
+const SUPABASE_URL = "https://pjicnaamvuluommctphb.supabase.co";
+const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBqaWNuYWFtdnVsdW9tbWN0cGhiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI0ODUwMjcsImV4cCI6MjA4ODA2MTAyN30.RevJFA0u6Ts4la2vyjgaTgtvqFWeqJTo0zrCg8wOCOY";
+const BU = 'trg';
+
+let mesActual = new Date();
+let allData = [];
+let recData = [];
+let lineChart = null;
+
+function $(id){ return document.getElementById(id); }
+
+function showError(msg){
+  const el = $('error-msg');
+  el.textContent = msg;
+  el.style.display = 'block';
+}
+
+async function fetchSupabase(table, params){
+  const url = new URL(`${SUPABASE_URL}/rest/v1/${table}`);
+  Object.entries(params).forEach(([k,v]) => url.searchParams.set(k,v));
+  const r = await fetch(url, {
+    headers:{
+      'apikey': SUPABASE_KEY,
+      'Authorization': `Bearer ${SUPABASE_KEY}`,
+      'Content-Type': 'application/json'
+    }
+  });
+  if(!r.ok) throw new Error(`Supabase error ${r.status}: ${await r.text()}`);
+  return r.json();
+}
+
+function fmtDate(d){ return d.toISOString().slice(0,10); }
+
+function initFechas(){
+  const hoy = new Date();
+  const primerDia = new Date(hoy.getFullYear(), hoy.getMonth(), 1);
+  $('date-from').value = fmtDate(primerDia);
+  $('date-to').value = fmtDate(hoy);
+}
+
+async function cargarDatos(){
+  $('error-msg').style.display = 'none';
+  const desde = $('date-from').value;
+  const hasta = $('date-to').value + 'T23:59:59';
+  const prod = $('filter-producto').value;
+
+  let qOpt = `business_unit=eq.${BU}&tipo=eq.opt_in&fecha_envio=gte.${desde}&fecha_envio=lte.${hasta}&select=*&limit=2000`;
+  let qRec = `business_unit=eq.${BU}&tipo=eq.recordatorio&enviado_at=gte.${desde}&enviado_at=lte.${hasta}&select=*&limit=2000`;
+  if(prod){ qOpt += `&producto=eq.${encodeURIComponent(prod)}`; qRec += `&producto=eq.${encodeURIComponent(prod)}`; }
+
+  try {
+    const [opts, recs] = await Promise.all([
+      fetchSupabase('notificaciones_programadas', Object.fromEntries(new URLSearchParams(qOpt))),
+      fetchSupabase('notificaciones_programadas', Object.fromEntries(new URLSearchParams(qRec)))
+    ]);
+    allData = opts;
+    recData = recs;
+    renderMetrics();
+    renderProductos();
+    renderCalendario();
+    renderLinea();
+  } catch(e){
+    showError('Error al conectar con Supabase: ' + e.message);
+  }
+}
+
+async function cargarProductos(){
+  try {
+    const data = await fetchSupabase('notificaciones_programadas', {
+      'business_unit': `eq.${BU}`,
+      'tipo': 'eq.opt_in',
+      'select': 'producto'
+    });
+    const prods = [...new Set(data.map(d => d.producto))].sort();
+    const sel = $('filter-producto');
+    prods.forEach(p => {
+      const o = document.createElement('option');
+      o.value = p; o.textContent = p;
+      sel.appendChild(o);
+    });
+  } catch(e){}
+}
+
+function renderMetrics(){
+  const enviados = allData.filter(d => d.enviado_at).length;
+  const si = allData.filter(d => d.respondio_si === true).length;
+  const no = allData.filter(d => d.respondio_si === false).length;
+  const ignore = enviados - si - no;
+  const recs = recData.filter(d => d.enviado_at).length;
+  const conResp = si + no;
+  const conv = conResp > 0 ? Math.round(si / conResp * 100) : 0;
+
+  $('m-total').textContent = enviados;
+  $('m-si').textContent = si;
+  $('m-si-pct').textContent = enviados > 0 ? Math.round(si/enviados*100) + '% del total' : '—';
+  $('m-no').textContent = no;
+  $('m-no-pct').textContent = enviados > 0 ? Math.round(no/enviados*100) + '% del total' : '—';
+  $('m-ignore').textContent = ignore > 0 ? ignore : 0;
+  $('m-ignore-pct').textContent = enviados > 0 ? Math.round(Math.max(0,ignore)/enviados*100) + '% del total' : '—';
+  $('m-rec').textContent = recs;
+  $('m-conv').textContent = conv + '%';
+}
+
+function renderProductos(){
+  const counts = {};
+  allData.filter(d => d.enviado_at).forEach(d => {
+    if(!counts[d.producto]) counts[d.producto] = {total:0,si:0,no:0};
+    counts[d.producto].total++;
+    if(d.respondio_si === true) counts[d.producto].si++;
+    if(d.respondio_si === false) counts[d.producto].no++;
+  });
+  const prods = Object.entries(counts).sort((a,b) => b[1].total - a[1].total);
+  const maxT = prods.length > 0 ? prods[0][1].total : 1;
+  const wrap = $('prod-wrap');
+  if(prods.length === 0){ wrap.innerHTML = '<p class="loading">Sin datos en este periodo</p>'; return; }
+  wrap.innerHTML = `<table class="prod-table">
+    <thead><tr>
+      <th>Producto</th>
+      <th style="text-align:right">Enviados</th>
+      <th style="text-align:right">Sí</th>
+      <th style="text-align:right">No</th>
+      <th style="min-width:80px">Tasa</th>
+    </tr></thead>
+    <tbody>${prods.map(([p,c]) => {
+      const pct = c.total > 0 ? Math.round(c.si/c.total*100) : 0;
+      const barW = Math.round(c.total/maxT*100);
+      return `<tr>
+        <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${p}</td>
+        <td style="text-align:right">${c.total}</td>
+        <td style="text-align:right;color:#3B6D11">${c.si}</td>
+        <td style="text-align:right;color:#A32D2D">${c.no}</td>
+        <td><div style="display:flex;align-items:center;gap:6px">
+          <div class="bar-bg"><div class="bar-fill" style="width:${barW}%"></div></div>
+          <span style="font-size:11px;color:var(--color-text-secondary);min-width:28px">${pct}%</span>
+        </div></td>
+      </tr>`;
+    }).join('')}</tbody>
+  </table>`;
+}
+
+function renderCalendario(){
+  const y = mesActual.getFullYear();
+  const m = mesActual.getMonth();
+  $('cal-titulo').textContent = new Date(y,m,1).toLocaleDateString('es-MX',{month:'long',year:'numeric'});
+
+  const dias = ['Lun','Mar','Mié','Jue','Vie','Sáb','Dom'];
+  const hdr = $('cal-headers');
+  hdr.innerHTML = dias.map(d => `<div class="cal-header">${d}</div>`).join('');
+
+  const primerDia = new Date(y,m,1);
+  const ultimoDia = new Date(y,m+1,0);
+  const offsetLunes = (primerDia.getDay() + 6) % 7;
+
+  const byDay = {};
+  const byDayRec = {};
+
+  allData.filter(d => d.enviado_at).forEach(d => {
+    const f = d.enviado_at.slice(0,10);
+    const fd = new Date(f + 'T12:00:00');
+    if(fd.getFullYear()===y && fd.getMonth()===m){
+      if(!byDay[f]) byDay[f] = {total:0,si:0,no:0};
+      byDay[f].total++;
+      if(d.respondio_si===true) byDay[f].si++;
+      if(d.respondio_si===false) byDay[f].no++;
+    }
+  });
+  recData.filter(d => d.enviado_at).forEach(d => {
+    const f = d.enviado_at.slice(0,10);
+    const fd = new Date(f + 'T12:00:00');
+    if(fd.getFullYear()===y && fd.getMonth()===m){
+      byDayRec[f] = (byDayRec[f]||0)+1;
+    }
+  });
+
+  const hoy = fmtDate(new Date());
+  const cal = $('cal-body');
+  let html = '';
+  for(let i=0;i<offsetLunes;i++) html += `<div class="cal-day empty"></div>`;
+  for(let d=1;d<=ultimoDia.getDate();d++){
+    const key = `${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    const info = byDay[key];
+    const rec = byDayRec[key]||0;
+    const isHoy = key===hoy;
+    html += `<div class="cal-day${isHoy?' today':''}">
+      <span class="cal-num">${d}</span>
+      ${info && info.total>0 ? `<span class="cal-pill pill-total">${info.total} opt</span>` : ''}
+      ${info && info.si>0 ? `<span class="cal-pill pill-si">${info.si} sí</span>` : ''}
+      ${info && info.no>0 ? `<span class="cal-pill pill-no">${info.no} no</span>` : ''}
+      ${rec>0 ? `<span class="cal-pill pill-rec">${rec} rec</span>` : ''}
+    </div>`;
+  }
+  cal.innerHTML = html;
+}
+
+function renderLinea(){
+  const counts = {};
+  allData.filter(d => d.enviado_at).forEach(d => {
+    const f = d.enviado_at.slice(0,10);
+    counts[f] = (counts[f]||0)+1;
+  });
+  const labels = Object.keys(counts).sort();
+  const vals = labels.map(l => counts[l]);
+
+  const ctx = $('chart-linea');
+  if(lineChart) lineChart.destroy();
+  lineChart = new Chart(ctx, {
+    type:'line',
+    data:{
+      labels: labels.map(l => {
+        const d = new Date(l+'T12:00:00');
+        return d.toLocaleDateString('es-MX',{day:'numeric',month:'short'});
+      }),
+      datasets:[{
+        label:'Opt-ins enviados',
+        data: vals,
+        borderColor:'#378ADD',
+        backgroundColor:'rgba(55,138,221,0.08)',
+        fill:true,
+        tension:0.3,
+        pointRadius:3,
+        pointBackgroundColor:'#378ADD'
+      }]
+    },
+    options:{
+      responsive:true,
+      maintainAspectRatio:false,
+      plugins:{
+        legend:{display:false}
+      },
+      scales:{
+        x:{
+          ticks:{font:{size:11},autoSkip:true,maxRotation:45},
+          grid:{color:'rgba(128,128,128,0.1)'}
+        },
+        y:{
+          beginAtZero:true,
+          ticks:{font:{size:11},stepSize:1},
+          grid:{color:'rgba(128,128,128,0.1)'}
+        }
+      }
+    }
+  });
+}
+
+function cambiarMes(delta){
+  mesActual = new Date(mesActual.getFullYear(), mesActual.getMonth()+delta, 1);
+  renderCalendario();
+}
+
+initFechas();
+cargarProductos().then(() => cargarDatos());
+</script>
