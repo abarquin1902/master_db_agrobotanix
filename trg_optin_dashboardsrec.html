@@ -366,6 +366,36 @@
     <div id="rev-prod-body"><div class="loading-row"><span class="spinner"></span>Cargando...</div></div>
   </div>
 
+
+  <div class="section-label" style="margin-top:1.5rem">revenue por periodo (según filtro de fechas)</div>
+  <div class="metrics-grid">
+    <div class="metric">
+      <div class="metric-label">Revenue en periodo</div>
+      <div class="metric-value" id="rp-revenue" style="color:var(--green)">—</div>
+      <div class="metric-sub">MXN en recompras atribuidas</div>
+    </div>
+    <div class="metric">
+      <div class="metric-label">Recompraron</div>
+      <div class="metric-value" id="rp-recompro">—</div>
+      <div class="metric-sub" id="rp-recompro-pct">usuarios en el periodo</div>
+    </div>
+    <div class="metric">
+      <div class="metric-label">Órdenes generadas</div>
+      <div class="metric-value" id="rp-ordenes">—</div>
+      <div class="metric-sub">pedidos post-recordatorio</div>
+    </div>
+    <div class="metric">
+      <div class="metric-label">Ticket promedio</div>
+      <div class="metric-value" id="rp-ticket">—</div>
+      <div class="metric-sub">por recompra</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">recompras por producto — periodo</div>
+    <div id="rp-prod-body"><div class="loading-row"><span class="spinner"></span>Cargando...</div></div>
+  </div>
+
   <div class="card">
     <div class="card-title">opt-ins por producto</div>
     <div id="prod-body">
@@ -516,8 +546,8 @@ async function cargarDatos() {
 
     $('last-update').textContent = 'Actualizado ' + new Date().toLocaleTimeString('es-MX', {hour:'2-digit',minute:'2-digit'});
     cargarRevenue(prod);
+    cargarRevenuePeriodo(desde, hasta, prod);
   } catch(e) {
-    console.error('ERROR cargarDatos:', e);
     $('error-box').textContent = 'No se pudo conectar con Supabase. Revisa las credenciales. ' + e.message;
     $('error-box').style.display = 'block';
     $('prod-body').innerHTML = '<div class="empty-row">Sin datos</div>';
@@ -698,6 +728,86 @@ function cambiarMes(delta) {
 
 initFechas();
 cargarProductos().then(() => cargarDatos());
+async function cargarRevenuePeriodo(desde, hasta, prod) {
+  try {
+    let url = `${SUPABASE_URL}/rest/v1/reporte_recompras?select=*&limit=1000&business_unit=eq.${BU}`;
+    url += `&primer_recordatorio=gte.${desde}`;
+    url += `&primer_recordatorio=lte.${encodeURIComponent(hasta)}`;
+    if (prod) url += `&producto=eq.${encodeURIComponent(prod)}`;
+    const r = await fetch(url, {
+      headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
+    });
+    if (!r.ok) throw new Error(`Error ${r.status}`);
+    const data = await r.json();
+    renderRevenuePeriodo(data);
+  } catch(e) {
+    $('rp-prod-body').innerHTML = '<div class="empty-row">No se pudo cargar revenue del periodo</div>';
+  }
+}
+
+function renderRevenuePeriodo(data) {
+  const total     = data.length;
+  const recompros = data.filter(d => d.recompro).length;
+  const ordenes   = data.reduce((s, d) => s + (d.ordenes_post || 0), 0);
+  const revenue   = data.reduce((s, d) => s + parseFloat(d.revenue_post || 0), 0);
+  const ticket    = recompros > 0 ? revenue / recompros : 0;
+  const pct       = total > 0 ? Math.round(recompros / total * 100) : 0;
+
+  $('rp-revenue').textContent  = '$' + revenue.toLocaleString('es-MX', {minimumFractionDigits:2, maximumFractionDigits:2});
+  $('rp-recompro').textContent = recompros;
+  $('rp-recompro-pct').textContent = `${pct}% de ${total} usuarios`;
+  $('rp-ordenes').textContent  = ordenes;
+  $('rp-ticket').textContent   = '$' + ticket.toLocaleString('es-MX', {minimumFractionDigits:2, maximumFractionDigits:2});
+
+  const byProd = {};
+  data.forEach(d => {
+    if (!byProd[d.producto]) byProd[d.producto] = { usuarios:0, recompro:0, ordenes:0, revenue:0 };
+    byProd[d.producto].usuarios++;
+    if (d.recompro) byProd[d.producto].recompro++;
+    byProd[d.producto].ordenes  += d.ordenes_post || 0;
+    byProd[d.producto].revenue  += parseFloat(d.revenue_post || 0);
+  });
+
+  const rows = Object.entries(byProd)
+    .filter(([,v]) => v.revenue > 0)
+    .sort((a,b) => b[1].revenue - a[1].revenue);
+
+  if (rows.length === 0) {
+    $('rp-prod-body').innerHTML = '<div class="empty-row">Sin recompras en este periodo</div>';
+    return;
+  }
+
+  const maxRev = rows[0][1].revenue;
+  $('rp-prod-body').innerHTML = `
+    <table>
+      <thead><tr>
+        <th>Producto</th>
+        <th style="text-align:right">Usuarios</th>
+        <th style="text-align:right">Recompraron</th>
+        <th style="text-align:right">Órdenes</th>
+        <th style="text-align:right">Revenue MXN</th>
+        <th style="min-width:100px;text-align:right">Tasa</th>
+      </tr></thead>
+      <tbody>${rows.map(([p,c]) => {
+        const pct = Math.round(c.recompro / c.usuarios * 100);
+        const barW = Math.round(c.revenue / maxRev * 100);
+        return `<tr>
+          <td class="prod-name">${p}</td>
+          <td style="text-align:right">${c.usuarios}</td>
+          <td style="text-align:right"><span class="badge badge-green">${c.recompro}</span></td>
+          <td style="text-align:right">${c.ordenes}</td>
+          <td style="text-align:right;font-weight:500;color:var(--green)">$${c.revenue.toLocaleString('es-MX', {minimumFractionDigits:2, maximumFractionDigits:2})}</td>
+          <td>
+            <div class="bar-wrap">
+              <div class="bar-bg"><div class="bar-fill" style="width:${barW}%;background:var(--green)"></div></div>
+              <span class="pct-label">${pct}%</span>
+            </div>
+          </td>
+        </tr>`;
+      }).join('')}</tbody>
+    </table>`;
+}
+
 async function cargarRevenue(prod) {
   try {
     let url = `${SUPABASE_URL}/rest/v1/reporte_recompras?select=*&limit=1000&business_unit=eq.${BU}`;
