@@ -697,6 +697,7 @@ function cambiarMes(delta) {
 initFechas();
 cargarProductos().then(() => cargarDatos());
 async function cargarRevenue(prod) {
+  console.log('cargarRevenue llamada con prod:', prod);
   try {
     let url = `${SUPABASE_URL}/rest/v1/reporte_recompras?select=*&limit=1000&business_unit=eq.${BU}`;
     if (prod) url += `&producto=eq.${encodeURIComponent(prod)}`;
