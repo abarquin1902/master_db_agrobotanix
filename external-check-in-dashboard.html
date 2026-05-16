@@ -6,9 +6,7 @@
   <title>Nanofactor · Asistencia RH</title>
   <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@700;800&display=swap" rel="stylesheet" />
   <style>
-    /* ── Reset ── */
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
     body {
       font-family: 'DM Mono', monospace;
       font-size: 13px;
@@ -17,98 +15,46 @@
       min-height: 100vh;
       padding: 32px 20px 60px;
     }
-
-    /* ── Layout ── */
     .page { max-width: 900px; margin: 0 auto; }
-
-    /* ── Header ── */
     .header { display: flex; align-items: flex-end; justify-content: space-between; flex-wrap: wrap; gap: 16px; margin-bottom: 32px; }
-    .header-left {}
     .brand { font-size: 10px; letter-spacing: 0.3em; text-transform: uppercase; color: #888; margin-bottom: 4px; }
     .title { font-family: 'Syne', sans-serif; font-size: 24px; font-weight: 800; color: #1a1a18; }
-
-    /* ── Controls bar ── */
     .controls { display: flex; gap: 10px; flex-wrap: wrap; align-items: flex-end; margin-bottom: 28px; }
     .ctrl { display: flex; flex-direction: column; gap: 5px; }
     .ctrl-label { font-size: 10px; letter-spacing: 0.15em; text-transform: uppercase; color: #888; }
-    select {
-      background: #fff;
-      border: 1px solid #d8d6d0;
-      border-radius: 4px;
-      font-family: 'DM Mono', monospace;
-      font-size: 12px;
-      color: #1a1a18;
-      padding: 7px 10px;
-      outline: none;
-      cursor: pointer;
-      transition: border-color 0.15s;
-      min-width: 160px;
+    select, input[type="month"] {
+      background: #fff; border: 1px solid #d8d6d0; border-radius: 4px;
+      font-family: 'DM Mono', monospace; font-size: 12px; color: #1a1a18;
+      padding: 7px 10px; outline: none; transition: border-color 0.15s;
     }
-    select:focus { border-color: #888; }
-
-    /* period range inputs */
-    input[type="month"] {
-      background: #fff;
-      border: 1px solid #d8d6d0;
-      border-radius: 4px;
-      font-family: 'DM Mono', monospace;
-      font-size: 12px;
-      color: #1a1a18;
-      padding: 7px 10px;
-      outline: none;
-      transition: border-color 0.15s;
-    }
-    input[type="month"]:focus { border-color: #888; }
-
+    select { min-width: 180px; cursor: pointer; }
+    select:focus, input[type="month"]:focus { border-color: #888; }
     .btn {
-      padding: 8px 16px;
-      background: #1a1a18;
-      color: #f5f4f1;
-      border: none;
-      border-radius: 4px;
-      font-family: 'DM Mono', monospace;
-      font-size: 11px;
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
-      cursor: pointer;
-      transition: background 0.15s;
-      white-space: nowrap;
+      padding: 8px 16px; background: #1a1a18; color: #f5f4f1; border: none;
+      border-radius: 4px; font-family: 'DM Mono', monospace; font-size: 11px;
+      letter-spacing: 0.12em; text-transform: uppercase; cursor: pointer;
+      transition: background 0.15s; white-space: nowrap;
     }
     .btn:hover { background: #3a3a38; }
     .btn:disabled { opacity: 0.4; cursor: not-allowed; }
     .btn-outline {
-      background: #fff;
-      color: #1a1a18;
-      border: 1px solid #d8d6d0;
+      background: #fff; color: #1a1a18; border: 1px solid #d8d6d0;
     }
     .btn-outline:hover { background: #f0eeea; border-color: #888; }
-
-    /* ── Status bar ── */
     .status-bar { font-size: 11px; color: #888; min-height: 18px; margin-bottom: 20px; }
     .status-bar.error { color: #b03030; }
     .status-bar.ok { color: #3a6e1a; }
-
-    /* ── KPI cards ── */
-    .kpi-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; margin-bottom: 28px; }
-    .kpi {
-      background: #fff;
-      border: 1px solid #e8e6e0;
-      border-radius: 6px;
-      padding: 14px 16px;
-    }
+    .kpi-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 10px; margin-bottom: 28px; }
+    .kpi { background: #fff; border: 1px solid #e8e6e0; border-radius: 6px; padding: 14px 16px; }
     .kpi-val { font-family: 'Syne', sans-serif; font-size: 26px; font-weight: 800; margin-bottom: 2px; }
-    .kpi-label { font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: #888; }
-    .kpi-val.green { color: #3b6d11; }
+    .kpi-val.green  { color: #3b6d11; }
     .kpi-val.yellow { color: #7a5200; }
-    .kpi-val.red { color: #8c2020; }
+    .kpi-val.red    { color: #8c2020; }
     .kpi-val.neutral { color: #1a1a18; }
-
-    /* ── Legend ── */
+    .kpi-label { font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: #888; }
     .legend { display: flex; gap: 20px; flex-wrap: wrap; margin-bottom: 18px; align-items: center; }
     .leg { display: flex; align-items: center; gap: 7px; font-size: 11px; color: #666; }
     .leg-dot { width: 11px; height: 11px; border-radius: 50%; flex-shrink: 0; }
-
-    /* ── Month nav ── */
     .month-nav { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
     .nav-btn {
       background: #fff; border: 1px solid #d8d6d0; border-radius: 4px;
@@ -118,79 +64,57 @@
     }
     .nav-btn:hover { border-color: #888; }
     .month-label { font-family: 'Syne', sans-serif; font-size: 15px; font-weight: 700; }
-
-    /* ── Calendar ── */
     .cal-header { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; margin-bottom: 4px; }
     .cal-dow { text-align: center; font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: #aaa; padding: 3px 0; }
-
     .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
-
     .cal-day {
-      aspect-ratio: 1;
-      min-height: 50px;
-      background: #fff;
-      border: 1px solid #e8e6e0;
-      border-radius: 4px;
-      display: flex; flex-direction: column;
-      align-items: center; justify-content: center;
-      cursor: default;
-      position: relative;
-      transition: border-color 0.12s;
+      min-height: 62px;
+      background: #fff; border: 1px solid #e8e6e0; border-radius: 4px;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      cursor: default; position: relative; transition: border-color 0.12s;
+      padding: 4px 2px;
     }
-    .cal-day:hover:not(.empty) { border-color: #888; }
-    .cal-day.empty { background: transparent; border-color: transparent; }
+    .cal-day:hover:not(.empty) { border-color: #888; z-index: 2; }
+    .cal-day.empty   { background: transparent; border-color: transparent; }
     .cal-day.weekend { background: #faf9f6; }
-    .cal-day.future { opacity: 0.35; }
-    .cal-day.today { border-color: #aaa; }
-
-    .cal-day.green  { background: #eaf3de; border-color: #97c459; }
-    .cal-day.yellow { background: #fdf3dc; border-color: #d4a017; }
-    .cal-day.red    { background: #faeaea; border-color: #d88080; }
-
-    .day-num { font-size: 13px; font-weight: 500; color: #1a1a18; }
+    .cal-day.future  { opacity: 0.35; }
+    .cal-day.today   { border-color: #aaa; }
+    .cal-day.green   { background: #eaf3de; border-color: #97c459; }
+    .cal-day.yellow  { background: #fdf3dc; border-color: #d4a017; }
+    .cal-day.red     { background: #faeaea; border-color: #d88080; }
+    .day-num { font-size: 13px; font-weight: 500; color: #1a1a18; line-height: 1; }
     .cal-day.green  .day-num { color: #27500a; }
     .cal-day.yellow .day-num { color: #7a5200; }
     .cal-day.red    .day-num { color: #7a2020; }
-
-    .day-time { font-size: 9px; margin-top: 2px; opacity: 0.8; letter-spacing: 0.03em; }
-
-    /* Tooltip */
+    .day-times { display: flex; flex-direction: column; align-items: center; gap: 1px; margin-top: 4px; width: 100%; }
+    .day-time-in, .day-time-out {
+      font-size: 9px; letter-spacing: 0.02em; width: 100%; text-align: center;
+      display: flex; align-items: center; justify-content: center; gap: 3px;
+    }
+    .dot-in  { width: 5px; height: 5px; border-radius: 50%; background: #639922; flex-shrink: 0; }
+    .dot-out { width: 5px; height: 5px; border-radius: 50%; background: #888; flex-shrink: 0; }
+    .dot-out-missing { width: 5px; height: 5px; border-radius: 50%; background: #d88080; flex-shrink: 0; }
     .tip {
-      display: none;
-      position: absolute;
-      bottom: calc(100% + 6px);
-      left: 50%; transform: translateX(-50%);
-      background: #1a1a18;
-      color: #f5f4f1;
-      border-radius: 4px;
-      padding: 7px 11px;
-      font-size: 11px;
-      white-space: nowrap;
-      z-index: 10;
-      pointer-events: none;
-      line-height: 1.7;
+      display: none; position: absolute; bottom: calc(100% + 6px); left: 50%; transform: translateX(-50%);
+      background: #1a1a18; color: #f5f4f1; border-radius: 4px; padding: 8px 12px;
+      font-size: 11px; white-space: nowrap; z-index: 20; pointer-events: none; line-height: 1.8;
+      min-width: 160px; text-align: left;
     }
     .cal-day:hover .tip { display: block; }
-
-    /* ── Export button area ── */
     .export-row { display: flex; justify-content: flex-end; margin-top: 20px; gap: 8px; }
-
-    /* ── Period selector note ── */
-    .period-note { font-size: 10px; color: #aaa; margin-left: 4px; align-self: flex-end; padding-bottom: 9px; }
+    .period-note { font-size: 10px; color: #aaa; align-self: flex-end; padding-bottom: 9px; }
   </style>
 </head>
 <body>
 <div class="page">
 
-  <!-- Header -->
   <div class="header">
-    <div class="header-left">
+    <div>
       <div class="brand">Nanofactor · Recursos Humanos</div>
       <div class="title">Tablero de asistencia</div>
     </div>
   </div>
 
-  <!-- Controls -->
   <div class="controls">
     <div class="ctrl">
       <div class="ctrl-label">Empleado</div>
@@ -210,10 +134,8 @@
     <div class="period-note">Por defecto: mes actual</div>
   </div>
 
-  <!-- Status -->
   <div class="status-bar" id="statusBar"></div>
 
-  <!-- KPIs -->
   <div class="kpi-row">
     <div class="kpi"><div class="kpi-val neutral" id="kTotal">—</div><div class="kpi-label">Días registrados</div></div>
     <div class="kpi"><div class="kpi-val green"   id="kGreen">—</div><div class="kpi-label">Puntual (antes 9:30)</div></div>
@@ -222,28 +144,30 @@
     <div class="kpi"><div class="kpi-val neutral" id="kPct">—</div><div class="kpi-label">% puntualidad</div></div>
   </div>
 
-  <!-- Calendar nav (single-month view) -->
   <div class="month-nav">
     <button class="nav-btn" onclick="changeCalMonth(-1)" aria-label="Mes anterior">‹</button>
     <div class="month-label" id="calMonthLabel">—</div>
     <button class="nav-btn" onclick="changeCalMonth(1)" aria-label="Mes siguiente">›</button>
   </div>
 
-  <!-- Legend -->
   <div class="legend">
     <div class="leg"><div class="leg-dot" style="background:#639922"></div> Entrada antes 9:30</div>
     <div class="leg"><div class="leg-dot" style="background:#d4a017"></div> Entrada 9:30–11:00</div>
     <div class="leg"><div class="leg-dot" style="background:#d88080"></div> Entrada después 11:00 / sin registro</div>
-    <div class="leg"><div class="leg-dot" style="background:#e8e6e0"></div> Sin datos / fin de semana</div>
+    <div class="leg" style="margin-left:8px; border-left:1px solid #ddd; padding-left:16px;">
+      <div class="dot-in" style="width:9px;height:9px;border-radius:50%;background:#639922;flex-shrink:0"></div> Entrada
+    </div>
+    <div class="leg">
+      <div class="dot-out" style="width:9px;height:9px;border-radius:50%;background:#888;flex-shrink:0"></div> Salida
+    </div>
+    <div class="leg">
+      <div class="dot-out-missing" style="width:9px;height:9px;border-radius:50%;background:#d88080;flex-shrink:0"></div> Sin salida
+    </div>
   </div>
 
-  <!-- Calendar header (DOW) -->
   <div class="cal-header" id="calHeader"></div>
-
-  <!-- Calendar grid -->
   <div class="cal-grid" id="calGrid"></div>
 
-  <!-- Export -->
   <div class="export-row">
     <button class="btn btn-outline" onclick="exportCSV()">↓ Exportar periodo a CSV</button>
   </div>
@@ -251,71 +175,58 @@
 </div>
 
 <script>
-/* ─────────────────────────────────────────
-   CONFIGURACIÓN  — reemplaza con tus datos
-───────────────────────────────────────── */
-
+/* ── CONFIGURACIÓN ── reemplaza con tus datos ── */
 const SUPABASE_URL = "https://pjicnaamvuluommctphb.supabase.co";
 const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBqaWNuYWFtdnVsdW9tbWN0cGhiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI0ODUwMjcsImV4cCI6MjA4ODA2MTAyN30.RevJFA0u6Ts4la2vyjgaTgtvqFWeqJTo0zrCg8wOCOY";
 
-/* ─────────────────────────────────────────
-   Estado global
-───────────────────────────────────────── */
+/* ── Estado global ── */
 const now = new Date();
 let calYear  = now.getFullYear();
-let calMonth = now.getMonth();          // 0-indexed
-let allRecords = [];                    // todos los checkins del periodo
-let employees  = [];
+let calMonth = now.getMonth();
+let dayMap   = {};   // dayKey → { inRec, outRec, cls }
+let employees = [];
 
-/* Helpers */
+const MONTHS_ES   = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+const DAYS_ES     = ['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];
+const DAYS_FULL   = ['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
+const CLS_LABELS  = { green: 'Puntual', yellow: 'Tardanza leve', red: 'Tardanza severa' };
+
 const $ = id => document.getElementById(id);
-const MONTHS_ES = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
-const DAYS_ES   = ['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];
 
 function toMx(utcStr) {
   const d = new Date(utcStr);
   return new Date(d.toLocaleString('en-US', { timeZone: 'America/Mexico_City' }));
 }
-
 function classify(mxDate) {
   const mins = mxDate.getHours() * 60 + mxDate.getMinutes();
-  if (mins < 9 * 60 + 30)  return 'green';
-  if (mins <= 11 * 60)      return 'yellow';
+  if (mins < 9 * 60 + 30) return 'green';
+  if (mins <= 11 * 60)    return 'yellow';
   return 'red';
 }
-
 function fmtTime(mxDate) {
   return String(mxDate.getHours()).padStart(2,'0') + ':' + String(mxDate.getMinutes()).padStart(2,'0');
 }
-
-function setStatus(msg, type='') {
-  const el = $('statusBar');
-  el.textContent = msg;
-  el.className = 'status-bar' + (type ? ' ' + type : '');
+function dayKey(mxDate) {
+  return `${mxDate.getFullYear()}-${mxDate.getMonth()}-${mxDate.getDate()}`;
+}
+function setStatus(msg, type = '') {
+  $('statusBar').textContent = msg;
+  $('statusBar').className = 'status-bar' + (type ? ' ' + type : '');
 }
 
-/* ─────────────────────────────────────────
-   Supabase fetch helper
-───────────────────────────────────────── */
+/* ── Supabase helper ── */
 async function supa(path, params = '') {
   const res = await fetch(`${SUPABASE_URL}/rest/v1/${path}${params}`, {
-    headers: {
-      'apikey': SUPABASE_KEY,
-      'Authorization': `Bearer ${SUPABASE_KEY}`,
-    }
+    headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
   });
-  if (!res.ok) throw new Error(`Supabase error ${res.status}: ${await res.text()}`);
+  if (!res.ok) throw new Error(`Supabase ${res.status}: ${await res.text()}`);
   return res.json();
 }
 
-/* ─────────────────────────────────────────
-   Init: default period = mes actual
-───────────────────────────────────────── */
-function padM(n) { return String(n).padStart(2,'0'); }
-
+/* ── Init ── */
 function initPeriod() {
   const y = now.getFullYear();
-  const m = padM(now.getMonth() + 1);
+  const m = String(now.getMonth() + 1).padStart(2,'0');
   $('periodFrom').value = `${y}-${m}`;
   $('periodTo').value   = `${y}-${m}`;
 }
@@ -330,8 +241,7 @@ async function init() {
     sel.innerHTML = '<option value="">— Selecciona un empleado —</option>';
     employees.forEach(e => {
       const opt = document.createElement('option');
-      opt.value = e.id;
-      opt.textContent = e.name;
+      opt.value = e.id; opt.textContent = e.name;
       sel.appendChild(opt);
     });
     setStatus(`${employees.length} empleados cargados.`, 'ok');
@@ -340,13 +250,9 @@ async function init() {
   }
 }
 
-function onEmpChange() {
-  if ($('empSelect').value) loadData();
-}
+function onEmpChange() { if ($('empSelect').value) loadData(); }
 
-/* ─────────────────────────────────────────
-   Load attendance data for period
-───────────────────────────────────────── */
+/* ── Load data: trae checkins Y checkouts ── */
 async function loadData() {
   const empId = $('empSelect').value;
   if (!empId) { setStatus('Selecciona un empleado.', 'error'); return; }
@@ -357,44 +263,53 @@ async function loadData() {
 
   const [fy, fm] = fromVal.split('-').map(Number);
   const [ty, tm] = toVal.split('-').map(Number);
-  const dateFrom = new Date(fy, fm - 1, 1).toISOString();
-  const dateTo   = new Date(ty, tm, 0, 23, 59, 59).toISOString();  // last day of end month
 
-  if (new Date(dateFrom) > new Date(dateTo)) {
+  if (fy * 12 + fm > ty * 12 + tm) {
     setStatus('"Desde" no puede ser posterior a "Hasta".', 'error'); return;
   }
 
-  const empName = employees.find(e => e.id == empId)?.name || '';
+  const dateFrom = new Date(fy, fm - 1, 1).toISOString();
+  const dateTo   = new Date(ty, tm, 0, 23, 59, 59).toISOString();
+  const empName  = employees.find(e => e.id == empId)?.name || '';
+
   setStatus(`Cargando datos de ${empName}...`);
 
   try {
+    // Traemos AMBAS acciones en una sola query
     const rows = await supa(
       'kiosk_attendance',
-      `?select=action,timestamp&employee_id=eq.${empId}&action=eq.checkin&timestamp=gte.${dateFrom}&timestamp=lte.${dateTo}&order=timestamp.asc`
+      `?select=action,timestamp&employee_id=eq.${empId}&timestamp=gte.${dateFrom}&timestamp=lte.${dateTo}&order=timestamp.asc`
     );
 
-    allRecords = rows.map(r => {
-      const mx = toMx(r.timestamp);
-      return {
-        utc: r.timestamp,
-        mx,
-        cls: classify(mx),
-        timeStr: fmtTime(mx),
-        dayKey: `${mx.getFullYear()}-${mx.getMonth()}-${mx.getDate()}`
+    // Separar y procesar
+    const ins  = {};   // dayKey → primer checkin del día
+    const outs = {};   // dayKey → último checkout del día
+
+    rows.forEach(r => {
+      const mx  = toMx(r.timestamp);
+      const key = dayKey(mx);
+      if (r.action === 'checkin') {
+        if (!ins[key]) ins[key] = { mx, timeStr: fmtTime(mx), cls: classify(mx) };
+      } else if (r.action === 'checkout') {
+        outs[key] = { mx, timeStr: fmtTime(mx) };   // sobreescribe → queda el último
+      }
+    });
+
+    // Construir dayMap cruzado
+    dayMap = {};
+    const allKeys = new Set([...Object.keys(ins), ...Object.keys(outs)]);
+    allKeys.forEach(k => {
+      dayMap[k] = {
+        inRec:  ins[k]  || null,
+        outRec: outs[k] || null,
+        cls:    ins[k]  ? ins[k].cls : 'red'
       };
     });
 
-    // Deduplicate: keep first checkin per day
-    const seen = new Set();
-    allRecords = allRecords.filter(r => {
-      if (seen.has(r.dayKey)) return false;
-      seen.add(r.dayKey); return true;
-    });
-
     updateKPIs(fy, fm, ty, tm);
-    setStatus(`${allRecords.length} días con registro cargados — ${empName}.`, 'ok');
+    const totalIn = Object.keys(ins).length;
+    setStatus(`${totalIn} días con entrada cargados — ${empName}.`, 'ok');
 
-    // Show calendar at the "from" month by default
     calYear  = fy;
     calMonth = fm - 1;
     renderCalendar();
@@ -403,117 +318,126 @@ async function loadData() {
   }
 }
 
-/* ─────────────────────────────────────────
-   KPIs  (for the full period range)
-───────────────────────────────────────── */
+/* ── KPIs ── */
 function updateKPIs(fy, fm, ty, tm) {
-  // Count working days in range (Mon–Fri) as denominator for absence
+  const todayMx   = toMx(new Date().toISOString());
   let workDays = 0;
-  const iterDate = new Date(fy, fm - 1, 1);
-  const endDate  = new Date(ty, tm, 0);   // last day of end month
-  const todayMx  = toMx(new Date().toISOString());
-
-  while (iterDate <= endDate && iterDate <= todayMx) {
-    const dow = iterDate.getDay();
-    if (dow !== 0 && dow !== 6) workDays++;
-    iterDate.setDate(iterDate.getDate() + 1);
+  const iter = new Date(fy, fm - 1, 1);
+  const end  = new Date(ty, tm, 0);
+  while (iter <= end && iter <= todayMx) {
+    const d = iter.getDay();
+    if (d !== 0 && d !== 6) workDays++;
+    iter.setDate(iter.getDate() + 1);
   }
 
-  const g = allRecords.filter(r => r.cls === 'green').length;
-  const y = allRecords.filter(r => r.cls === 'yellow').length;
-  const r = allRecords.filter(r => r.cls === 'red').length;
-  const absences = workDays - allRecords.length;
-  const totalRed = r + Math.max(0, absences);
+  const entries = Object.values(dayMap).filter(d => d.inRec);
+  const g  = entries.filter(d => d.cls === 'green').length;
+  const y  = entries.filter(d => d.cls === 'yellow').length;
+  const r  = entries.filter(d => d.cls === 'red').length;
+  const absences = Math.max(0, workDays - entries.length);
   const pct = workDays > 0 ? Math.round((g / workDays) * 100) : 0;
 
-  $('kTotal').textContent  = allRecords.length;
+  $('kTotal').textContent  = entries.length;
   $('kGreen').textContent  = g;
   $('kYellow').textContent = y;
-  $('kRed').textContent    = totalRed;
+  $('kRed').textContent    = r + absences;
   $('kPct').textContent    = pct + '%';
 }
 
-/* ─────────────────────────────────────────
-   Calendar
-───────────────────────────────────────── */
-function changeCalMonth(delta) {
-  calMonth += delta;
+/* ── Calendar ── */
+function changeCalMonth(d) {
+  calMonth += d;
   if (calMonth > 11) { calMonth = 0; calYear++; }
   if (calMonth < 0)  { calMonth = 11; calYear--; }
   renderCalendar();
 }
 
 function renderCalendarShell() {
-  const header = $('calHeader');
-  header.innerHTML = '';
+  const h = $('calHeader');
+  h.innerHTML = '';
   DAYS_ES.forEach(d => {
     const div = document.createElement('div');
-    div.className = 'cal-dow';
-    div.textContent = d;
-    header.appendChild(div);
+    div.className = 'cal-dow'; div.textContent = d;
+    h.appendChild(div);
   });
-  $('calMonthLabel').textContent = `${MONTHS_ES[calMonth]} ${calYear}`;
 }
 
 function renderCalendar() {
   $('calMonthLabel').textContent = `${MONTHS_ES[calMonth]} ${calYear}`;
 
-  const todayMx   = toMx(new Date().toISOString());
-  const todayKey  = `${todayMx.getFullYear()}-${todayMx.getMonth()}-${todayMx.getDate()}`;
-  const firstDow  = new Date(calYear, calMonth, 1).getDay();
-  const daysInMon = new Date(calYear, calMonth + 1, 0).getDate();
-
-  // Build map for quick lookup
-  const dayMap = {};
-  allRecords.forEach(r => { dayMap[r.dayKey] = r; });
-
-  const grid = $('calGrid');
+  const todayMx  = toMx(new Date().toISOString());
+  const todayKey = dayKey(todayMx);
+  const firstDow = new Date(calYear, calMonth, 1).getDay();
+  const daysInM  = new Date(calYear, calMonth + 1, 0).getDate();
+  const grid     = $('calGrid');
   grid.innerHTML = '';
 
-  // Empty cells
   for (let i = 0; i < firstDow; i++) {
     const e = document.createElement('div');
     e.className = 'cal-day empty';
     grid.appendChild(e);
   }
 
-  for (let day = 1; day <= daysInMon; day++) {
+  for (let day = 1; day <= daysInM; day++) {
     const dayDate = new Date(calYear, calMonth, day);
     const dow     = dayDate.getDay();
     const isWknd  = dow === 0 || dow === 6;
-    const dayKey  = `${calYear}-${calMonth}-${day}`;
-    const isFuture = dayDate > todayMx && dayKey !== todayKey;
+    const key     = `${calYear}-${calMonth}-${day}`;
+    const isFuture = dayDate > todayMx && key !== todayKey;
 
     const cell = document.createElement('div');
     cell.className = 'cal-day';
-    if (isWknd)          cell.classList.add('weekend');
-    if (isFuture)        cell.classList.add('future');
-    if (dayKey === todayKey) cell.classList.add('today');
+    if (isWknd)        cell.classList.add('weekend');
+    if (isFuture)      cell.classList.add('future');
+    if (key === todayKey) cell.classList.add('today');
 
     const num = document.createElement('div');
-    num.className = 'day-num';
-    num.textContent = day;
+    num.className = 'day-num'; num.textContent = day;
     cell.appendChild(num);
 
     const tip = document.createElement('div');
     tip.className = 'tip';
 
-    const rec = dayMap[dayKey];
-    if (rec) {
+    const rec = dayMap[key];
+
+    if (rec && rec.inRec) {
       cell.classList.add(rec.cls);
-      const timeDiv = document.createElement('div');
-      timeDiv.className = 'day-time';
-      timeDiv.textContent = rec.timeStr;
-      cell.appendChild(timeDiv);
-      const labels = { green: 'Puntual', yellow: 'Tardanza leve', red: 'Tardanza severa' };
-      tip.innerHTML = `Entrada: ${rec.timeStr} MX<br>${labels[rec.cls]}`;
+
+      const timesDiv = document.createElement('div');
+      timesDiv.className = 'day-times';
+
+      // Entrada
+      const inDiv = document.createElement('div');
+      inDiv.className = 'day-time-in';
+      inDiv.innerHTML = `<span class="dot-in"></span>${rec.inRec.timeStr}`;
+      timesDiv.appendChild(inDiv);
+
+      // Salida
+      const outDiv = document.createElement('div');
+      outDiv.className = 'day-time-out';
+      if (rec.outRec) {
+        outDiv.innerHTML = `<span class="dot-out"></span>${rec.outRec.timeStr}`;
+      } else {
+        outDiv.innerHTML = `<span class="dot-out-missing"></span><span style="color:#d88080">—</span>`;
+      }
+      timesDiv.appendChild(outDiv);
+      cell.appendChild(timesDiv);
+
+      // Tooltip
+      const durStr = rec.outRec
+        ? calcDur(rec.inRec.mx, rec.outRec.mx)
+        : 'sin salida registrada';
+      tip.innerHTML =
+        `Entrada: <b>${rec.inRec.timeStr}</b> MX<br>` +
+        `Salida: <b>${rec.outRec ? rec.outRec.timeStr : '—'}</b> MX<br>` +
+        `${CLS_LABELS[rec.cls]}<br>` +
+        `<span style="color:#aaa;font-size:10px">${durStr}</span>`;
+
     } else if (!isWknd && !isFuture) {
       cell.classList.add('red');
       tip.textContent = 'Sin registro de entrada';
-    } else if (isWknd) {
-      tip.textContent = 'Fin de semana';
     } else {
-      tip.textContent = '—';
+      tip.textContent = isWknd ? 'Fin de semana' : '—';
     }
 
     cell.appendChild(tip);
@@ -521,55 +445,62 @@ function renderCalendar() {
   }
 }
 
-/* ─────────────────────────────────────────
-   Export CSV
-───────────────────────────────────────── */
-function exportCSV() {
-  const empName = employees.find(e => e.id == $('empSelect').value)?.name || 'empleado';
-  const from = $('periodFrom').value || '';
-  const to   = $('periodTo').value   || '';
+function calcDur(mxIn, mxOut) {
+  const diffMin = Math.round((mxOut - mxIn) / 60000);
+  if (diffMin < 0) return 'horario inconsistente';
+  const h = Math.floor(diffMin / 60);
+  const m = diffMin % 60;
+  return `${h}h ${m}m en sitio`;
+}
 
-  if (!allRecords.length) {
+/* ── Export CSV ── */
+function exportCSV() {
+  const empId   = $('empSelect').value;
+  const empName = employees.find(e => e.id == empId)?.name || 'empleado';
+  const from = $('periodFrom').value;
+  const to   = $('periodTo').value;
+
+  if (!Object.keys(dayMap).length) {
     setStatus('No hay datos para exportar.', 'error'); return;
   }
 
-  // Build day map for the full period
   const [fy, fm] = from.split('-').map(Number);
   const [ty, tm] = to.split('-').map(Number);
-  const dayMap = {};
-  allRecords.forEach(r => { dayMap[r.dayKey] = r; });
-
-  const rows = [['Fecha', 'Día', 'Hora entrada (MX)', 'Estado', 'Empleado']];
-  const iterDate = new Date(fy, fm - 1, 1);
-  const endDate  = new Date(ty, tm, 0);
   const todayMx  = toMx(new Date().toISOString());
-  const DAYS_FULL = ['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
-  const LABELS = { green: 'Puntual', yellow: 'Tardanza leve', red: 'Tardanza severa' };
 
-  while (iterDate <= endDate) {
-    const dow    = iterDate.getDay();
+  const rows = [['Fecha', 'Día', 'Hora entrada (MX)', 'Hora salida (MX)', 'Tiempo en sitio', 'Estado', 'Empleado']];
+
+  const iter = new Date(fy, fm - 1, 1);
+  const end  = new Date(ty, tm, 0);
+
+  while (iter <= end) {
+    const dow    = iter.getDay();
     const isWknd = dow === 0 || dow === 6;
     if (!isWknd) {
-      const dKey = `${iterDate.getFullYear()}-${iterDate.getMonth()}-${iterDate.getDate()}`;
-      const isFuture = iterDate > todayMx;
-      const rec = dayMap[dKey];
-      const fechaStr = `${String(iterDate.getDate()).padStart(2,'0')}/${String(iterDate.getMonth()+1).padStart(2,'0')}/${iterDate.getFullYear()}`;
-      if (rec) {
-        rows.push([fechaStr, DAYS_FULL[dow], rec.timeStr, LABELS[rec.cls], empName]);
-      } else if (!isFuture) {
-        rows.push([fechaStr, DAYS_FULL[dow], '—', 'Sin registro', empName]);
+      const key      = `${iter.getFullYear()}-${iter.getMonth()}-${iter.getDate()}`;
+      const isFuture = iter > todayMx;
+      if (!isFuture) {
+        const fechaStr = `${String(iter.getDate()).padStart(2,'0')}/${String(iter.getMonth()+1).padStart(2,'0')}/${iter.getFullYear()}`;
+        const rec = dayMap[key];
+        if (rec && rec.inRec) {
+          const outStr = rec.outRec ? rec.outRec.timeStr : '—';
+          const dur    = rec.outRec ? calcDur(rec.inRec.mx, rec.outRec.mx) : '—';
+          rows.push([fechaStr, DAYS_FULL[dow], rec.inRec.timeStr, outStr, dur, CLS_LABELS[rec.cls], empName]);
+        } else {
+          rows.push([fechaStr, DAYS_FULL[dow], '—', '—', '—', 'Sin registro', empName]);
+        }
       }
     }
-    iterDate.setDate(iterDate.getDate() + 1);
+    iter.setDate(iter.getDate() + 1);
   }
 
-  const csv = rows.map(r => r.map(v => `"${v}"`).join(',')).join('\n');
+  const csv  = rows.map(r => r.map(v => `"${v}"`).join(',')).join('\n');
   const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href     = URL.createObjectURL(blob);
   a.download = `asistencia_${empName.replace(/\s+/g,'_')}_${from}_${to}.csv`;
   a.click();
-  setStatus('CSV exportado correctamente.', 'ok');
+  setStatus('CSV exportado.', 'ok');
 }
 
 /* ── Kick off ── */
