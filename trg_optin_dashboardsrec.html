@@ -396,6 +396,26 @@
     <div id="rp-prod-body"><div class="loading-row"><span class="spinner"></span>Cargando...</div></div>
   </div>
 
+  <div class="section-label" style="margin-top:1.5rem">pendientes — cola de envío</div>
+  <div class="metrics-grid" style="margin-bottom:1.25rem">
+    <div class="metric">
+      <div class="metric-label">Opt-ins pendientes</div>
+      <div class="metric-value" id="p-optins" style="color:var(--blue)">—</div>
+      <div class="metric-sub">sin enviar aún</div>
+    </div>
+    <div class="metric">
+      <div class="metric-label">Recordatorios pendientes</div>
+      <div class="metric-value" id="p-recs" style="color:var(--purple)">—</div>
+      <div class="metric-sub">del mes actual</div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-title">pendientes por recordatorio — con % sí histórico</div>
+    <div id="rec-pend-cards" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px">
+      <div class="loading-row"><span class="spinner"></span>Cargando...</div>
+    </div>
+  </div>  
+
   <div class="card">
     <div class="card-title">opt-ins por producto</div>
     <div id="prod-body">
@@ -739,7 +759,8 @@ function cambiarMes(delta) {
 }
 
 initFechas();
-cargarProductos().then(() => cargarDatos());
+// cargarProductos().then(() => cargarDatos());
+cargarProductos().then(() => { cargarDatos(); cargarPendientes(); });
 async function cargarRevenuePeriodo(desde, hasta, prod) {
   try {
     let url = `${SUPABASE_URL}/rest/v1/reporte_recompras?select=*&limit=1000&business_unit=eq.${BU}`;
@@ -897,6 +918,61 @@ function renderRevenue(data) {
         </tr>`;
       }).join('')}</tbody>
     </table>`;
+}
+
+async function cargarPendientes() {
+  const hoy = new Date();
+  const mesInicio = `${hoy.getFullYear()}-${String(hoy.getMonth()+1).padStart(2,'0')}-01`;
+  const mesFin   = `${hoy.getFullYear()}-${String(hoy.getMonth()+1).padStart(2,'0')}-31`;
+
+  const [rOptins, rRecs, rHist] = await Promise.all([
+    fetch(`${SUPABASE_URL}/rest/v1/notificaciones_programadas?select=id&limit=5000&business_unit=eq.${BU}&tipo=eq.opt_in&enviado_at=is.null&activo=eq.true`,
+      { headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` } }),
+    fetch(`${SUPABASE_URL}/rest/v1/notificaciones_programadas?select=numero_recordatorio&limit=5000&business_unit=eq.${BU}&tipo=eq.recordatorio&enviado_at=is.null&activo=eq.true&fecha_envio=gte.${mesInicio}&fecha_envio=lte.${mesFin}T23:59:59`,
+      { headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` } }),
+    fetch(`${SUPABASE_URL}/rest/v1/notificaciones_programadas?select=numero_recordatorio,respondio_si&limit=5000&business_unit=eq.${BU}&tipo=eq.recordatorio&enviado_at=not.is.null`,
+      { headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` } })
+  ]);
+
+  const optins   = await rOptins.json();
+  const recs     = await rRecs.json();
+  const historico = await rHist.json();
+
+  $('p-optins').textContent = optins.length;
+  $('p-recs').textContent   = recs.length;
+
+  const pendByNum = {}, histByNum = {};
+  recs.forEach(r => { const n = r.numero_recordatorio||1; pendByNum[n] = (pendByNum[n]||0)+1; });
+  historico.forEach(r => {
+    const n = r.numero_recordatorio||1;
+    if (!histByNum[n]) histByNum[n] = { total:0, si:0 };
+    histByNum[n].total++;
+    if (r.respondio_si === true) histByNum[n].si++;
+  });
+
+  const nums = [...new Set([...Object.keys(pendByNum),...Object.keys(histByNum)])].map(Number).sort();
+  if (!nums.length) { $('rec-pend-cards').innerHTML = '<div class="empty-row">Sin pendientes este mes</div>'; return; }
+
+  $('rec-pend-cards').innerHTML = nums.map(n => {
+    const pend = pendByNum[n]||0;
+    const hist = histByNum[n]||{ total:0, si:0 };
+    const pct  = hist.total > 0 ? Math.round(hist.si/hist.total*100) : null;
+    return `<div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1rem 1.1rem">
+      <span style="background:var(--purple-bg);color:var(--purple);font-size:11px;font-weight:600;padding:2px 8px;border-radius:20px">Recordatorio #${n}</span>
+      <div style="font-size:28px;font-weight:600;margin:8px 0 2px">${pend}</div>
+      <div style="font-size:11px;color:var(--hint);margin-bottom:8px">pendientes este mes</div>
+      <div style="font-size:11px;color:var(--muted);margin-bottom:4px">% sí histórico <span style="color:var(--hint)">(${hist.si}/${hist.total})</span></div>
+      ${pct!==null
+        ? `<div style="display:flex;align-items:center;gap:8px">
+             <div style="flex:1;height:5px;background:var(--surface2);border-radius:3px">
+               <div style="width:${pct}%;height:5px;border-radius:3px;background:var(--green)"></div>
+             </div>
+             <span style="font-size:12px;font-weight:500;color:var(--green);min-width:32px;text-align:right">${pct}%</span>
+           </div>`
+        : `<span style="font-size:11px;color:var(--hint)">Sin historial aún</span>`
+      }
+    </div>`;
+  }).join('');
 }
 
 </script>
