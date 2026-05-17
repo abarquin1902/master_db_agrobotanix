@@ -926,13 +926,25 @@ async function cargarPendientes() {
   const mesFin   = `${hoy.getFullYear()}-${String(hoy.getMonth()+1).padStart(2,'0')}-31`;
 
   const [rOptins, rRecs, rHist] = await Promise.all([
-    fetch(`${SUPABASE_URL}/rest/v1/notificaciones_programadas?select=id&limit=5000&business_unit=eq.${BU}&tipo=eq.opt_in&enviado_at=is.null&activo=eq.true`,
-      { headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` } }),
-    fetch(`${SUPABASE_URL}/rest/v1/notificaciones_programadas?select=numero_recordatorio&limit=5000&business_unit=eq.${BU}&tipo=eq.recordatorio&enviado_at=is.null&activo=eq.true&fecha_envio=gte.${mesInicio}&fecha_envio=lte.${mesFin}T23:59:59`,
-      { headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` } }),
-    fetch(`${SUPABASE_URL}/rest/v1/notificaciones_programadas?select=numero_recordatorio,respondio_si&limit=5000&business_unit=eq.${BU}&tipo=eq.recordatorio&enviado_at=not.is.null`,
-      { headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` } })
-  ]);
+  fetch(
+    `${SUPABASE_URL}/rest/v1/notificaciones_programadas?select=id&limit=5000` +
+    `&business_unit=eq.${BU}&tipo=eq.opt_in&enviado_at=is.null&activo=eq.true`,
+    { headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` } }
+  ),
+  fetch(
+    `${SUPABASE_URL}/rest/v1/notificaciones_programadas?select=numero_recordatorio&limit=5000` +
+    `&business_unit=eq.${BU}&tipo=eq.recordatorio&enviado_at=is.null&activo=eq.true` +
+    `&numero_recordatorio=lte.3` +
+    `&fecha_envio=gte.${mesInicio}&fecha_envio=lte.${mesFin}T23:59:59`,
+    { headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` } }
+  ),
+  fetch(
+    `${SUPABASE_URL}/rest/v1/notificaciones_programadas?select=numero_recordatorio,respondio_si&limit=5000` +
+    `&business_unit=eq.${BU}&tipo=eq.recordatorio&numero_recordatorio=lte.3` +
+    `&enviado_at=gte.${mesInicio}&enviado_at=lte.${mesFin}T23:59:59`,
+    { headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` } }
+  )
+]);
 
   const optins   = await rOptins.json();
   const recs     = await rRecs.json();
