@@ -622,7 +622,11 @@ function renderProductos() {
 function renderLinea() {
   const counts = {};
   allOpts.filter(d => d.enviado_at).forEach(d => {
-    const f = d.enviado_at.slice(0,10);
+    // const f = d.enviado_at.slice(0,10);
+    // DESPUÉS — convierte a CDMX antes de sacar la fecha
+    const f = new Date(d.enviado_at)
+      .toLocaleDateString('en-CA', { timeZone: 'America/Mexico_City' });
+    // en-CA devuelve formato YYYY-MM-DD directamente, y al usar la zona horaria de CDMX evitamos problemas con envíos que caen justo en medianoche UTC
     counts[f] = (counts[f]||0) + 1;
   });
   const labels = Object.keys(counts).sort();
@@ -684,7 +688,11 @@ function renderCalendario() {
 
   const byOpt = {}, byRec = {};
   allOpts.filter(d => d.enviado_at).forEach(d => {
-    const f = d.enviado_at.slice(0,10);
+    // const f = d.enviado_at.slice(0,10);
+    // DESPUÉS — convierte a CDMX antes de sacar la fecha
+    const f = new Date(d.enviado_at)
+      .toLocaleDateString('en-CA', { timeZone: 'America/Mexico_City' });
+    // en-CA devuelve formato YYYY-MM-DD directamente
     const fd = new Date(f + 'T12:00:00');
     if (fd.getFullYear()===y && fd.getMonth()===m) {
       if (!byOpt[f]) byOpt[f] = { total:0, si:0, no:0 };
@@ -694,13 +702,17 @@ function renderCalendario() {
     }
   });
   allRecs.filter(d => d.enviado_at).forEach(d => {
-    const f = d.enviado_at.slice(0,10);
+    // const f = d.enviado_at.slice(0,10);
+      const f = new Date(d.enviado_at)
+        .toLocaleDateString('en-CA', { timeZone: 'America/Mexico_City' });
+    // en-CA devuelve formato YYYY-MM-DD directamente
     const fd = new Date(f + 'T12:00:00');
     if (fd.getFullYear()===y && fd.getMonth()===m)
       byRec[f] = (byRec[f]||0) + 1;
   });
 
-  const hoy = fmtDate(new Date());
+  // const hoy = fmtDate(new Date());
+  const hoy = new Date().toLocaleDateString('en-CA', { timeZone: 'America/Mexico_City' });
   const ultimoDia = new Date(y, m+1, 0).getDate();
   const offsetLunes = (new Date(y,m,1).getDay() + 6) % 7;
 
