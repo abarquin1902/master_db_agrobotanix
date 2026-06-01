@@ -164,7 +164,9 @@ SERVICES_META = {
     },
     "generador_anuncios_agrobotanix": {
         "desc": "Generador automático de anuncios de imágenes en bulk para Agrobotanix",
-        "category": "agentes", "repo": "gen_anuncios_agro"
+        "category": "agentes",
+        "repo": "master_db_agrobotanix, gen_anuncios_agro",
+        "link": "https://master-db-agrobotanix.onrender.com/"
     },
     "project-manager-nfg": {
         "desc": "Project manager interno — gestión de tareas con alertas automáticas a 3 días y 1 día de vencimiento vía Zoho Cliq",
@@ -388,6 +390,7 @@ h1{{font-size:20px;font-weight:500;margin-bottom:4px;}}
     <div class="consumer">Tablero Recordatorios<a href="https://abarquin1902.github.io/master_db_agrobotanix/trg_optin_dashboardsrec.html" target="_blank">↗ Ver</a></div>
     <div class="consumer">Tablero Actividades DS<a href="https://ai-ds-activities.onrender.com/" target="_blank">↗ Ver</a></div>
     <div class="consumer">External Check-in<a href="https://abarquin1902.github.io/master_db_agrobotanix/external-check-in-dashboard.html" target="_blank">↗ Tablero</a><a href="https://external-checkin-nfg.onrender.com/" target="_blank">↗ App</a></div>
+    <div class="consumer">Generador de Anuncios Agro<a href="https://master-db-agrobotanix.onrender.com/" target="_blank">↗ Ver</a></div>
     <div class="consumer">Mapa Agrobotanix<a href="https://agrobotanix.com/pages/dashboard-agrobotanix" target="_blank">↗ Ver</a></div>
   </div>
 </div>
