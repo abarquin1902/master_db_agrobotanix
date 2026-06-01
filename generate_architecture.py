@@ -382,7 +382,8 @@ h1{{font-size:20px;font-weight:500;margin-bottom:4px;}}
 <div class="section">
   <div class="section-title">Dashboards & salidas de negocio</div>
   <div class="consumer-row">
-    <div class="consumer">Zoho Analytics<a href="https://analytics.zoho.com" target="_blank">↗ Abrir</a></div>
+    <div class="consumer">Zoho Analytics — Ventas NFG<a href="https://analytics.zoho.com/open-view/3181513000002195430" target="_blank">↗ Dashboard</a></div>
+    <div class="consumer">Zoho People — Asistencia<a href="https://analytics.zoho.com/open-view/3181513000002262199" target="_blank">↗ Dashboard</a></div>
     <div class="consumer">Tablero Sustentabilidad<a href="https://abarquin1902.github.io/master_db_agrobotanix/trg_sustentabilidad.html" target="_blank">↗ Ver</a></div>
     <div class="consumer">Tablero Recordatorios<a href="https://abarquin1902.github.io/master_db_agrobotanix/trg_optin_dashboardsrec.html" target="_blank">↗ Ver</a></div>
     <div class="consumer">Tablero Actividades DS<a href="https://ai-ds-activities.onrender.com/" target="_blank">↗ Ver</a></div>
