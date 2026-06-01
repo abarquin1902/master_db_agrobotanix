@@ -285,10 +285,10 @@ def build_html(services_raw, crons, table_counts):
         views_html  = "".join(f'<span class="tbl tbl-view">{v}</span>' for v in proj["views"])
         key = proj["key"]
         tc = table_counts.get(key, {})
-        live = f' <span class="live-count">({tc.get("tables",0)} tablas · {tc.get("views",0)} vistas en vivo)</span>' if tc else ""
+        # live = f' <span class="live-count">({tc.get("tables",0)} tablas · {tc.get("views",0)} vistas en vivo)</span>' if tc else ""
         return f'''
       <div class="db-proj">
-        <div class="db-proj-name">{proj_name}{live}</div>
+        <div class="db-proj-name">{proj_name}</div>
         <div class="db-tables">{tables_html}{views_html}</div>
       </div>'''
 
