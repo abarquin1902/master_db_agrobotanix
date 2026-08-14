@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title> Etapa 1: Ingesta de datos - NFG (Boceto)  </title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --ivory:#FAF9F5;
+  --paper:#FFFFFF;
+  --ink:#14171A;
+  --ink-soft:#4A5056;
+  --ink-faint:#8A9198;
+  --line:#E6E3DA;
+  --green-deep:#0B4F3C;
+  --green-mid:#146B4F;
+  --green-light:#D7F0E1;
+  --amber-human:#B9800F;
+  --amber-human-bg:#FBF1DA;
+  --radius:16px;
+  --radius-sm:10px;
+  --shadow-sm:0 10px 26px -16px rgba(15,20,20,0.22);
+  --ease:cubic-bezier(.22,.61,.36,1);
+}
+html,body{height:100%;}
+body{
+  background:var(--ivory);
+  color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Roboto,Helvetica,Arial,sans-serif;
+  -webkit-font-smoothing:antialiased;
+}
+.wrap{max-width:720px;margin:0 auto;padding:40px 24px 80px;}
+
+.badge{
+  display:inline-flex;align-items:center;gap:.5rem;
+  background:var(--amber-human-bg);color:var(--amber-human);
+  border-radius:999px;padding:.4rem .9rem;font-size:.78rem;font-weight:700;
+  margin-bottom:1.4rem;
+}
+.badge svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2;}
+
+.kicker{
+  text-transform:uppercase;letter-spacing:.12em;font-size:.72rem;font-weight:700;
+  color:var(--green-deep);margin-bottom:.6rem;
+}
+h1{font-size:clamp(1.6rem,3.2vw,2.1rem);font-weight:750;letter-spacing:-0.01em;margin-bottom:.5rem;}
+.sub{color:var(--ink-soft);font-size:.98rem;line-height:1.55;max-width:56ch;margin-bottom:2.2rem;}
+
+.card{
+  background:var(--paper);border:1px solid var(--line);border-radius:var(--radius);
+  padding:1.6rem 1.7rem;box-shadow:var(--shadow-sm);margin-bottom:1.4rem;
+}
+.field-label{font-size:.82rem;font-weight:700;color:var(--ink);margin-bottom:.5rem;display:block;}
+.text-input{
+  width:100%;padding:.85rem 1rem;border:1.5px solid var(--line);border-radius:var(--radius-sm);
+  font-size:.95rem;color:var(--ink);font-family:inherit;
+}
+.select-wrap{position:relative;}
+select{
+  width:100%;padding:.85rem 1rem;border:1.5px solid var(--line);border-radius:var(--radius-sm);
+  font-size:1rem;font-weight:650;color:var(--green-deep);background:var(--paper);
+  appearance:none;cursor:pointer;
+}
+select:focus{outline:2px solid var(--green-mid);outline-offset:1px;}
+.select-wrap::after{
+  content:"";position:absolute;right:1rem;top:50%;transform:translateY(-65%);
+  width:8px;height:8px;border-right:2px solid var(--ink-soft);border-bottom:2px solid var(--ink-soft);
+  transform-origin:center;rotate:45deg;pointer-events:none;
+}
+
+.form-header{
+  display:flex;align-items:center;justify-content:space-between;margin-bottom:1.2rem;
+}
+.form-header .tag{
+  font-size:.72rem;font-weight:700;color:var(--green-deep);background:var(--green-light);
+  padding:.3rem .7rem;border-radius:999px;
+}
+.variable-row{padding:1rem 0;border-bottom:1px solid var(--line);}
+.variable-row:last-child{border-bottom:none;}
+.variable-row label{display:block;font-size:.9rem;font-weight:650;color:var(--ink);margin-bottom:.6rem;}
+.variable-row .hint{font-size:.76rem;color:var(--ink-faint);font-weight:400;margin-left:.4rem;}
+
+.num-input{display:flex;align-items:center;gap:.6rem;}
+.num-input input[type=number]{
+  width:120px;padding:.6rem .8rem;border:1.5px solid var(--line);border-radius:var(--radius-sm);
+  font-size:.95rem;color:var(--ink);
+}
+.num-input .unit{font-size:.85rem;color:var(--ink-soft);font-weight:600;}
+
+.range-row{display:flex;align-items:center;gap:.9rem;}
+input[type=range]{flex:1;accent-color:var(--green-deep);}
+.range-value{
+  min-width:34px;text-align:center;font-weight:700;color:var(--green-deep);
+  background:var(--green-light);border-radius:999px;padding:.2rem .5rem;font-size:.85rem;
+}
+
+.toggle-row{display:flex;gap:.6rem;}
+.toggle-btn{
+  padding:.5rem 1.1rem;border:1.5px solid var(--line);border-radius:999px;
+  background:var(--paper);font-size:.85rem;font-weight:650;color:var(--ink-soft);cursor:pointer;
+  transition:all .15s var(--ease);
+}
+.toggle-btn.active{background:var(--green-deep);border-color:var(--green-deep);color:#fff;}
+
+.chip-row{display:flex;gap:.5rem;flex-wrap:wrap;}
+.chip-btn{
+  padding:.5rem 1rem;border:1.5px solid var(--line);border-radius:999px;
+  background:var(--paper);font-size:.83rem;font-weight:650;color:var(--ink-soft);cursor:pointer;
+  transition:all .15s var(--ease);
+}
+.chip-btn.active{background:var(--green-deep);border-color:var(--green-deep);color:#fff;}
+
+.save-btn{
+  width:100%;padding:1rem;border:none;border-radius:var(--radius-sm);
+  background:var(--green-deep);color:#fff;font-size:1rem;font-weight:700;cursor:pointer;
+  transition:background .15s var(--ease);
+}
+.save-btn:hover{background:var(--green-mid);}
+
+.toast{
+  position:fixed;bottom:28px;left:50%;transform:translateX(-50%) translateY(20px);
+  background:var(--ink);color:#fff;padding:.9rem 1.4rem;border-radius:var(--radius-sm);
+  font-size:.9rem;font-weight:650;opacity:0;pointer-events:none;
+  transition:opacity .3s var(--ease),transform .3s var(--ease);
+  box-shadow:0 20px 50px -20px rgba(0,0,0,.4);
+}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+
+.foot-note{font-size:.78rem;color:var(--ink-faint);text-align:center;margin-top:1.6rem;line-height:1.6;}
+
+.choice-row{display:grid;grid-template-columns:1fr 1fr;gap:1rem;}
+.choice-card{
+  background:var(--paper);border:1.5px solid var(--line);border-radius:var(--radius);
+  padding:1.6rem 1.4rem;cursor:pointer;text-align:left;transition:all .15s var(--ease);
+}
+.choice-card:hover{border-color:var(--green-deep);box-shadow:var(--shadow-sm);}
+.choice-card h3{font-size:1rem;font-weight:750;margin-bottom:.4rem;color:var(--ink);}
+.choice-card p{font-size:.83rem;color:var(--ink-soft);line-height:1.4;}
+
+.cultivo-item{
+  display:flex;justify-content:space-between;align-items:center;
+  padding:1rem 0;border-bottom:1px solid var(--line);cursor:pointer;
+}
+.cultivo-item:last-child{border-bottom:none;}
+.cultivo-item:hover .cultivo-item-title{color:var(--green-mid);}
+.cultivo-item-title{font-size:.95rem;font-weight:650;color:var(--ink);transition:color .15s var(--ease);}
+.cultivo-item-sub{font-size:.78rem;color:var(--ink-faint);margin-top:.2rem;}
+.cultivo-item-arrow{color:var(--ink-faint);font-size:1.1rem;}
+
+.back-link{
+  font-size:.83rem;color:var(--green-deep);font-weight:650;cursor:pointer;
+  display:inline-flex;align-items:center;gap:.3rem;margin-bottom:1rem;
+}
+.back-link:hover{text-decoration:underline;}
+
+.historial-item{display:flex;gap:.9rem;padding:.8rem 0;border-bottom:1px solid var(--line);}
+.historial-item:last-child{border-bottom:none;}
+.historial-dot{width:8px;height:8px;border-radius:50%;background:var(--green-deep);margin-top:.4rem;flex-shrink:0;}
+.historial-fecha{font-size:.78rem;color:var(--ink-faint);font-weight:650;}
+.historial-resumen{font-size:.88rem;color:var(--ink);margin-top:.15rem;}
+
+.view{display:none;}
+.view.active{display:block;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="badge">
+    <svg viewBox="0 0 24 24"><path d="M12 9v4M12 17h.01M10.3 3.9L2.7 17a2 2 0 001.7 3h15.2a2 2 0 001.7-3L13.7 3.9a2 2 0 00-3.4 0z"/></svg>
+    Boceto ilustrativo — no es el front final (Mes 2)
+  </div>
+
+  <div class="kicker">Agrobotanix · Registro de observación</div>
+  <h1>Registrar observación</h1>
+  <p class="sub">Sirve tanto para reportes de campo como para avances de pruebas en laboratorio. Cada observación se guarda con fecha, ligada al cultivo específico — así se arma la línea de tiempo completa de cada experimento.</p>
+
+  <div class="view active" id="view-start">
+    <div class="choice-row">
+      <div class="choice-card" onclick="goTo('existing-list')">
+        <h3>Cultivo existente</h3>
+        <p>Agregar una nueva observación a un cultivo que ya tiene historial — por ejemplo, la segunda etapa de un experimento.</p>
+      </div>
+      <div class="choice-card" onclick="goTo('new-form')">
+        <h3>Cultivo nuevo</h3>
+        <p>Registrar un cultivo o experimento que todavía no existe en el sistema.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="view" id="view-existing-list">
+    <span class="back-link" onclick="goTo('start')">&larr; Volver</span>
+    <div class="card">
+      <span class="field-label">Selecciona el cultivo</span>
+      <div id="cultivoListContainer"></div>
+    </div>
+  </div>
+
+  <div class="view" id="view-existing-historial">
+    <span class="back-link" onclick="goTo('existing-list')">&larr; Volver a la lista</span>
+    <div class="card">
+      <div class="form-header">
+        <strong id="historialTitulo" style="font-size:1.05rem;"></strong>
+        <span class="tag" id="historialTipo"></span>
+      </div>
+      <div id="historialContainer"></div>
+    </div>
+    <button class="save-btn" id="agregarObsBtn">Agregar nueva observación</button>
+  </div>
+
+  <div class="view" id="view-new-form">
+    <span class="back-link" onclick="goTo('start')">&larr; Volver</span>
+    <div class="card">
+      <span class="field-label">Título</span>
+      <input type="text" class="text-input" id="nuevoTitulo" placeholder='Ej. "Finca cafetalera Jiménez" o "Experimento de campo 3 — Chiapas"'>
+    </div>
+    <div class="card">
+      <span class="field-label">Ubicación (coordenadas)</span>
+      <input type="text" class="text-input" id="nuevaUbicacion" placeholder="Ej. 16.7569, -93.1292">
+    </div>
+    <div class="card">
+      <span class="field-label">Hectáreas</span>
+      <input type="number" class="text-input" id="nuevasHectareas" placeholder="0" style="max-width:160px;">
+    </div>
+    <div class="card">
+      <span class="field-label">Cultivo específico</span>
+      <div class="select-wrap">
+        <select id="nuevoCultivoTipo"></select>
+      </div>
+    </div>
+    <button class="save-btn" id="crearBtn">Crear y continuar</button>
+  </div>
+
+  <div class="view" id="view-observacion">
+    <span class="back-link" id="obsBackLink">&larr; Volver</span>
+
+    <div class="card">
+      <span class="field-label">Reportado por</span>
+      <input type="text" class="text-input" id="reportadoPor" placeholder="Nombre de quien reporta (campo o laboratorio)">
+    </div>
+
+    <div class="card">
+      <div class="form-header">
+        <strong id="cultivoTitulo" style="font-size:1.05rem;"></strong>
+        <span class="tag" id="cultivoCount"></span>
+      </div>
+      <div id="variablesContainer"></div>
+    </div>
+
+    <div class="card">
+      <span class="field-label">Observaciones generales</span>
+      <textarea id="observacionesGenerales" rows="3" class="text-input" placeholder="Cualquier cosa que no encaje en las variables de arriba..." style="resize:vertical;"></textarea>
+    </div>
+
+    <button class="save-btn" id="saveBtn">Guardar reporte</button>
+    <p class="foot-note">Al guardar, esto quedaría en registro_seguimiento_agro y valor_variable_cultivo — aquí solo se simula, sin conexión real a base de datos.</p>
+  </div>
+
+</div>
+
+<div class="toast" id="toast">Reporte guardado (simulado) — así quedaría en las tablas de Agro</div>
+
+<script>
+const DATA = {
+  cafe: {
+    nombre: "Café",
+    variables: [
+      { nombre: "Vigor de planta", tipo: "escala", unidad: "0–5" },
+      { nombre: "Número de hojas", tipo: "numerico", unidad: "conteo/rama" },
+      { nombre: "Defoliación", tipo: "porcentaje" },
+      { nombre: "Incidencia de roya", tipo: "porcentaje" },
+      { nombre: "Severidad de roya", tipo: "escala", unidad: "0–5" },
+      { nombre: "Brotes nuevos", tipo: "numerico", unidad: "conteo" },
+      { nombre: "Floración", tipo: "porcentaje" },
+      { nombre: "Frutos por rama", tipo: "numerico", unidad: "conteo" },
+      { nombre: "Fruto sano", tipo: "porcentaje" },
+      { nombre: "Rendimiento", tipo: "numerico", unidad: "kg/ha" }
+    ]
+  },
+  maiz: {
+    nombre: "Maíz",
+    variables: [
+      { nombre: "Días después de siembra", tipo: "numerico", unidad: "DDS" },
+      { nombre: "Altura de planta", tipo: "numerico", unidad: "cm" },
+      { nombre: "Número de hojas", tipo: "numerico", unidad: "conteo" },
+      { nombre: "Diámetro de tallo", tipo: "numerico", unidad: "mm" },
+      { nombre: "Coloración foliar", tipo: "escala", unidad: "0–5" },
+      { nombre: "Incidencia de enfermedades foliares", tipo: "porcentaje" },
+      { nombre: "Severidad de enfermedades", tipo: "escala", unidad: "0–5" },
+      { nombre: "Daño por gusano cogollero", tipo: "porcentaje" },
+      { nombre: "Número de mazorcas", tipo: "numerico", unidad: "conteo/planta" },
+      { nombre: "Tamaño de mazorca", tipo: "numerico", unidad: "cm" },
+      { nombre: "Peso de mazorca", tipo: "numerico", unidad: "g" },
+      { nombre: "Grano por mazorca", tipo: "numerico", unidad: "estimado" },
+      { nombre: "Rendimiento final", tipo: "numerico", unidad: "t/ha" }
+    ]
+  },
+  fresa: {
+    nombre: "Fresa (Berries)",
+    variables: [
+      { nombre: "Etapa fenológica", tipo: "categorico", opciones: ["Trasplante", "Floración", "Fruto", "Cosecha"] },
+      { nombre: "Incidencia de Botrytis", tipo: "porcentaje" },
+      { nombre: "Severidad de Botrytis", tipo: "porcentaje" },
+      { nombre: "Presencia de cenicilla", tipo: "porcentaje" },
+      { nombre: "Mildiu en zarzamora", tipo: "porcentaje" },
+      { nombre: "Antracnosis", tipo: "porcentaje" },
+      { nombre: "Pudrición de corona", tipo: "porcentaje" },
+      { nombre: "Pudrición raíz/cuello", tipo: "escala", unidad: "0–5" },
+      { nombre: "Marchitez", tipo: "porcentaje" },
+      { nombre: "Agalla de la corona", tipo: "porcentaje" },
+      { nombre: "Número de flores", tipo: "numerico", unidad: "conteo/planta" },
+      { nombre: "Número de frutos", tipo: "numerico", unidad: "conteo/planta" },
+      { nombre: "Fruto comercial", tipo: "porcentaje" },
+      { nombre: "Fruto descartado", tipo: "porcentaje" },
+      { nombre: "Peso promedio de fruto", tipo: "numerico", unidad: "g" },
+      { nombre: "Firmeza", tipo: "categorico", opciones: ["Baja", "Media", "Alta"] },
+      { nombre: "°Brix", tipo: "numerico", unidad: "°Brix" },
+      { nombre: "Vida de anaquel", tipo: "numerico", unidad: "días" },
+      { nombre: "Vigor de cañas o coronas", tipo: "escala", unidad: "0–5" }
+    ]
+  },
+  citricos: {
+    nombre: "Cítricos",
+    variables: [
+      { nombre: "Vigor del árbol", tipo: "escala", unidad: "0–5" },
+      { nombre: "Coloración foliar", tipo: "categorico", opciones: ["Verde", "Clorosis", "Moteado"] },
+      { nombre: "Brotes nuevos", tipo: "categorico", opciones: ["Bajo", "Medio", "Alto"] },
+      { nombre: "Incidencia de HLB", tipo: "porcentaje" },
+      { nombre: "PCR/qPCR HLB", tipo: "categorico", opciones: ["Positivo", "Negativo", "No aplica"] },
+      { nombre: "Presencia de CTV u otros virus", tipo: "booleano" },
+      { nombre: "Defoliación", tipo: "porcentaje" },
+      { nombre: "Floración", tipo: "porcentaje" },
+      { nombre: "Frutos por árbol", tipo: "numerico", unidad: "conteo" },
+      { nombre: "Tamaño de fruto", tipo: "numerico", unidad: "mm" },
+      { nombre: "Caída de fruto", tipo: "porcentaje" },
+      { nombre: "Rendimiento", tipo: "numerico", unidad: "t/ha" }
+    ]
+  }
+};
+
+let CULTIVOS_EXISTENTES = [
+  {
+    id: 1,
+    titulo: "Finca cafetalera Jiménez",
+    tipo: "cafe",
+    historial: [
+      { fecha: "02 may 2026", resumen: "Primera observación — vigor bajo, sin enfermedad detectada" },
+      { fecha: "14 jun 2026", resumen: "Segunda observación — incidencia de roya detectada, inicia fase preventiva" }
+    ]
+  },
+  {
+    id: 2,
+    titulo: "Experimento de campo 3 — Chiapas",
+    tipo: "citricos",
+    historial: [
+      { fecha: "01 jul 2026", resumen: "Primera observación — sospecha de HLB, pendiente confirmación PCR" }
+    ]
+  }
+];
+
+let currentCultivoId = null;
+
+const views = ['start', 'existing-list', 'existing-historial', 'new-form', 'observacion'];
+function goTo(name) {
+  views.forEach(v => document.getElementById('view-' + v).classList.remove('active'));
+  document.getElementById('view-' + name).classList.add('active');
+}
+
+const nuevoCultivoTipoSelect = document.getElementById('nuevoCultivoTipo');
+Object.keys(DATA).forEach(key => {
+  const opt = document.createElement('option');
+  opt.value = key;
+  opt.textContent = DATA[key].nombre;
+  nuevoCultivoTipoSelect.appendChild(opt);
+});
+
+function renderCultivoList() {
+  const listContainer = document.getElementById('cultivoListContainer');
+  listContainer.innerHTML = '';
+  CULTIVOS_EXISTENTES.forEach(c => {
+    const item = document.createElement('div');
+    item.className = 'cultivo-item';
+    item.innerHTML = `
+      <div>
+        <div class="cultivo-item-title">${c.titulo}</div>
+        <div class="cultivo-item-sub">${DATA[c.tipo].nombre} · ${c.historial.length} observación(es) registrada(s)</div>
+      </div>
+      <div class="cultivo-item-arrow">&rsaquo;</div>
+    `;
+    item.addEventListener('click', () => openHistorial(c.id));
+    listContainer.appendChild(item);
+  });
+}
+renderCultivoList();
+
+function openHistorial(id) {
+  currentCultivoId = id;
+  const c = CULTIVOS_EXISTENTES.find(x => x.id === id);
+  document.getElementById('historialTitulo').textContent = c.titulo;
+  document.getElementById('historialTipo').textContent = DATA[c.tipo].nombre;
+  const hc = document.getElementById('historialContainer');
+  hc.innerHTML = '';
+  c.historial.slice().reverse().forEach(h => {
+    const row = document.createElement('div');
+    row.className = 'historial-item';
+    row.innerHTML = `
+      <div class="historial-dot"></div>
+      <div>
+        <div class="historial-fecha">${h.fecha}</div>
+        <div class="historial-resumen">${h.resumen}</div>
+      </div>
+    `;
+    hc.appendChild(row);
+  });
+  goTo('existing-historial');
+}
+
+document.getElementById('agregarObsBtn').addEventListener('click', () => {
+  const c = CULTIVOS_EXISTENTES.find(x => x.id === currentCultivoId);
+  document.getElementById('obsBackLink').onclick = () => goTo('existing-historial');
+  renderObservacionForm(c.tipo);
+  goTo('observacion');
+});
+
+document.getElementById('crearBtn').addEventListener('click', () => {
+  const titulo = document.getElementById('nuevoTitulo').value || '(sin título)';
+  const tipo = nuevoCultivoTipoSelect.value;
+  const nuevo = { id: CULTIVOS_EXISTENTES.length + 1, titulo: titulo, tipo: tipo, historial: [] };
+  CULTIVOS_EXISTENTES.push(nuevo);
+  currentCultivoId = nuevo.id;
+  document.getElementById('obsBackLink').onclick = () => goTo('new-form');
+  renderObservacionForm(tipo, titulo);
+  goTo('observacion');
+});
+
+function renderField(v) {
+  const row = document.createElement('div');
+  row.className = 'variable-row';
+
+  const label = document.createElement('label');
+  label.textContent = v.nombre;
+  if (v.unidad) {
+    const hint = document.createElement('span');
+    hint.className = 'hint';
+    hint.textContent = '(' + v.unidad + ')';
+    label.appendChild(hint);
+  }
+  row.appendChild(label);
+
+  if (v.tipo === 'numerico' || v.tipo === 'porcentaje') {
+    const wrap = document.createElement('div');
+    wrap.className = 'num-input';
+    const input = document.createElement('input');
+    input.type = 'number';
+    input.placeholder = '0';
+    wrap.appendChild(input);
+    const unit = document.createElement('span');
+    unit.className = 'unit';
+    unit.textContent = v.tipo === 'porcentaje' ? '%' : (v.unidad || '');
+    wrap.appendChild(unit);
+    row.appendChild(wrap);
+  } else if (v.tipo === 'escala') {
+    const wrap = document.createElement('div');
+    wrap.className = 'range-row';
+    const input = document.createElement('input');
+    input.type = 'range';
+    input.min = 0; input.max = 5; input.value = 0;
+    const value = document.createElement('span');
+    value.className = 'range-value';
+    value.textContent = '0';
+    input.addEventListener('input', () => value.textContent = input.value);
+    wrap.appendChild(input);
+    wrap.appendChild(value);
+    row.appendChild(wrap);
+  } else if (v.tipo === 'booleano') {
+    const wrap = document.createElement('div');
+    wrap.className = 'toggle-row';
+    ['Sí', 'No'].forEach(opt => {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'toggle-btn';
+      btn.textContent = opt;
+      btn.addEventListener('click', () => {
+        wrap.querySelectorAll('.toggle-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+      });
+      wrap.appendChild(btn);
+    });
+    row.appendChild(wrap);
+  } else if (v.tipo === 'categorico') {
+    const wrap = document.createElement('div');
+    wrap.className = 'chip-row';
+    v.opciones.forEach(opt => {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'chip-btn';
+      btn.textContent = opt;
+      btn.addEventListener('click', () => {
+        wrap.querySelectorAll('.chip-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+      });
+      wrap.appendChild(btn);
+    });
+    row.appendChild(wrap);
+  }
+
+  return row;
+}
+
+function renderObservacionForm(tipoKey, tituloOverride) {
+  const c = DATA[tipoKey];
+  const cultivoRef = CULTIVOS_EXISTENTES.find(x => x.id === currentCultivoId);
+  document.getElementById('cultivoTitulo').textContent = tituloOverride || (cultivoRef ? cultivoRef.titulo : c.nombre);
+  document.getElementById('cultivoCount').textContent = c.variables.length + ' variables · ' + c.nombre;
+  const container = document.getElementById('variablesContainer');
+  container.innerHTML = '';
+  c.variables.forEach(v => container.appendChild(renderField(v)));
+  document.getElementById('reportadoPor').value = '';
+  document.getElementById('observacionesGenerales').value = '';
+}
+
+document.getElementById('saveBtn').addEventListener('click', () => {
+  const c = CULTIVOS_EXISTENTES.find(x => x.id === currentCultivoId);
+  if (c) {
+    const hoy = new Date().toLocaleDateString('es-MX', { day: '2-digit', month: 'short', year: 'numeric' });
+    c.historial.push({ fecha: hoy, resumen: 'Nueva observación registrada' });
+  }
+  const toast = document.getElementById('toast');
+  toast.classList.add('show');
+  setTimeout(() => toast.classList.remove('show'), 2600);
+});
+</script>
+</body>
+</html>
